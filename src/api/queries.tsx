@@ -19,6 +19,27 @@ interface modelSubmitProps {
 }
 
 /**
+ * @function getAuthorizedUsers
+ * @description returns an array of authorized username objects
+ * 
+ */
+export async function getAuthorizedUsers() {
+  const users = await prisma.authorized.findMany()
+  return users
+}
+
+/**
+ * @function getUserById
+ * @description returns a user object by ID
+ * 
+ * @param {id} id of the user
+ */
+export async function getUserById(id: string) {
+  const user = await prisma.user.findUnique({ where: { id: id } })
+  return user
+}
+
+/**
  * @function getModelUid
  * @description returns a list of models matching the species parameter
  * 
@@ -27,9 +48,9 @@ interface modelSubmitProps {
 export async function getModel(species: string) {
   const models = await prisma.model.findMany({
     where: { spec_name: species, site_ready: true, base_model: true }
-  });
+  })
 
-  return models;
+  return models
 };
 
 
@@ -164,7 +185,7 @@ export const getAllSiteReadyModels = async (development: boolean): Promise<model
 export const getAllAnnotationModels = async (): Promise<model[]> => {
 
   const models = await prisma.model.findMany({
-    where: {site_ready: true, base_model: false},
+    where: { site_ready: true, base_model: false },
     orderBy: {
       spec_name: 'asc'
     }

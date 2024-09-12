@@ -84,6 +84,7 @@ model model {
   build_process       String?       @default("Photogrammetry") @db.VarChar(50)
   thumbnail           String        @default("")
   annotator           String?       @db.VarChar(75)
+  annotatorId         String?       @db.VarChar(50) 
   annotations         annotations[]
   image_set           image_set[]
   species             species       @relation(fields: [spec_name], references: [spec_name], onDelete: NoAction, map: "model_ibfk_1")
@@ -230,4 +231,8 @@ model video_annotation {
   length        String?     @db.VarChar(5)
   annotation_id String      @id @db.VarChar(36)
   annotations   annotations @relation(fields: [annotation_id], references: [annotation_id], onDelete: Cascade, map: "videoFk1")
+}
+
+model authorized {
+  username      String      @id
 }
