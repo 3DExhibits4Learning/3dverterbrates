@@ -190,7 +190,7 @@ export const fetchSpecimenObservationsLeaders = async (specimenName: string, sea
  * @returns {Promise<{ hasInfo: boolean; data?: GbifResponse }>} whether GBIF data is available, and if so, returns the data
  */
 export const fetchSpecimenGbifInfo = async (specimenName: string): Promise<{ hasInfo: boolean; data?: GbifResponse }> => {
-  const gbifUrl: string = 'https://api.gbif.org/v1/species/match?kingdom=plantae&name=';
+  const gbifUrl: string = 'https://api.gbif.org/v1/species/match?kingdom=animalia,plantae&name=';
   const gbifInfo: GbifResponse = await basicFetch<GbifResponse>(gbifUrl + specimenName);
 
   if (gbifInfo.matchType !== 'EXACT') {
@@ -265,7 +265,6 @@ export const fetchGbifImages = async (key: number | undefined, rank: string): Pr
     };
     gbifOccurrenceArray.push(specimenObservationInfo);
   }
-
 
   return gbifOccurrenceArray;
 };

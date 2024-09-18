@@ -71,6 +71,8 @@ export default function MainWrap(props: {
 
   }, [])
 
+  console.log('MODEL LENGTH', props.model.length)
+
   return <>
 
     {
