@@ -22,9 +22,9 @@ export default async function Page() {
     return (
         <>
             <Header pageRoute="collections" headerTitle='Management' />
-            <section className="flex flex-col !min-h-[calc(100vh-177px)]">
+            <main className="flex flex-col !min-h-[calc(100vh-177px)]">
                 <ManagerClient pendingModels={pendingModels} />
-            </section>
+            </main>
             <Foot />
         </>
     )

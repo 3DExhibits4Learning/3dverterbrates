@@ -5,6 +5,7 @@ import { useRef, LegacyRef, useState } from "react";
 import PendingModelsAdmin from "@/components/Admin/PendingModels";
 import { Button } from "@nextui-org/react";
 import DataTransferModal from "../Shared/DataTransferModal";
+import { Accordion, AccordionItem } from "@nextui-org/react";
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[] }) {
 
@@ -19,7 +20,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[] })
         setOpenModal(true)
         setTransferring(true)
 
-        const res = await fetch(`/api/sketchfab/thumbnail?uid=${uid}&nonCommunity=true`)
+        await fetch(`/api/sketchfab/thumbnail?uid=${uid}&nonCommunity=true`)
             .then(res => res.json())
             .then(res => {
                 console.log(res.response)
@@ -30,6 +31,22 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[] })
 
     return (
         <>
+            <Accordion>
+                <AccordionItem key={'Models'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                    <Accordion>
+                        <AccordionItem key='uploadModel' aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                        </AccordionItem>
+                        </Accordion>
+                </AccordionItem>
+                <AccordionItem key={'newImageSet'} aria-label={'New Image Set'} title={"I've photographed a new specimen"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                </AccordionItem>
+                <AccordionItem key={'new3DModel'} aria-label={'New Image Set'} title={"I've created a new 3D Model"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                </AccordionItem>
+                <AccordionItem key={'specimenToPhotograph'} aria-label={'New Image Set'} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                </AccordionItem>
+                <AccordionItem key={'specimenToModel'} aria-label={'New Image Set'} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                </AccordionItem>
+            </Accordion>
             <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel="Updating Thumbnail" result={result} />
             <div className="flex h-48 w-full">
                 <div className="h-full w-1/3 flex flex-col items-center">
