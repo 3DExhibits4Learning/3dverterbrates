@@ -32,19 +32,31 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[] })
     return (
         <>
             <Accordion>
-                <AccordionItem key={'Models'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                <AccordionItem key={'adminModels'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                     <Accordion>
-                        <AccordionItem key='uploadModel' aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                        <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to upload 3D Model
                         </AccordionItem>
-                        </Accordion>
+                        <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to update 3D Model
+                        </AccordionItem>
+                        <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to delete 3D Model
+                        </AccordionItem>
+                    </Accordion>
                 </AccordionItem>
-                <AccordionItem key={'newImageSet'} aria-label={'New Image Set'} title={"I've photographed a new specimen"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                </AccordionItem>
-                <AccordionItem key={'new3DModel'} aria-label={'New Image Set'} title={"I've created a new 3D Model"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                </AccordionItem>
-                <AccordionItem key={'specimenToPhotograph'} aria-label={'New Image Set'} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                </AccordionItem>
-                <AccordionItem key={'specimenToModel'} aria-label={'New Image Set'} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                    <Accordion>
+                        <AccordionItem key='' aria-label={'New Specimen'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to upload 3D Model
+                        </AccordionItem>
+                        <AccordionItem key='updateModel' aria-label={'New Specimen'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to update 3D Model
+                        </AccordionItem>
+                        <AccordionItem key='deleteModel' aria-label={'New Specimen'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Form fields to delete 3D Model
+                        </AccordionItem>
+                    </Accordion>
                 </AccordionItem>
             </Accordion>
             <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel="Updating Thumbnail" result={result} />

@@ -31,9 +31,11 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   const sRef = useRef<Herbarium>()
   const modelViewer = useRef<HTMLIFrameElement>()
   const annotationDiv = useRef<HTMLDivElement>()
+  const material = useRef<any>()
 
-  const annotationSwitch = document.getElementById("annotationSwitch");
-  const annotationSwitchMobile = document.getElementById("annotationSwitchMobileHidden");
+  const annotationSwitch = document.getElementById("annotationSwitch")
+  const annotationSwitchMobile = document.getElementById("annotationSwitchMobileHidden")
+  const scaleSwitch = document.getElementById("scaleSwitch")
 
   const successObj = {
     success: (api: any) => {
@@ -67,6 +69,15 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
     annotationControl(api, annotations, (event.target as HTMLInputElement).checked)
   }
 
+  // Experimental Scale Listener
+  const scaleSwitchListener = (event: Event) => {
+    material.current.channels.Opacity.enable = true;
+    material.current.channels.Opacity.type = 'alphaBlend';
+    material.current.channels.Opacity.factor = (event.target as HTMLInputElement).checked ? 1 : 0
+    api.setMaterial(material.current, function () {
+    })
+  }
+
   // This effect initializes the sketchfab client and instantiates the specimen:Herbarium object; it also ensures the page begins from the top upon load
   useEffect(() => {
 
@@ -96,7 +107,19 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   useEffect(() => {
 
     if (s && annotations && api) {
+      
+      // For Experimental Scale - strategy should be switched from opacity control to api.show/api.hide
 
+      api.getSceneGraph(function (err: any, result: any) {
+        // get the id from that log
+        console.log(result)
+      })
+
+      api.getMaterialList((err: any, materials: any) => {
+        material.current = materials[1];
+          (scaleSwitch as HTMLInputElement).addEventListener('change', scaleSwitchListener)
+      })
+      
       // Create the first annotation if it exists
       if (s.model.annotationPosition) {
         const position = JSON.parse(s.model.annotationPosition)
@@ -257,7 +280,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
               }
 
               {
-                !!index && annotations[index - 1].annotation_type === 'video' && 
+                !!index && annotations[index - 1].annotation_type === 'video' &&
                 <div className="w-full h-full" id="annotationDivVideo">
                   {/*@ts-ignore - align works on iframe just fine*/}
                   <iframe align='left' className='fade w-[calc(100%-15px)] h-full' src={annotations[index - 1].url}></iframe>
@@ -265,7 +288,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
               }
 
               {
-                !!index && annotations[index - 1].annotation_type === 'model' && 
+                !!index && annotations[index - 1].annotation_type === 'model' &&
                 <>
                   <div className="w-full h-[65%]" id="annotationDivMedia" style={{ display: "block" }}>
                     <ModelAnnotation uid={(annotations[index - 1].annotation as model_annotation).uid} />

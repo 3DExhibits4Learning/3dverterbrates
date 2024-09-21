@@ -29,6 +29,7 @@ export default function MainWrap(props: {
   var modelHeight = isMobileOrTablet() ? "calc(100vh - 160px)" : "calc(100vh - 104.67px)"
 
   const [isSelected, setIsSelected] = useState(true)
+  const [scaleSelected, setScaleSelected] = useState(false)
   const [viewWidthInPx, setViewWidthInPx] = useState(window.outerWidth)
   const [viewportHeightInPx, setViewportHeightInPx] = useState(window.outerHeight + 200)
   const [swiperHeight, setSwiperHeight] = useState(window.outerHeight - 96)
@@ -71,8 +72,6 @@ export default function MainWrap(props: {
 
   }, [])
 
-  console.log('MODEL LENGTH', props.model.length)
-
   return <>
 
     {
@@ -80,9 +79,14 @@ export default function MainWrap(props: {
       <>
         <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
           <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>
+          <div className='flex mr-4'>
+          <Switch className='mr-12' defaultSelected id="scaleSwitch" isSelected={scaleSelected} color='secondary' onValueChange={setScaleSelected}>
+            <span className="text-white">Scale</span>
+          </Switch>
           <Switch style={{ paddingRight: "2.5%" }} defaultSelected id="annotationSwitch" isSelected={isSelected} color='secondary' onValueChange={setIsSelected}>
             <span className="text-white">Annotations</span>
           </Switch>
+          </div>
         </div>
         <div className="flex flex-col m-auto" style={{ width: "100vw", maxWidth: viewWidthInPx, margin: "0 auto !important" }}>
           <div style={{ height: modelHeight, maxHeight: viewportHeightInPx }}>

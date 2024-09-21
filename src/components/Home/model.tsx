@@ -28,11 +28,11 @@ export default function HomeModel() {
             var slider = document.getElementById('opacitySlider')
 
             var setOpacity = function setOpacity(opacity: any, material: any) {
-              material.channels.Opacity.enable = true;
-              material.channels.Opacity.type = 'alphaBlend';
-              material.channels.Opacity.factor = opacity;
+              material.channels.Opacity.enable = true
+              material.channels.Opacity.type = 'alphaBlend'
+              material.channels.Opacity.factor = opacity
               api.setMaterial(material, function () {
-              });
+              })
             }
 
             if (slider) {
