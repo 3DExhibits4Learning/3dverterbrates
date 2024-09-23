@@ -87,8 +87,8 @@ model model {
   annotatorId         String?       @db.VarChar(50) 
   annotations         annotations[]
   image_set           image_set[]
-  species             species       @relation(fields: [spec_name], references: [spec_name], onDelete: NoAction, map: "model_ibfk_1")
-  specimen            specimen      @relation(fields: [spec_acquis_date, spec_name], references: [spec_acquis_date, spec_name], onDelete: NoAction, map: "model_ibfk_2")
+  species             species       @relation(fields: [spec_name], references: [spec_name], onDelete: Cascade, map: "model_ibfk_1")
+  specimen            specimen      @relation(fields: [spec_acquis_date, spec_name], references: [spec_acquis_date, spec_name], onDelete: Cascade, map: "model_ibfk_2")
   software            software[]
   model_annotation    model_annotation?
 

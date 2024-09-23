@@ -3,20 +3,15 @@
  * @fileoverview database queries used throughout the application
  */
 
-//import { PrismaClient } from "@prisma/client"
 import { model } from "@prisma/client";
 import prisma from '@/utils/prisma'
 
-//const prisma = new PrismaClient()
-
+// Legacy export (so all the resulting imports don't need to be changed)
 export function prismaClient() {
   return prisma
 }
 
-interface modelSubmitProps {
-  email: string,
-  artistName: string
-}
+/***** USER QUERIES *****/
 
 /**
  * @function getAuthorizedUsers
@@ -40,6 +35,38 @@ export async function getUserById(id: string) {
 }
 
 /**
+ * @function getAccounts
+ * @description return an array of providers corresponding to the userId argument
+ * 
+ */
+export const getAccountProviders = async (userId: string,) => {
+  const accountsObj = await prisma.account.findMany({
+    where: { userId: userId },
+  });
+  return accountsObj
+}
+
+/**
+ * @function getAccount
+ * @description returns a user account based on the userId and the provider
+ * 
+ */
+export const getAccount = async (id: string, provider: string) => {
+
+  const account = await prisma.account.findFirst({
+    where: {
+      userId: id,
+      provider: provider,
+    },
+  })
+
+  return account
+}
+
+
+/***** MODEL QUERIES *****/
+
+/**
  * @function getModelUid
  * @description returns a list of models matching the species parameter
  * 
@@ -51,80 +78,7 @@ export async function getModel(species: string) {
   })
 
   return models
-};
-
-
-/**
- * @function getAnnotations
- * @description returns a list of annotations matching the uid parameter in order of annotation number
- * 
- * @param {string} uid of the annotated model
- */
-export async function getAnnotations(uid: string) {
-  const annotations = await prisma.annotations.findMany({
-    where: { uid: uid },
-    orderBy: { annotation_no: 'asc' }
-  });
-
-  return annotations;
-};
-
-
-/**
-* @function getCitations
-* @description returns a list of photo annotations (and corresponding citation info) matching the url parameter
-* 
-* @param {string} uid of the annotated model
-*/
-export async function getCitations(url: string) {
-  const citation = await prisma.photo_annotation.findMany({
-    where: { url: url }
-  });
-
-  return citation;
-};
-
-/**
-* @function getPhotoAnnotation
-* @description returns a unique photo annotation based on id
-* 
-* @param {string} annotation_id of the annotated model
-*/
-export async function getPhotoAnnotation(id: string) {
-  const annotation = await prisma.photo_annotation.findUnique({
-    where: { annotation_id: id }
-  });
-
-  return annotation;
-};
-
-/**
-* @function getVideoAnnotation
-* @description returns a unique video annotation based on id
-* 
-* @param {string} annotation_id of the annotated model
-*/
-export async function getVideoAnnotation(id: string) {
-  const annotation = await prisma.video_annotation.findUnique({
-    where: { annotation_id: id }
-  });
-
-  return annotation;
-};
-
-/**
-* @function getModelAnnotation
-* @description returns a unique model annotation based on id
-* 
-* @param {string} annotation_id of the annotated model
-*/
-export async function getModelAnnotation(id: string) {
-  const annotation = await prisma.model_annotation.findUnique({
-    where: { annotation_id: id }
-  });
-
-  return annotation;
-};
+}
 
 /**
 * @function getSoftwares
@@ -138,8 +92,7 @@ export async function getSoftwares(uid: string) {
   });
 
   return softwares;
-};
-
+}
 
 /**
 * @function getImageSet
@@ -153,8 +106,7 @@ export async function getImageSet(uid: string) {
   });
 
   return imageSet;
-};
-
+}
 
 /**
  * @function getAllSiteReadyModels
@@ -195,8 +147,8 @@ export const getAllAnnotationModels = async (): Promise<model[]> => {
 };
 
 /**
- * @function getPendingModels
- * @description returns an array of pending model objects contributed by the user with specified email address.
+ * @function updateModelAnnotator
+ * @description update the annotator for a 3D model
  * 
  */
 export const updateModelAnnotator = async (uid: string, annotator: string) => {
@@ -281,217 +233,91 @@ export const updateThumbUrl = async (thumbUrl: string, confirmation?: string, ui
   }
 }
 
-
 /**
- * @function getAccounts
- * @description return an array of providers corresponding to the userId argument
+ * @function delete3DModel
+ * @description deletes a 3D Model
  * 
  */
-export const getAccountProviders = async (userId: string,) => {
-  const accountsObj = await prisma.account.findMany({
-    where: { userId: userId },
-  });
-  return accountsObj
-};
+export const delete3DModel = async (uid: string) => {
+  const deletedModel = await prisma.model.delete({
+    where: { uid: uid }
+  })
+  return deletedModel
+}
+
+
+/***** ANNOTATION QUERIES *****/
 
 /**
-* @function getSubmittalSoftware
-* @description return an array of softwares based on the id (confirmation) number of the model
+ * @function getAnnotations
+ * @description returns a list of annotations matching the uid parameter in order of annotation number
+ * 
+ * @param {string} uid of the annotated model
+ */
+export async function getAnnotations(uid: string) {
+  const annotations = await prisma.annotations.findMany({
+    where: { uid: uid },
+    orderBy: { annotation_no: 'asc' }
+  });
+
+  return annotations;
+}
+
+
+/**
+* @function getCitations
+* @description returns a list of photo annotations (and corresponding citation info) matching the url parameter
 * 
+* @param {string} uid of the annotated model
 */
-export const getSubmittalSoftware = async (id: string,) => {
-  const softwareObj = await prisma.submittalSoftware.findMany({
-    where: { id: id },
+export async function getCitations(url: string) {
+  const citation = await prisma.photo_annotation.findMany({
+    where: { url: url }
   });
-  let softwareArray = []
-  for (let software in softwareObj)
-    softwareArray.push(softwareObj[software].software)
-  return softwareArray
-};
+
+  return citation;
+}
 
 /**
- * @function getSubmittalTags
- * @description return an array of tags based on the id (confirmation) number of the model
- * 
- */
-export const getSubmittalTags = async (id: string,) => {
-  const tagObj = await prisma.submittalTags.findMany({
-    where: { id: id },
-  });
-  let tagArray = []
-  for (let tag in tagObj)
-    tagArray.push(tagObj[tag].tag)
-  return tagArray
-};
-
-/**
-* @function approveModel
-* @description approve a pending 3D model
+* @function getPhotoAnnotation
+* @description returns a unique photo annotation based on id
 * 
+* @param {string} annotation_id of the annotated model
 */
-export const approveModel = async (confirmation: string,) => {
-  const updateObj = await prisma.userSubmittal.update({
-    where: {
-      confirmation: confirmation
-    },
-    data: {
-      status: 'Published'
-    }
-  })
-  return updateObj
+export async function getPhotoAnnotation(id: string) {
+  const annotation = await prisma.photo_annotation.findUnique({
+    where: { annotation_id: id }
+  });
+
+  return annotation;
+}
+
+/**
+* @function getVideoAnnotation
+* @description returns a unique video annotation based on id
+* 
+* @param {string} annotation_id of the annotated model
+*/
+export async function getVideoAnnotation(id: string) {
+  const annotation = await prisma.video_annotation.findUnique({
+    where: { annotation_id: id }
+  });
+
+  return annotation;
 };
 
 /**
- * @function getSpecimenWithoutPhotos
- * @description returns an object array of all specimens since 6/20/2024 that do not have corresponding image_set data
- * 
- */
-export const getSpecimenWithoutPhotos = async () => {
-  let filteredSpecimen = []
+* @function getModelAnnotation
+* @description returns a unique model annotation based on id
+* 
+* @param {string} annotation_id of the annotated model
+*/
+export async function getModelAnnotation(id: string) {
+  const annotation = await prisma.model_annotation.findUnique({
+    where: { annotation_id: id }
+  });
 
-  const specimen = await prisma.specimen.findMany({
-    where: {
-      spec_acquis_date: {
-        gte: new Date('2024-06-01')
-      }
-    },
-    include: {
-      image_set: true
-    }
-  })
-
-  for (let i in specimen) {
-    if (specimen[i].image_set.length === 0) {
-      filteredSpecimen.push(specimen[i])
-    }
-  }
-
-  return filteredSpecimen
-}
-
-/**
- * @function getSpecimenToModel
- * @description returns an object array of all specimens since 6/20/2024 that do not have a corresponding image_set, but lack a corresponding 3D model
- * 
- */
-export const getSpecimenToModel = async () => {
-
-  const specimenToModel = await prisma.image_set.findMany({
-    where: {
-      uid: null,
-      spec_acquis_date: {
-        gte: new Date('2024-06-01'),
-      }
-    },
-  })
-
-  return specimenToModel
-}
-
-/**
- * @function getCommunityThumbnails
- * @description returns an array of thumbnail url's for 3D models uploaded by the community
- * 
- */
-export const getCommunityThumbnails = async () => {
-
-  let thumbmnails: string[] = []
-
-  const communityUploads = await prisma.userSubmittal.findMany({
-    where: {
-      status: 'published',
-    },
-  })
-
-  for (let i in communityUploads) {
-    thumbmnails.push(communityUploads[i].thumbnail)
-  }
-
-  return thumbmnails
-}
-
-/**
- * @function getModelsToAnnotate
- * @description 
- * 
- */
-export const getModelsToAnnotate = async () => {
-
-  const modelsToAnnotate = await prisma.model.findMany({
-    where: {
-      site_ready: true,
-      base_model: true,
-      annotated: false,
-      spec_acquis_date: {
-        gte: new Date('2024-06-01'),
-      }
-    },
-  })
-
-  return modelsToAnnotate
-}
-
-/**
- * @function getTestModel
- * @description 
- * 
- */
-export const getTestModel = async () => {
-
-  const modelsToAnnotate = await prisma.model.findMany({
-    where: {
-      spec_name: 'sisyrinchium bellum'
-    },
-  })
-
-  return modelsToAnnotate
-}
-
-/**
- * @function getAccount
- * @description returns a user account based on the userId and the provider
- * 
- */
-export const getAccount = async (id: string, provider: string) => {
-
-  const account = await prisma.account.findFirst({
-    where: {
-      userId: id,
-      provider: provider,
-    },
-  })
-
-  return account
-}
-
-/**
- * @function getPublishedUserSubmittals
- * @description returns a user account based on the userId and the provider
- * 
- */
-export const getPublishedUserSubmittals = async () => {
-
-  const submittals = await prisma.userSubmittal.findMany({
-    where: {
-      status: 'published'
-    },
-  })
-  return submittals
-}
-
-/**
- * @function getPublishedUserSubmittalsBySpecies
- * @description returns a user account based on the userId and the provider
- * 
- */
-export const getPublishedUserSubmittalsBySpecies = async (speciesName: string) => {
-
-  const submittals = await prisma.userSubmittal.findMany({
-    where: {
-      speciesName: speciesName
-    },
-  })
-  return submittals
+  return annotation;
 }
 
 /**
@@ -762,6 +588,27 @@ export const deleteAnnotation = async (id: string, modelUid: string) => {
 }
 
 /**
+ * @function deleteAllAnnotations
+ * @description delete all annotations for a 3D model
+ * 
+ */
+export const deleteAllAnnotations = async (uid: string) => {
+
+  const deletionPromises = []
+  const annotations = await getAnnotations(uid)
+
+  for(let annotation in annotations){
+      deletionPromises.push(prisma.annotations.delete({
+        where:{annotation_id: annotations[annotation].annotation_id}
+      }))
+  }
+
+  await Promise.all(deletionPromises)
+
+  return deletionPromises
+}
+
+/**
  * @function deletePhotoAnnotation
  * @description delete photo annotation
  * 
@@ -814,66 +661,175 @@ export const markAsAnnotated = async (uid: string, annotated: boolean) => {
   return updated
 }
 
+/***** COMMUNITY QUERIES */
 
-// /**
-//  * @function getAnnotationPositionsAndTitles
-//  * @description get annotation postions and titles
-//  *
-//  */
-// export const getAnnotationPositionsAndTitles = async (uid: string) => {
+/**
+* @function getSubmittalSoftware
+* @description return an array of softwares based on the id (confirmation) number of the model
+* 
+*/
+export const getSubmittalSoftware = async (id: string,) => {
+  const softwareObj = await prisma.submittalSoftware.findMany({
+    where: { id: id },
+  });
+  let softwareArray = []
+  for (let software in softwareObj)
+    softwareArray.push(softwareObj[software].software)
+  return softwareArray
+};
 
-//   const positionsAndTitles : {position: string, }
+/**
+ * @function getSubmittalTags
+ * @description return an array of tags based on the id (confirmation) number of the model
+ * 
+ */
+export const getSubmittalTags = async (id: string,) => {
+  const tagObj = await prisma.submittalTags.findMany({
+    where: { id: id },
+  });
+  let tagArray = []
+  for (let tag in tagObj)
+    tagArray.push(tagObj[tag].tag)
+  return tagArray
+};
 
-//   const firstAnnotationPosition = getFirstAnnotationPostion(uid)
+/**
+* @function approveModel
+* @description approve a pending 3D model
+* 
+*/
+export const approveModel = async (confirmation: string,) => {
+  const updateObj = await prisma.userSubmittal.update({
+    where: {
+      confirmation: confirmation
+    },
+    data: {
+      status: 'Published'
+    }
+  })
+  return updateObj
+}
+
+/**
+ * @function getCommunityThumbnails
+ * @description returns an array of thumbnail url's for 3D models uploaded by the community
+ * 
+ */
+export const getCommunityThumbnails = async () => {
+
+  let thumbmnails: string[] = []
+
+  const communityUploads = await prisma.userSubmittal.findMany({
+    where: {
+      status: 'published',
+    },
+  })
+
+  for (let i in communityUploads) {
+    thumbmnails.push(communityUploads[i].thumbnail)
+  }
+
+  return thumbmnails
+}
+
+/**
+ * @function getPublishedUserSubmittals
+ * @description returns a user account based on the userId and the provider
+ * 
+ */
+export const getPublishedUserSubmittals = async () => {
+
+  const submittals = await prisma.userSubmittal.findMany({
+    where: {
+      status: 'published'
+    },
+  })
+  return submittals
+}
+
+/**
+ * @function getPublishedUserSubmittalsBySpecies
+ * @description returns a user account based on the userId and the provider
+ * 
+ */
+export const getPublishedUserSubmittalsBySpecies = async (speciesName: string) => {
+
+  const submittals = await prisma.userSubmittal.findMany({
+    where: {
+      speciesName: speciesName
+    },
+  })
+  return submittals
+}
+
+/***** ADMIN QUERIES *****/
+
+/**
+ * @function getSpecimenWithoutPhotos
+ * @description returns an object array of all specimens since 6/20/2024 that do not have corresponding image_set data
+ * 
+ */
+export const getSpecimenWithoutPhotos = async () => {
+  let filteredSpecimen = []
+
+  const specimen = await prisma.specimen.findMany({
+    where: {
+      spec_acquis_date: {
+        gte: new Date('2024-06-01')
+      }
+    },
+    include: {
+      image_set: true
+    }
+  })
+
+  for (let i in specimen) {
+    if (specimen[i].image_set.length === 0) {
+      filteredSpecimen.push(specimen[i])
+    }
+  }
+
+  return filteredSpecimen
+}
+
+/**
+ * @function getSpecimenToModel
+ * @description returns an object array of all specimens since 6/20/2024 that do not have a corresponding image_set, but lack a corresponding 3D model
+ * 
+ */
+export const getSpecimenToModel = async () => {
+
+  const specimenToModel = await prisma.image_set.findMany({
+    where: {
+      uid: null,
+      spec_acquis_date: {
+        gte: new Date('2024-06-01'),
+      }
+    },
+  })
+
+  return specimenToModel
+}
 
 
-// }
+/**
+ * @function getModelsToAnnotate
+ * @description 
+ * 
+ */
+export const getModelsToAnnotate = async () => {
 
+  const modelsToAnnotate = await prisma.model.findMany({
+    where: {
+      site_ready: true,
+      base_model: true,
+      annotated: false,
+      spec_acquis_date: {
+        gte: new Date('2024-06-01'),
+      }
+    },
+  })
 
+  return modelsToAnnotate
+}
 
-
-
-
-
-
-
-
-//  /**
-//  * @function getProviderAccountId
-//  * @description return an array of providers corresponding to the userId argument
-//  *
-//  */
-// export const getProviderAccountId = async (userId: string, provider: string) => {
-//   const accountsObj =  await prisma.account.findMany({
-//      where: { userId : userId },
-//    });
-//    let providers = []
-//    for(let accounts in accountsObj){
-//     providers.push(accountsObj[accounts].provider)
-//    }
-//    return providers
-//  };
-
-//   /**
-//  * @function getiNatTokenExpiration
-//  * @description get the expiration time of user's iNaturalist api token
-//  *
-//  */
-// export const getiNatTokenExpiration = async (userId: string, provider: string) => {
-//   const providerAccount = await prisma.account.findMany({
-//     where: { userId : userId, provider : provider }
-//   });
-//   return providerAccount[0].expires_at
-// };
-
-//  /**
-//  * @function updateInaturalistTokenExpiration
-//  * @description manually updates the expiration of the inaturalist
-//  *
-//  */
-// export const updateInaturalistTokenExpiration = async (confirmation: string, thumbUrl: string) => {
-//   await prisma.userSubmittal.update({
-//     where: { confirmation : confirmation },
-//     data: { thumbnail : thumbUrl }
-//   });
-// };
