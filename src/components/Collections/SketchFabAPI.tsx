@@ -234,7 +234,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
                     <div className='w-[65%] py-[20px] justify-center items-center text-center'>
                       <p>Build method: {s.model.build_process}</p>
                       <p>Created with: {arrayFromObjects(s.software)}</p>
-                      <p>Images: {s.image_set[0].no_of_images}</p>
+                      {/* <p>Images: {s.image_set[0].no_of_images}</p> */}
                       <p>Modeler: {s.model.modeled_by}</p>
                       <p>Annotator: {s.getAnnotator()}</p>
                     </div>
