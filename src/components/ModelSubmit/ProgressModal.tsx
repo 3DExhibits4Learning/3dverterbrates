@@ -32,8 +32,8 @@ const ProgressModal = (props: { progress: number, success: boolean | null, error
                                     <>
                                         <div>
                                             <br></br>
-                                            <p>Thank you for contributing!</p><br></br>
-                                            <p>You will receive an email with a link to your model when it&apos;s published on the site. You can also check its status in your <a href='/dashboard'><u>dashboard</u></a></p>
+                                            <p>Model uploaded successfully!</p><br></br>
+                                            <p>The model can be seen <a href='/admin'><u>here</u> (The servers may need a few minutes to refresh)</a></p>
                                         </div>
                                         <div className="flex justify-around mb-8">
                                             <div>
@@ -45,7 +45,7 @@ const ProgressModal = (props: { progress: number, success: boolean | null, error
                                                 </Button>
                                             </div>
                                             <div>
-                                                <Button color="primary" onPress={() => router.push('/dashboard')}>
+                                                <Button color="primary" onPress={() => router.push('/admin')}>
                                                     Dashboard
                                                 </Button>
                                             </div>

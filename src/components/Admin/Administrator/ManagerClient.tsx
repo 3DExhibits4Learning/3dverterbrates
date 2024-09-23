@@ -53,13 +53,13 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                 <AccordionItem key={'adminModels'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                     <Accordion>
                         <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            <ModelSubmitForm token={props.projectUid} email={props.email} orgUid={props.orgUid}/>
+                            <ModelSubmitForm token={props.projectUid} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} />
                         </AccordionItem>
                         <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                             Form fields to update 3D Model
                         </AccordionItem>
                         <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            <div className="h-[400px] w-[600px] flex flex-col items-center border-2 border-[#00856A] rounded-xl">
+                            <div className="h-[400px] w-[600px] flex flex-col items-center border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
                                 <p className="my-8 text-xl text-center">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
                                 <label className='text-xl block mb-2 font-medium'>UID</label>
                                 <input

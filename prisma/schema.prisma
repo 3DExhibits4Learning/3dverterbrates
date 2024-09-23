@@ -47,7 +47,7 @@ model annotations {
 model model {
   uid                 String        @id @db.VarChar(100)
   spec_name           String        @db.VarChar(100)
-  spec_acquis_date    DateTime      @db.Date
+  spec_acquis_date    DateTime?      @db.Date
   modeled_by          String        @db.VarChar(25)
   site_ready          Boolean       @default(false)
   pref_comm_name      String        @default("") @db.VarChar(100)
@@ -58,13 +58,12 @@ model model {
   thumbnail           String        @default("")
   annotator           String?       @db.VarChar(75)
   annotatorId         String?       @db.VarChar(50) 
+  lat                 Decimal?      
+  lng                 Decimal?
+  email               String        @db.VarChar(100)
   annotations         annotations[]
   software            software[]
   model_annotation    model_annotation?
-
-  @@index([spec_acquis_date, spec_name], map: "model_ibfk_2")
-  @@index([spec_acquis_date], map: "spec_acquis_date")
-  @@index([spec_name], map: "spec_name")
 }
 
 model model_annotation {

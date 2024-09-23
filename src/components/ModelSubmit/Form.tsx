@@ -15,7 +15,7 @@ import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
 
-export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string }) {
+export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string }) {
 
     // Variable initialization
 
@@ -41,8 +41,8 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
     // Handler that is called everytime a field is updated; it checks all mandatory fields for values, enabling the upload button if those fields exist
 
     const isUploadable = () => {
-            if (speciesName.current && artistName.current && mobileValue.current && radioValue.current && software.current && file.current && positionRef.current) { setUploadDisabled(false) }
-            else { setUploadDisabled(true) }
+        if (speciesName.current && artistName.current && mobileValue.current && radioValue.current && software.current && file.current && positionRef.current) { setUploadDisabled(false) }
+        else { setUploadDisabled(true) }
     }
 
     // Upload handler
@@ -53,29 +53,28 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
         // This is the database entry handler
 
         const modelDbEntry = async () => {
-            try {
-                softwareArray.current.unshift(software.current)
+            softwareArray.current.unshift(software.current)
 
-                const data = {
-                    email: props.email,
-                    artist: artistName.current,
-                    species: speciesName.current,
-                    isMobile: mobileValue.current,
-                    methodology: radioValue.current,
-                    uid: uid,
-                    software: softwareArray.current,
-                    tags: tagArray.current,
-                    position: positionRef.current
-                }
-                const res = await fetch('/api/modelSubmit', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                })
-                if (!res.ok) throw new Error(await res.text())
+            const data = {
+                email: props.email,
+                artist: artistName.current,
+                species: speciesName.current,
+                isMobile: mobileValue.current,
+                methodology: radioValue.current,
+                uid: uid,
+                software: softwareArray.current,
+                tags: tagArray.current,
+                position: positionRef.current
             }
-            catch (e: any) {
-                console.error(e)
-            }
+            await fetch('/api/modelSubmit', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(()=> setSuccess(true))
+            .catch(e => {
+                setErrorMsg(e.message)
+                setSuccess(false)
+            })
         }
 
         // Handler for fileUpload
@@ -84,10 +83,10 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
 
         try {
             const data = new FormData()
-            data.set('orgProject', props.orgUid)
+            data.set('orgProject', props.projectUid)
             data.set('modelFile', file.current)
             data.set('visibility', 'private')
-            data.set('options', JSON.stringify({background: {color:"#000000"}}))
+            data.set('options', JSON.stringify({ background: { color: "#000000" } }))
 
             const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${props.orgUid}/models`
 
@@ -98,22 +97,21 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 }
             })
             uid = res.data.uid
-            setSuccess(true)
+
+            // We then make a post request to our route handler which creates a db record containing the metadata associated with the model
+            await modelDbEntry()
         }
         catch (e: any) {
             setErrorMsg(e.message)
             setSuccess(false)
             return
         }
-
-        // We then make a post request to our route handler which creates a db record containing the metadata associated with the model
-        modelDbEntry()
     }
 
     return (
         <>
             <ProgressModal progress={uploadProgress} success={success} errorMsg={errorMsg} />
-            <h1 className='hidden lg:block ml-[20%] text-3xl py-8'>Submit a 3D Model of a Plant!</h1>
+            <h1 className='hidden lg:block ml-[20%] text-3xl py-8 mb-4'>Fill in form data and upload model file(s)</h1>
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
                 <Divider />
                 <div className='flex items-center h-[75px]'>
@@ -121,7 +119,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 </div>
                 <Divider className='mb-6' />
                 <SpeciesName ref={speciesName} handler={isUploadable} />
-                <FormMap position={position} setPosition={setPosition} ref={positionRef} title/>
+                <FormMap position={position} setPosition={setPosition} ref={positionRef} title />
                 <TagInput ref={tagArray} />
                 <Divider className='mt-8' />
                 <h1 className='ml-12 text-3xl mt-4 mb-4'>Model Data</h1>
@@ -140,10 +138,10 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                             file.current = e.target.files[0]
                         isUploadable()
                     }}
-                        type='file' 
+                        type='file'
                         name='file'
                         id='formFileInput'
-                        >
+                    >
                     </input>
                 </div>
                 <Button

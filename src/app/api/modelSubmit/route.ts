@@ -9,11 +9,10 @@ export async function POST(request: Request) {
         // Get request body
         const body = await request.json()
 
-        // Variable initializtion
+        // Variable initialization
         const isMobile = body.isMobile == 'Yes' ? true : false
         var thumbUrl: string = ''
         const modelUid = body.uid as string
-        const confirmation = uid()
 
         // Typescript satisfied header
         const requestHeader: HeadersInit = new Headers()
@@ -27,16 +26,13 @@ export async function POST(request: Request) {
             .then(data => thumbUrl = data.thumbnails.images[0].url)
 
         // Insert data into database
-        const insert = await prisma.userSubmittal.create({
+        const insert = await prisma.model.create({
             data: {
-                confirmation: confirmation,
                 email: body.email as string,
-                artistName: body.artist as string,
-                speciesName: body.species as string,
-                createdWithMobile: isMobile,
-                methodology: body.methodology as string,
-                modeluid: modelUid,
-                status: 'Pending',
+                modeled_by: body.artist as string,
+                spec_name: body.species as string,
+                build_process: body.methodology as string,
+                uid: modelUid,
                 thumbnail: thumbUrl,
                 lat: body.position.lat,
                 lng: body.position.lng
@@ -45,21 +41,21 @@ export async function POST(request: Request) {
 
         // Insert software and tag data into database
         for (let software in body.software) {
-            await prisma.submittalSoftware.create({
+            await prisma.software.create({
                 data: {
-                    id: confirmation,
+                    uid: modelUid,
                     software: body.software[software]
                 }
             })
         }
-        for (let tag in body.tags) {
-            await prisma.submittalTags.create({
-                data: {
-                    id: confirmation,
-                    tag: body.tags[tag].value
-                }
-            })
-        }
+        // for (let tag in body.tags) {
+        //     await prisma.submittalTags.create({
+        //         data: {
+        //             id: confirmation,
+        //             tag: body.tags[tag].value
+        //         }
+        //     })
+        // }
         return Response.json({ data: 'Model Added', response: insert })
     }
     catch(e: any) {return Response.json({data:'error', response:e.message}, {status:400, statusText:'Error'})}
