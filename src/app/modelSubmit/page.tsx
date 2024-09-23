@@ -14,6 +14,7 @@ export default async function Page() {
     }
 
     const providers = await getAccountProviders(session.user.id as string)
+    const user = session.user.name ?? ''
 
     const isSketchfabLinked = () => {
         let res = false
@@ -34,6 +35,7 @@ export default async function Page() {
             isSketchfabLinked={isSketchfabLinked() as boolean} 
             orgUid={process.env.SKETCHFAB_ORGANIZATION as string} 
             projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string}
+            user={user}
             />
             <Foot />
         </>

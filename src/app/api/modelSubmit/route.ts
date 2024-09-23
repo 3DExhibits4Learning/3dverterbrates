@@ -10,7 +10,6 @@ export async function POST(request: Request) {
         const body = await request.json()
 
         // Variable initialization
-        const isMobile = body.isMobile == 'Yes' ? true : false
         var thumbUrl: string = ''
         const modelUid = body.uid as string
 
@@ -48,14 +47,14 @@ export async function POST(request: Request) {
                 }
             })
         }
-        // for (let tag in body.tags) {
-        //     await prisma.submittalTags.create({
-        //         data: {
-        //             id: confirmation,
-        //             tag: body.tags[tag].value
-        //         }
-        //     })
-        // }
+        for (let tag in body.tags) {
+            await prisma.tags.create({
+                data: {
+                    uid: modelUid,
+                    tag: body.tags[tag].value
+                }
+            })
+        }
         return Response.json({ data: 'Model Added', response: insert })
     }
     catch(e: any) {return Response.json({data:'error', response:e.message}, {status:400, statusText:'Error'})}

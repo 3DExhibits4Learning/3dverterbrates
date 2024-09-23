@@ -15,7 +15,7 @@ import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
 
-export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string }) {
+export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string, user: string}) {
 
     // Variable initialization
 

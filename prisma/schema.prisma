@@ -47,7 +47,7 @@ model annotations {
 model model {
   uid                 String        @id @db.VarChar(100)
   spec_name           String        @db.VarChar(100)
-  spec_acquis_date    DateTime?      @db.Date
+  spec_acquis_date    DateTime?     @db.Date
   modeled_by          String        @db.VarChar(25)
   site_ready          Boolean       @default(false)
   pref_comm_name      String        @default("") @db.VarChar(100)
@@ -61,8 +61,10 @@ model model {
   lat                 Decimal?      
   lng                 Decimal?
   email               String        @db.VarChar(100)
+  user                String        @db.VarChar(100)
   annotations         annotations[]
   software            software[]
+  tags                tags[]
   model_annotation    model_annotation?
 }
 
@@ -107,6 +109,14 @@ model software {
   model    model  @relation(fields: [uid], references: [uid], onDelete: Cascade, map: "software_ibfk_1")
 
   @@id([uid, software])
+}
+
+model tags {
+  uid      String @db.VarChar(100)
+  tag      String @db.VarChar(25)
+  model    model  @relation(fields: [uid], references: [uid], onDelete: Cascade, map: "tag_ibfk_1")
+
+  @@id([uid, tag])
 }
 
 model submittalAttempt {

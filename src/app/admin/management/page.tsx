@@ -12,7 +12,8 @@ export default async function Page() {
     // management AUTH redirect
 
     const session = await getServerSession(authOptions)
-    let email = session?.user?.email as string
+    const email = session?.user?.email as string
+    const user = session.user.name ?? ''
 
     if (!management.includes(email)) {
         return <h1>NOT AUTHORIZED</h1>
@@ -24,7 +25,13 @@ export default async function Page() {
         <>
             <Header pageRoute="collections" headerTitle='Management' />
             <main className="flex flex-col !min-h-[calc(100vh-177px)]">
-                <ManagerClient pendingModels={pendingModels} projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string} email={session.user.email} orgUid={process.env.SKETCHFAB_ORGANIZATION as string}/>
+                <ManagerClient 
+                pendingModels={pendingModels} 
+                projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string} 
+                email={email} 
+                orgUid={process.env.SKETCHFAB_ORGANIZATION as string}
+                user={user} 
+                />
             </main>
             <Foot />
         </>

@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 //import ModelSubmitForm from "@/components/ModelSubmit/Form";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 
-export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string }) {
+export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string }) {
 
     const [uid, setUid] = useState<string>()
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -53,7 +53,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                 <AccordionItem key={'adminModels'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                     <Accordion>
                         <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            <ModelSubmitForm token={props.projectUid} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} />
+                            <ModelSubmitForm token={props.projectUid} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} user={props.user}/>
                         </AccordionItem>
                         <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                             Form fields to update 3D Model
