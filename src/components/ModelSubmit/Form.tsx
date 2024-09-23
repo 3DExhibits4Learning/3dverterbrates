@@ -15,7 +15,7 @@ import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
 
-export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked: boolean }) {
+export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string }) {
 
     // Variable initialization
 
@@ -84,12 +84,12 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
 
         try {
             const data = new FormData()
-            data.set('orgProject', 'efb74a4893f34d8eb4e6bfbfbf14c6de')
+            data.set('orgProject', props.orgUid)
             data.set('modelFile', file.current)
             data.set('visibility', 'private')
             data.set('options', JSON.stringify({background: {color:"#000000"}}))
 
-            const orgModelUploadEnd = 'https://api.sketchfab.com/v3/orgs/0974c639b9364864bc9af2160fefbc1c/models'
+            const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${props.orgUid}/models`
 
             const res = await axios.post(orgModelUploadEnd, data, {
                 onUploadProgress: (axiosProgressEvent) => setUploadProgress(axiosProgressEvent.progress as number),

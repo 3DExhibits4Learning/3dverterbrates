@@ -28,7 +28,7 @@ export default async function Page() {
     return (
         <>
             <Header headerTitle='Submit a 3D Model' pageRoute='modelSubmit' />
-            <ModelSubmitForm token={process.env.SKETCHFAB_API_TOKEN as AxiosHeaderValue} email={session.user.email as string} isSketchfabLinked={isSketchfabLinked() as boolean} />
+            <ModelSubmitForm token={process.env.SKETCHFAB_API_TOKEN as AxiosHeaderValue} email={session.user.email as string} isSketchfabLinked={isSketchfabLinked() as boolean} orgUid={process.env.SKETCHFAB_ORGANIZATION as string} />
             <Foot />
         </>
     )

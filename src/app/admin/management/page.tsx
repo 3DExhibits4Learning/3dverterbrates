@@ -24,7 +24,7 @@ export default async function Page() {
         <>
             <Header pageRoute="collections" headerTitle='Management' />
             <main className="flex flex-col !min-h-[calc(100vh-177px)]">
-                <ManagerClient pendingModels={pendingModels} />
+                <ManagerClient pendingModels={pendingModels} projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string} email={session.user.email} orgUid={process.env.SKETCHFAB_ORGANIZATION as string}/>
             </main>
             <Foot />
         </>

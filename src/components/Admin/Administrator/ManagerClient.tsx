@@ -6,8 +6,11 @@ import PendingModelsAdmin from "@/components/Admin/PendingModels";
 import { Button } from "@nextui-org/react";
 import DataTransferModal from "../../Shared/DataTransferModal";
 import { Accordion, AccordionItem } from "@nextui-org/react";
+import dynamic from "next/dynamic";
+//import ModelSubmitForm from "@/components/ModelSubmit/Form";
+const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 
-export default function ManagerClient(props: { pendingModels: userSubmittal[] }) {
+export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string }) {
 
     const [uid, setUid] = useState<string>()
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -50,7 +53,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[] })
                 <AccordionItem key={'adminModels'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                     <Accordion>
                         <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            Form fields to upload 3D Model
+                            <ModelSubmitForm token={props.projectUid} email={props.email} orgUid={props.orgUid}/>
                         </AccordionItem>
                         <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                             Form fields to update 3D Model
