@@ -30,7 +30,8 @@ export default async function Page() {
                 projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string} 
                 email={email} 
                 orgUid={process.env.SKETCHFAB_ORGANIZATION as string}
-                user={user} 
+                user={user}
+                token={process.env.SKETCHFAB_API_TOKEN as string} 
                 />
             </main>
             <Foot />

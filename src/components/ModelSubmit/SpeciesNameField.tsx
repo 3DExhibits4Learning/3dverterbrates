@@ -6,7 +6,7 @@ const SpeciesName = forwardRef((props: { handler: Function, edit?: boolean, defa
     const [speciesOptions, setSpeciesOptions] = useState<any[]>([])
 
     const fetchAutoCompleteSpecies = async () => {
-        const speciesOptions = await fetch(`https://api.inaturalist.org/v1/taxa/autocomplete?taxon_id=47126&rank=species&q=${speciesRef.current}`)
+        const speciesOptions = await fetch(`https://api.inaturalist.org/v1/taxa/autocomplete?taxon_id=1&rank=species&q=${speciesRef.current}`)
             .then(res => res.json()).then(json => json.results)
         setSpeciesOptions(speciesOptions)
         props.handler()

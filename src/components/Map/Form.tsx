@@ -2,6 +2,7 @@
 
 import { forwardRef, MutableRefObject } from 'react';
 import { MapContainer, TileLayer, useMapEvents, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css';
 
 
@@ -23,6 +24,13 @@ const FormMap = forwardRef((props: { position: any, setPosition: any, className?
 
     const positionRef = ref as MutableRefObject<any>
 
+    const markerIcon = new L.Icon({
+      iconUrl: '../../../marker-icon.png',
+      iconRetinaUrl: '../../../marker-icon.png',
+      popupAnchor: [-0, -0],
+      iconSize: [24, 32],
+  });
+
     const LocationMarker = () => {
       const map = useMapEvents({
         click(e) {
@@ -32,7 +40,7 @@ const FormMap = forwardRef((props: { position: any, setPosition: any, className?
         }
       })
       return props.position === null ? null : (
-        <Marker position={props.position}>
+        <Marker position={props.position} icon={markerIcon}>
           <Popup>Your specimen was collected here</Popup>
         </Marker>
       )

@@ -14,6 +14,7 @@ import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
+import DataTransferModal from '../Shared/DataTransferModal';
 
 export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string, user: string}) {
 
@@ -35,6 +36,9 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
     const [success, setSuccess] = useState<boolean | null>(null)
     const [errorMsg, setErrorMsg] = useState<string>('')
     const [position, setPosition] = useState<Leaflet.LatLngExpression | null>(null)
+    const [open, setOpen] = useState<boolean>(false)
+    const [transferring, setTransferring] = useState<boolean>(false)
+    const [result, setResult] = useState<string>('')
 
     var uid: string
 
@@ -70,12 +74,19 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 method: 'POST',
                 body: JSON.stringify(data)
             })
-            .then(()=> setSuccess(true))
+            .then(res => res.json())
+            .then(json => {
+                setResult(json.data)
+                setTransferring(false)
+            })
             .catch(e => {
-                setErrorMsg(e.message)
-                setSuccess(false)
+                setResult(e.message)
+                setTransferring(false)
             })
         }
+
+        setOpen(true)
+        setTransferring(true)
 
         // Handler for fileUpload
 
@@ -83,6 +94,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
 
         try {
             const data = new FormData()
+            
             data.set('orgProject', props.projectUid)
             data.set('modelFile', file.current)
             data.set('visibility', 'private')
@@ -95,22 +107,26 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 headers: {
                     'Authorization': props.token as AxiosHeaderValue
                 }
+            }).catch((e) => {
+                if(process.env.NODE_ENV === 'development') console.error(e.message)
+                throw Error("Couldn't upload model")
             })
+
             uid = res.data.uid
 
             // We then make a post request to our route handler which creates a db record containing the metadata associated with the model
             await modelDbEntry()
         }
         catch (e: any) {
-            setErrorMsg(e.message)
-            setSuccess(false)
-            return
+            setResult(e.message)
+            setTransferring(false)
         }
     }
 
     return (
         <>
-            <ProgressModal progress={uploadProgress} success={success} errorMsg={errorMsg} />
+            {/* <ProgressModal progress={uploadProgress} success={success} errorMsg={errorMsg} /> */}
+            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload progress={uploadProgress}/>
             <h1 className='hidden lg:block ml-[20%] text-3xl py-8 mb-4'>Fill in form data and upload model file(s)</h1>
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
                 <Divider />
