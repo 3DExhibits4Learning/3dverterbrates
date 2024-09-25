@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios, { AxiosHeaderValue } from 'axios';
-import ProgressModal from '@/components/ModelSubmit/ProgressModal';
 import ArtistName from './ArtistNameField';
 import SpeciesName from './SpeciesNameField';
 import MobileSelect from './MobileSelectField';
@@ -15,8 +14,10 @@ import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
 import DataTransferModal from '../Shared/DataTransferModal';
+import SpeciesAcquisitionDate from './AcquisitionDate';
+import ProgressModal from './ProgressModal';
 
-export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string, user: string}) {
+export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string, user: string }) {
 
     // Variable initialization
 
@@ -29,12 +30,11 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
     const softwareArray = useRef<Array<string>>([])
     const tagArray = useRef<object[]>([])
     const positionRef = useRef<any>({})
+    const speciesAcquisitionDate = useRef<HTMLInputElement>()
 
     const [additionalSoftware, setAdditionalSoftware] = useState(0)
     const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
     const [uploadProgress, setUploadProgress] = useState<number>(0)
-    const [success, setSuccess] = useState<boolean | null>(null)
-    const [errorMsg, setErrorMsg] = useState<string>('')
     const [position, setPosition] = useState<Leaflet.LatLngExpression | null>(null)
     const [open, setOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
@@ -49,31 +49,26 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
         else { setUploadDisabled(true) }
     }
 
-    // Upload handler
+    // This is the database entry handler
+    const modelDbEntry = async () => {
+        softwareArray.current.unshift(software.current)
 
-    const handleUpload = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-
-        // This is the database entry handler
-
-        const modelDbEntry = async () => {
-            softwareArray.current.unshift(software.current)
-
-            const data = {
-                email: props.email,
-                artist: artistName.current,
-                species: speciesName.current,
-                isMobile: mobileValue.current,
-                methodology: radioValue.current,
-                uid: uid,
-                software: softwareArray.current,
-                tags: tagArray.current,
-                position: positionRef.current
-            }
-            await fetch('/api/modelSubmit', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            })
+        const data = {
+            email: props.email,
+            artist: artistName.current,
+            species: speciesName.current,
+            methodology: radioValue.current,
+            uid: uid,
+            software: softwareArray.current,
+            tags: tagArray.current,
+            position: positionRef.current,
+            speciesAcquisitionDate: (speciesAcquisitionDate.current as HTMLInputElement).value ?? null,
+            user: props.user
+        }
+        await fetch('/api/modelSubmit', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        })
             .then(res => res.json())
             .then(json => {
                 setResult(json.data)
@@ -83,23 +78,29 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 setResult(e.message)
                 setTransferring(false)
             })
-        }
+    }
 
+    // Upload handler
+
+    const handleUpload = async (e: React.MouseEvent<HTMLButtonElement>) => {
+
+        e.preventDefault()
         setOpen(true)
         setTransferring(true)
 
         // Handler for fileUpload
-
         if (!file.current) return
 
         try {
+            //Create / set formData
             const data = new FormData()
-            
+
             data.set('orgProject', props.projectUid)
             data.set('modelFile', file.current)
             data.set('visibility', 'private')
             data.set('options', JSON.stringify({ background: { color: "#000000" } }))
 
+            // Axios request features upload progress
             const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${props.orgUid}/models`
 
             const res = await axios.post(orgModelUploadEnd, data, {
@@ -108,10 +109,11 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                     'Authorization': props.token as AxiosHeaderValue
                 }
             }).catch((e) => {
-                if(process.env.NODE_ENV === 'development') console.error(e.message)
+                if (process.env.NODE_ENV === 'development') console.error(e.message)
                 throw Error("Couldn't upload model")
             })
 
+            // Grab uid of model for db for storage
             uid = res.data.uid
 
             // We then make a post request to our route handler which creates a db record containing the metadata associated with the model
@@ -126,8 +128,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
     return (
         <>
             {/* <ProgressModal progress={uploadProgress} success={success} errorMsg={errorMsg} /> */}
-            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload progress={uploadProgress}/>
-            <h1 className='hidden lg:block ml-[20%] text-3xl py-8 mb-4'>Fill in form data and upload model file(s)</h1>
+            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload progress={uploadProgress} />
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
                 <Divider />
                 <div className='flex items-center h-[75px]'>
@@ -135,6 +136,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                 </div>
                 <Divider className='mb-6' />
                 <SpeciesName ref={speciesName} handler={isUploadable} />
+                <SpeciesAcquisitionDate ref={speciesAcquisitionDate}/>
                 <FormMap position={position} setPosition={setPosition} ref={positionRef} title />
                 <TagInput ref={tagArray} />
                 <Divider className='mt-8' />

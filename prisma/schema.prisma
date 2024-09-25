@@ -47,7 +47,7 @@ model annotations {
 model model {
   uid                 String        @id @db.VarChar(100)
   spec_name           String        @db.VarChar(100)
-  spec_acquis_date    DateTime?     @db.Date
+  spec_acquis_date    String?       @db.VarChar(20)
   modeled_by          String        @db.VarChar(25)
   site_ready          Boolean       @default(false)
   pref_comm_name      String        @default("") @db.VarChar(100)

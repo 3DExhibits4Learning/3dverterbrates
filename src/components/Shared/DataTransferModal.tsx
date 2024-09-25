@@ -31,6 +31,8 @@ export default function DataTransferModal(props: {
                                 {
                                     props.transferring && props.modelUpload && props.progress &&
                                     <>
+                                        <p>Upload Progress</p>
+                                        <p>(Closing this window will not stop upload)</p>
                                         <p><Progress aria-label="Loading..." value={props.progress * 100} className="max-w-md" /></p>
                                         <p>{'Upload is ' + Math.round(props.progress * 100) + '% Complete'}</p>
                                     </>
@@ -39,6 +41,13 @@ export default function DataTransferModal(props: {
                                 {
                                     !props.transferring &&
                                     <p>{props.result}</p>
+                                }
+                                {
+                                    !props.transferring && props.modelUpload &&
+                                    <>
+                                        <p>It may take a few minutes before your model is viewable.</p>
+                                        <p>When it is, submit a screen capture of it. This will be the thumbnail that will appear for users to click!</p>
+                                    </>
                                 }
                             </ModalBody>
                             <ModalFooter className="flex justify-center">
