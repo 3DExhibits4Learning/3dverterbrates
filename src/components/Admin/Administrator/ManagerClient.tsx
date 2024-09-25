@@ -1,14 +1,14 @@
 'use client'
 
 import { userSubmittal } from "@prisma/client";
-import { useState } from "react";
+import { SetStateAction, useState, Dispatch } from "react";
 import PendingModelsAdmin from "@/components/Admin/PendingModels";
-import { Button } from "@nextui-org/react";
 import DataTransferModal from "../../Shared/DataTransferModal";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import dynamic from "next/dynamic";
-//import ModelSubmitForm from "@/components/ModelSubmit/Form";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
+import DeleteModel from "./Model/DeleteModel";
+
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token:string }) {
 
@@ -58,26 +58,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                         <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                             Form fields to update 3D Model
                         </AccordionItem>
-                        <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            <div className="h-[400px] w-[600px] flex flex-col items-center border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
-                                <p className="my-8 text-xl text-center">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
-                                <label className='text-xl block mb-2 font-medium'>UID</label>
-                                <input
-                                    type='text'
-                                    className={`w-3/5 max-w-[500px] rounded-xl mb-12 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}
-                                    value={uid}
-                                    onChange={(e) => setUid(e.target.value)}
-                                >
-                                </input>
-                                <Button
-                                    className="w-1/2 text-white"
-                                    isDisabled={!uid}
-                                    onClick={() => deleteModel(uid as string)}
-                                >
-                                    Delete 3D Model
-                                </Button>
-                            </div>
-                        </AccordionItem>
+                        <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} />
                     </Accordion>
                 </AccordionItem>
                 <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
