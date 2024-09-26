@@ -10,7 +10,7 @@ const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
 
 
-export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token:string }) {
+export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
 
     const [uid, setUid] = useState<string>()
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -32,8 +32,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
             })
     }
 
-    const deleteModel = async(uid: string) => {
-        
+    const deleteModel = async (uid: string) => {
+
         setOpenModal(true)
         setTransferring(true)
         setLoadingLabel("Deleting Model and Annotations")
@@ -41,24 +41,36 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         await fetch(`/api/admin/models/delete?uid=${uid}`, {
             method: 'DELETE',
         })
-        .then(res => res.json()).then(res => {
-            setResult(res.data)
-            setTransferring(false)
-        })
+            .then(res => res.json()).then(res => {
+                setResult(res.data)
+                setTransferring(false)
+            })
     }
 
     return (
         <>
             <Accordion>
-                <AccordionItem key={'adminModels'} aria-label={'New Specimen'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                     <Accordion>
                         <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                            <ModelSubmitForm token={props.token} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} user={props.user}/>
+                            <ModelSubmitForm token={props.token} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} user={props.user} />
                         </AccordionItem>
                         <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                             Form fields to update 3D Model
                         </AccordionItem>
-                        <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} />
+                        <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} />
+                        </AccordionItem>
+                    </Accordion>
+                </AccordionItem>
+                <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                    <Accordion>
+                        <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Grid of models withouth thumbmails (or display message if none)
+                        </AccordionItem>
+                        <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            Text field and file input for updating of photo
+                        </AccordionItem>
                     </Accordion>
                 </AccordionItem>
                 <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>

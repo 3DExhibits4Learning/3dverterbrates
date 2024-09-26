@@ -95,20 +95,6 @@ export async function getSoftwares(uid: string) {
 }
 
 /**
-* @function getImageSet
-* @description returns image set data for photogrammetry models
-* 
-* @param {string} uid of the model
-*/
-export async function getImageSet(uid: string) {
-  const imageSet = await prisma.image_set.findMany({
-    where: { uid: uid }
-  });
-
-  return imageSet;
-}
-
-/**
  * @function getAllSiteReadyModels
  * @description returns a list of all models labeled as site_ready from the database.
  * 
@@ -209,28 +195,8 @@ export const getPublishedModels = async (email: string) => {
  * @description update thumbnail url of the model with the corresponding confirmation string (preferably) or the model uid.
  * 
  */
-export const updateThumbUrl = async (thumbUrl: string, confirmation?: string, uid?: string, nonCommunity?: boolean) => {
-
-  if (nonCommunity && uid) {
+export const updateThumbUrl = async (thumbUrl: string, uid: string) => {
     await prisma.model.update({ where: { uid: uid }, data: { thumbnail: thumbUrl } })
-  }
-
-  else {
-
-    if (confirmation) {
-      await prisma.userSubmittal.update({
-        where: { confirmation: confirmation },
-        data: { thumbnail: thumbUrl }
-      })
-    }
-
-    else if (uid) {
-      await prisma.userSubmittal.update({
-        where: { modeluid: uid },
-        data: { thumbnail: thumbUrl }
-      });
-    }
-  }
 }
 
 /**
@@ -765,54 +731,6 @@ export const getPublishedUserSubmittalsBySpecies = async (speciesName: string) =
 /***** ADMIN QUERIES *****/
 
 /**
- * @function getSpecimenWithoutPhotos
- * @description returns an object array of all specimens since 6/20/2024 that do not have corresponding image_set data
- * 
- */
-export const getSpecimenWithoutPhotos = async () => {
-  let filteredSpecimen = []
-
-  const specimen = await prisma.specimen.findMany({
-    where: {
-      spec_acquis_date: {
-        gte: new Date('2024-06-01')
-      }
-    },
-    include: {
-      image_set: true
-    }
-  })
-
-  for (let i in specimen) {
-    if (specimen[i].image_set.length === 0) {
-      filteredSpecimen.push(specimen[i])
-    }
-  }
-
-  return filteredSpecimen
-}
-
-/**
- * @function getSpecimenToModel
- * @description returns an object array of all specimens since 6/20/2024 that do not have a corresponding image_set, but lack a corresponding 3D model
- * 
- */
-export const getSpecimenToModel = async () => {
-
-  const specimenToModel = await prisma.image_set.findMany({
-    where: {
-      uid: null,
-      spec_acquis_date: {
-        gte: new Date('2024-06-01'),
-      }
-    },
-  })
-
-  return specimenToModel
-}
-
-
-/**
  * @function getModelsToAnnotate
  * @description 
  * 
@@ -824,9 +742,6 @@ export const getModelsToAnnotate = async () => {
       site_ready: true,
       base_model: true,
       annotated: false,
-      spec_acquis_date: {
-        gte: new Date('2024-06-01'),
-      }
     },
   })
 
