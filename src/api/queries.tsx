@@ -102,7 +102,7 @@ export async function getSoftwares(uid: string) {
  */
 export const getAllSiteReadyModels = async (development: boolean): Promise<model[]> => {
 
-  const whereClause = development ? { site_ready: true, base_model: true } : { site_ready: true, base_model: true, annotator: { not: null }, annotated: true }
+  const whereClause = development ? { site_ready: true, base_model: true, thumbnail: { not: null } } : { site_ready: true, base_model: true, annotator: { not: null }, annotated: true, thumbnail: { not: null } }
 
   const models = await prisma.model.findMany({
     where: whereClause,
@@ -112,7 +112,28 @@ export const getAllSiteReadyModels = async (development: boolean): Promise<model
   })
 
   return models as model[]
-};
+}
+
+/**
+ * @function getModelsWithoutThumbnails
+ * @description returns a list of all models without thumbnails.
+ * 
+ * @returns {Promise<model[]>}
+ */
+export const getModelsWithoutThumbnails = async (): Promise<model[]> => {
+
+  const models = await prisma.model.findMany({
+    where: {
+      thumbnail: null,
+      base_model: true
+    },
+    orderBy: {
+      spec_name: 'asc'
+    }
+  })
+
+  return models as model[]
+}
 
 /**
  * @function getAllAnnotationModels
@@ -196,7 +217,7 @@ export const getPublishedModels = async (email: string) => {
  * 
  */
 export const updateThumbUrl = async (thumbUrl: string, uid: string) => {
-    await prisma.model.update({ where: { uid: uid }, data: { thumbnail: thumbUrl } })
+  await prisma.model.update({ where: { uid: uid }, data: { thumbnail: thumbUrl } })
 }
 
 /**
@@ -563,10 +584,10 @@ export const deleteAllAnnotations = async (uid: string) => {
   const deletionPromises = []
   const annotations = await getAnnotations(uid)
 
-  for(let annotation in annotations){
-      deletionPromises.push(prisma.annotations.delete({
-        where:{annotation_id: annotations[annotation].annotation_id}
-      }))
+  for (let annotation in annotations) {
+    deletionPromises.push(prisma.annotations.delete({
+      where: { annotation_id: annotations[annotation].annotation_id }
+    }))
   }
 
   await Promise.all(deletionPromises)

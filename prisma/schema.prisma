@@ -55,7 +55,7 @@ model model {
   annotated           Boolean?      @default(false)
   annotationPosition  String?       @db.VarChar(250)
   build_process       String?       @default("Photogrammetry") @db.VarChar(50)
-  thumbnail           String        @default("")
+  thumbnail           String?        @default("")
   annotator           String?       @db.VarChar(75)
   annotatorId         String?       @db.VarChar(50) 
   lat                 Decimal?      

@@ -18,15 +18,15 @@ export async function POST(request: Request) {
         requestHeader.set('Authorization', process.env.SKETCHFAB_API_TOKEN as string)
 
         // Get model thumbnail - note that the thumbnail must be saved first!!!
-        await fetch(`https://api.sketchfab.com/v3/models/${modelUid}`, {
-            headers: requestHeader
-        })
-            .then(res => res.json())
-            .then(data => thumbUrl = data.thumbnails.images[0].url)
-            .catch((e) => {
-                if (process.env.NODE_ENV === 'development') console.error(e.message)
-                throw Error("Couldn't get model thumbnail")
-            })
+        // await fetch(`https://api.sketchfab.com/v3/models/${modelUid}`, {
+        //     headers: requestHeader
+        // })
+        //     .then(res => res.json())
+        //     .then(data => thumbUrl = data.thumbnails.images[0].url)
+        //     .catch((e) => {
+        //         if (process.env.NODE_ENV === 'development') console.error(e.message)
+        //         throw Error("Couldn't get model thumbnail")
+        //     })
 
         // Insert data into database
         const insert = await prisma.model.create({
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
                 spec_name: body.species as string,
                 build_process: body.methodology as string,
                 uid: modelUid,
-                thumbnail: thumbUrl,
+                //thumbnail: thumbUrl,
                 lat: body.position.lat,
                 lng: body.position.lng,
                 spec_acquis_date: body.speciesAcquisitionDate,
