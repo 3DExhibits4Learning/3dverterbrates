@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
 import AddThumbnail from "./Thumbnails/AddThumbnail";
+import Select from "@/components/Shared/Form Fields/Select";
+import UpdateThumbnail from "./Thumbnails/UpdateThumbnail";
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
 
@@ -23,6 +25,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[]>()
         const [modelsWithThumbnails, setModelsWithThumbnails] = useState<model[]>()
         const [file, setFile] = useState<File>()
+        const [updateFile, setUpdateFile] = useState<File>()
+        const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
 
         // Models are fetched client side due to decimals within their data
         // Wishlist: Create type/query for models without decimal objects and fetch them server side, then add decimals with route handler client side
@@ -117,10 +121,21 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                                 <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={addThumbnail} />
                             </AccordionItem>
                             <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                {
-                                    modelsWithThumbnails && modelsWithThumbnails.length > 0 &&
-                                    <input></input>
-                                }
+                                <section className="flex flex-col w-fit py-8 bg-[#D5CB9F] rounded-md px-4">
+                                    {
+                                        modelsWithThumbnails && modelsWithThumbnails.length > 0 &&
+                                        <>
+                                            <Select value={updateThumbUid} setValue={setUpdateThumbUid as Dispatch<SetStateAction<string>>} models={modelsWithThumbnails} title='Select Model' />
+
+                                            {
+                                                updateThumbUid &&
+                                                <div className="my-4">
+                                                    <UpdateThumbnail uid={updateThumbUid} file={updateFile} setFile={setUpdateFile as Dispatch<SetStateAction<File>>} updateThumbnail={updateThumbnail} />
+                                                </div>
+                                            }
+                                        </>
+                                    }
+                                </section>
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
