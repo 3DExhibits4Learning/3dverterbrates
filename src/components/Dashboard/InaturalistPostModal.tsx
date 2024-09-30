@@ -4,12 +4,12 @@ import { ChangeEvent, SetStateAction, useRef, useState, Dispatch, useEffect } fr
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Modal, ModalContent, ModalBody, ModalFooter, useDisclosure, Button } from "@nextui-org/react"
-import DataTransferModal from "../Shared/DataTransferModal"
+import DataTransferModal from "../Shared/Modals/DataTransferModal"
 import checkToken from "@/utils/checkToken"
 import { LegacyRef } from "react"
 import FormMap from "../Map/Form"
 import { LatLngLiteral } from "leaflet"
-import Autocomplete from "../Shared/AutoComplete"
+import Autocomplete from "../Shared/Form Fields/AutoComplete"
 
 export default function InaturalistPostModal(props: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
 

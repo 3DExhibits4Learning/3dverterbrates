@@ -81,6 +81,21 @@ export async function getModel(species: string) {
 }
 
 /**
+ * @function getModelThumbmail
+ * @description returns the path of a thumbnail for a 3D model
+ * 
+ * @param {string} uid of the model
+ */
+export async function getModelThumbnail(uid: string) {
+  const models = await prisma.model.findMany({
+    where: { uid: uid },
+    select: {thumbnail: true}
+  })
+
+  return models
+}
+
+/**
 * @function getSoftwares
 * @description returns a list of all softwares used for the uid parameter
 * 
@@ -125,6 +140,27 @@ export const getModelsWithoutThumbnails = async (): Promise<model[]> => {
   const models = await prisma.model.findMany({
     where: {
       thumbnail: null,
+      base_model: true
+    },
+    orderBy: {
+      spec_name: 'asc'
+    }
+  })
+
+  return models as model[]
+}
+
+/**
+ * @function getModelsWithThumbnails
+ * @description returns a list of all models with thumbnails.
+ * 
+ * @returns {Promise<model[]>}
+ */
+export const getModelsWithThumbnails = async (): Promise<model[]> => {
+
+  const models = await prisma.model.findMany({
+    where: {
+      thumbnail: {not: null},
       base_model: true
     },
     orderBy: {

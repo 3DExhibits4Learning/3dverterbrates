@@ -3,13 +3,11 @@
 import { model, userSubmittal } from "@prisma/client";
 import { SetStateAction, useState, Dispatch, useEffect } from "react";
 import PendingModelsAdmin from "@/components/Admin/PendingModels";
-import DataTransferModal from "../../Shared/DataTransferModal";
+import DataTransferModal from "../../Shared/Modals/DataTransferModal";
 import { Accordion, AccordionItem, Button } from "@nextui-org/react";
 import dynamic from "next/dynamic";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
-import PhotoInput from "@/components/Shared/PhotoInput";
-const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import AddThumbnail from "./Thumbnails/AddThumbnail";
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
@@ -23,7 +21,59 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
         const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[]>()
+        const [modelsWithThumbnails, setModelsWithThumbnails] = useState<model[]>()
         const [file, setFile] = useState<File>()
+
+        // Models are fetched client side due to decimals within their data
+        // Wishlist: Create type/query for models without decimal objects and fetch them server side, then add decimals with route handler client side
+        const getModelsThatNeedThumbnails = async () => {
+            setModelsNeedingThumbnails(await fetch('/api/admin/models/noThumb').then(res => res.json()).then(json => json.response).catch((e) => { throw Error(e.message) }))
+        }
+        const getModelsWithThumbnails = async () => {
+            setModelsWithThumbnails(await fetch('/api/admin/models/withThumb').then(res => res.json()).then(json => json.response).catch((e) => { throw Error(e.message) }))
+        }
+
+        const addThumbnail = async (uid: string) => {
+
+            setOpenModal(true)
+            setTransferring(true)
+            setLoadingLabel("Adding Thumbnail")
+
+            const data = new FormData()
+            data.set('uid', uid)
+            data.set('file', file as File)
+
+            await fetch(`/api/thumbnail/add`, {
+                method: 'POST',
+                body: data
+            })
+                .then(res => res.json())
+                .then(res => {
+                    setResult(res.data)
+                    setTransferring(false)
+                })
+        }
+
+        const updateThumbnail = async (uid: string) => {
+
+            setOpenModal(true)
+            setTransferring(true)
+            setLoadingLabel("Updating Thumbnail")
+
+            const data = new FormData()
+            data.set('uid', uid)
+            data.set('file', file as File)
+
+            await fetch(`/api/thumbnail/update`, {
+                method: 'POST',
+                body: data
+            })
+                .then(res => res.json())
+                .then(res => {
+                    setResult(res.data)
+                    setTransferring(false)
+                })
+        }
 
         const deleteModel = async (uid: string) => {
 
@@ -41,14 +91,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         }
 
         useEffect(() => {
-
-            // Model that need thumbnails are fetched client side due to decimals within their data
-            // Wishlist: Create type/query for models without decimal objects and fetch them server side, then add decimals with route handler client side
-
-            const getModelsThatNeedThumbnails = async () => {
-                setModelsNeedingThumbnails(await fetch('/api/admin/models/noThumb').then(res => res.json()).then(json => json.response).catch((e) => { throw Error(e.message) }))
-            }
             getModelsThatNeedThumbnails()
+            getModelsWithThumbnails()
         }, [])
 
         return (
@@ -70,10 +114,13 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                     <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <Accordion>
                             <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                    <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={AddThumbnail}/>
+                                <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={addThumbnail} />
                             </AccordionItem>
                             <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Text field and file input for updating of photo
+                                {
+                                    modelsWithThumbnails && modelsWithThumbnails.length > 0 &&
+                                    <input></input>
+                                }
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>

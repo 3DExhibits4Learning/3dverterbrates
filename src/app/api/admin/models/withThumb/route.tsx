@@ -1,8 +1,8 @@
-import { getModelsWithoutThumbnails } from "@/api/queries";
+import { getModelsWithThumbnails } from "@/api/queries";
 
 export async function GET() {
     try {
-        const models = await getModelsWithoutThumbnails().catch((e) => {
+        const models = await getModelsWithThumbnails().catch((e) => {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
             throw Error("Error getting models")
         })

@@ -13,7 +13,7 @@ import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
 import Leaflet from 'leaflet';
 import FormMap from '../Map/Form';
-import DataTransferModal from '../Shared/DataTransferModal';
+import DataTransferModal from '../Shared/Modals/DataTransferModal';
 import SpeciesAcquisitionDate from './AcquisitionDate';
 import ProgressModal from './ProgressModal';
 

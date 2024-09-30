@@ -3,9 +3,9 @@
 import { useState, useEffect, SetStateAction, Dispatch } from "react"
 import { model_annotation, photo_annotation, video_annotation, model } from "@prisma/client"
 import { Button } from "@nextui-org/react"
-import DataTransferModal from "../Shared/DataTransferModal"
+import DataTransferModal from "../Shared/Modals/DataTransferModal"
 import { v4 as uuidv4 } from 'uuid'
-import TextInput from "../Shared/TextInput"
+import TextInput from "../Shared/Form Fields/TextInput"
 import RadioButtons from "./AnnotationFields/RadioButtons"
 import AnnotationReposition from "./AnnotationFields/AnnotationReposition"
 import FileInput from "./AnnotationFields/ImageInput"
