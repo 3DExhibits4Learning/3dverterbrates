@@ -69,9 +69,9 @@ const SearchPageModelList = (props: SearchPageModelListProps) => {
                         <img
                           alt={'Image of ' + (model as model).spec_name}
                           role='button'
-                          src={model.thumbnail ?? ''}
+                          src={'/data/Vertebrates/Thumbnails/de007b9c21cc495c9d8467c12d2f2433/Screenshot 2024-09-30 085745.png' ?? ''}
                           className='w-full h-[calc(100vh-275px)] min-h-[25rem] max-h-[30rem] object-cover relative z-5 rounded-t-md'
-                          onError={(e: SyntheticEvent<HTMLImageElement, Event>) => { handleImgError(e.currentTarget, noImage); }}
+                          //onError={(e: SyntheticEvent<HTMLImageElement, Event>) => { handleImgError(e.currentTarget, noImage); }}
                         />
                       </a>
                     </section>

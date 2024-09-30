@@ -2,7 +2,7 @@
 
 import { SetStateAction, Dispatch } from "react"
 
-export default function FileInput(props: {setFile: Dispatch<SetStateAction<File>>}) {
+export default function ImageInput(props: {setFile: Dispatch<SetStateAction<File>>}) {
     return (
         <>
             <p className="text-xl mb-1">Photo<span className="text-red-600 ml-1">*</span></p>

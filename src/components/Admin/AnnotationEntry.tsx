@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid'
 import TextInput from "../Shared/TextInput"
 import RadioButtons from "./AnnotationFields/RadioButtons"
 import AnnotationReposition from "./AnnotationFields/AnnotationReposition"
-import FileInput from "./AnnotationFields/FileInput"
+import FileInput from "./AnnotationFields/ImageInput"
 import License from "./AnnotationFields/License"
 import Annotation from "./Annotation"
 import dynamic from "next/dynamic"

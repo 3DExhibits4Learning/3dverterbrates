@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
 import PhotoInput from "@/components/Shared/PhotoInput";
+const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
+import AddThumbnail from "./Thumbnails/AddThumbnail";
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
 
@@ -20,22 +22,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         const [transferring, setTransferring] = useState<boolean>(false)
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
-        const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[] | null>()
+        const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[]>()
         const [file, setFile] = useState<File>()
-
-        const updateThumbnail = async (uid: string) => {
-
-            setOpenModal(true)
-            setTransferring(true)
-            setLoadingLabel("Updating Thumbnail")
-
-            await fetch(`/api/sketchfab/thumbnail?uid=${uid}&nonCommunity=true`)
-                .then(res => res.json())
-                .then(res => {
-                    setResult(res.data)
-                    setTransferring(false)
-                })
-        }
 
         const deleteModel = async (uid: string) => {
 
@@ -82,25 +70,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                     <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <Accordion>
                             <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                {
-                                    modelsNeedingThumbnails && modelsNeedingThumbnails.length > 0 &&
-                                    modelsNeedingThumbnails.map((model, index) => {
-                                        return (
-                                            <>
-                                                <div key={index} className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4">
-                                                    <p>Species Name: {model.spec_name}</p>
-                                                    <p className="mb-8">UID: {model.uid}</p>
-                                                    <PhotoInput setFile={setFile as Dispatch<SetStateAction<File>>} title="Upload Thumbnail:" /> 
-                                                    <Button />
-                                                </div>
-                                            </>
-                                        )
-                                    })
-                                }
-                                {
-                                    !modelsNeedingThumbnails &&
-                                    <p className="text-xl"> There are no models without thumbnails </p>
-                                }
+                                    <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={AddThumbnail}/>
                             </AccordionItem>
                             <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                                 Text field and file input for updating of photo
