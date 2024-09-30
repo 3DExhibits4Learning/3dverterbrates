@@ -1,7 +1,7 @@
 'use client'
 
 import { model } from "@prisma/client"
-import PhotoInput from "@/components/Shared/PhotoInput";
+import PhotoInput from "@/components/Shared/Form Fields/PhotoInput";
 import dynamic from "next/dynamic";
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import { Button } from "@nextui-org/react";
