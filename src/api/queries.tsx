@@ -87,7 +87,7 @@ export async function getModel(species: string) {
  * @param {string} uid of the model
  */
 export async function getModelThumbnail(uid: string) {
-  const models = await prisma.model.findMany({
+  const models = await prisma.model.findUnique({
     where: { uid: uid },
     select: {thumbnail: true}
   })

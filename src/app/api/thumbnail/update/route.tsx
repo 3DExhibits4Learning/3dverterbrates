@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         const uid = formData.get('uid') as string
 
         // Get old thumbnail path
-        const oldThumbnail = await getModelThumbnail(uid).catch((e) => {
+        const oldThumbnailObject = await getModelThumbnail(uid).catch((e) => {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
             throw Error("Couldn't find previous thumbnail")
         })
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         })
 
         // Delete old thumbnail
-        await unlink('public/' + oldThumbnail).catch((e) => {
+        await unlink('public/' + oldThumbnailObject?.thumbnail).catch((e) => {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
             throw Error("Couldn't delete previous thumbnail")
         })

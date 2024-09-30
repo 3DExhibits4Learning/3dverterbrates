@@ -70,13 +70,13 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   }
 
   // Experimental Scale Listener
-  const scaleSwitchListener = (event: Event) => {
-    material.current.channels.Opacity.enable = true;
-    material.current.channels.Opacity.type = 'alphaBlend';
-    material.current.channels.Opacity.factor = (event.target as HTMLInputElement).checked ? 1 : 0
-    api.setMaterial(material.current, function () {
-    })
-  }
+  // const scaleSwitchListener = (event: Event) => {
+  //   material.current.channels.Opacity.enable = true;
+  //   material.current.channels.Opacity.type = 'alphaBlend';
+  //   material.current.channels.Opacity.factor = (event.target as HTMLInputElement).checked ? 1 : 0
+  //   api.setMaterial(material.current, function () {
+  //   })
+  // }
 
   // This effect initializes the sketchfab client and instantiates the specimen:Herbarium object; it also ensures the page begins from the top upon load
   useEffect(() => {
@@ -110,15 +110,15 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
       
       // For Experimental Scale - strategy should be switched from opacity control to api.show/api.hide
 
-      api.getSceneGraph(function (err: any, result: any) {
-        // get the id from that log
-        console.log(result)
-      })
+      // api.getSceneGraph(function (err: any, result: any) {
+      //   // get the id from that log
+      //   console.log(result)
+      // })
 
-      api.getMaterialList((err: any, materials: any) => {
-        material.current = materials[1];
-          (scaleSwitch as HTMLInputElement).addEventListener('change', scaleSwitchListener)
-      })
+      // api.getMaterialList((err: any, materials: any) => {
+      //   material.current = materials[1];
+      //     (scaleSwitch as HTMLInputElement).addEventListener('change', scaleSwitchListener)
+      // })
       
       // Create the first annotation if it exists
       if (s.model.annotationPosition) {

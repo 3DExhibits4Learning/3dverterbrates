@@ -1,24 +1,15 @@
 'use client'
 
-import { model } from "@prisma/client"
 import PhotoInput from "@/components/Shared/Form Fields/PhotoInput";
-import dynamic from "next/dynamic";
-const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import { Button } from "@nextui-org/react";
-import { SetStateAction, Dispatch, useState } from "react";
-import Select from "@/components/Shared/Form Fields/Select";
+import { SetStateAction, Dispatch } from "react";
 
 export default function UpdateThumbnail(props: { setFile: Dispatch<SetStateAction<File>>, file: File | undefined, updateThumbnail: Function, uid: string }) {
-
-    const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
 
     return (
         <>
             <section className="flex flex-col">
-                <div key={Math.random()} className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4">
-                    <div className="w-[500px] h-[500px] mb-8">
-                        <ModelViewer uid={props.uid} />
-                    </div>
+                <div key={Math.random()} className="rounded-xl w-full px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4">
                     <p className="text-center mb-8 text-xl">Upload Thumbnail:</p>
                     <div className="flex justify-between">
                         <PhotoInput setFile={props.setFile as Dispatch<SetStateAction<File>>} />

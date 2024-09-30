@@ -11,6 +11,7 @@ import DeleteModel from "./Model/DeleteModel";
 import AddThumbnail from "./Thumbnails/AddThumbnail";
 import Select from "@/components/Shared/Form Fields/Select";
 import UpdateThumbnail from "./Thumbnails/UpdateThumbnail";
+const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 
 export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
 
@@ -66,7 +67,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
 
             const data = new FormData()
             data.set('uid', uid)
-            data.set('file', file as File)
+            data.set('file', updateFile as File)
 
             await fetch(`/api/thumbnail/update`, {
                 method: 'POST',
@@ -99,6 +100,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
             getModelsWithThumbnails()
         }, [])
 
+        useEffect(() => console.log(updateFile))
+
         return (
             <>
                 <Accordion>
@@ -121,7 +124,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                                 <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={addThumbnail} />
                             </AccordionItem>
                             <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                <section className="flex flex-col w-fit py-8 bg-[#D5CB9F] rounded-md px-4">
+                                <section className="flex flex-col w-fit py-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46]">
                                     {
                                         modelsWithThumbnails && modelsWithThumbnails.length > 0 &&
                                         <>
@@ -130,6 +133,9 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
                                             {
                                                 updateThumbUid &&
                                                 <div className="my-4">
+                                                    <div className="w-[500px] h-[500px] mb-8">
+                                                        <ModelViewer uid={updateThumbUid} />
+                                                    </div>
                                                     <UpdateThumbnail uid={updateThumbUid} file={updateFile} setFile={setUpdateFile as Dispatch<SetStateAction<File>>} updateThumbnail={updateThumbnail} />
                                                 </div>
                                             }

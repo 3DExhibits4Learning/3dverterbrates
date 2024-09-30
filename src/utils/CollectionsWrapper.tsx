@@ -80,9 +80,9 @@ export default function MainWrap(props: {
         <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
           <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>
           <div className='flex mr-4'>
-          <Switch className='mr-12' defaultSelected id="scaleSwitch" isSelected={scaleSelected} color='secondary' onValueChange={setScaleSelected}>
+          {/* <Switch className='mr-12' defaultSelected id="scaleSwitch" isSelected={scaleSelected} color='secondary' onValueChange={setScaleSelected}>
             <span className="text-white">Scale</span>
-          </Switch>
+          </Switch> */}
           <Switch style={{ paddingRight: "2.5%" }} defaultSelected id="annotationSwitch" isSelected={isSelected} color='secondary' onValueChange={setIsSelected}>
             <span className="text-white">Annotations</span>
           </Switch>

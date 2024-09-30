@@ -1,4 +1,3 @@
-import { uid } from 'uid'
 import { prismaClient } from "@/api/queries";
 
 const prisma = prismaClient()
