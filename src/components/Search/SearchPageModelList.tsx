@@ -15,6 +15,9 @@ type SearchPageModelListProps = {
 
 const SearchPageModelList = (props: SearchPageModelListProps) => {
 
+  //console.log(props.models[1].thumbnail)
+  //console.log(props.models[1].thumbnail?.replace(/\\/g, "/"))
+
   const models = props.models
   const selectedModeler: string | undefined = props.selectedModeler
   const selectedAnnotator = props.selectedAnnotator
@@ -69,7 +72,7 @@ const SearchPageModelList = (props: SearchPageModelListProps) => {
                         <img
                           alt={'Image of ' + (model as model).spec_name}
                           role='button'
-                          src={model.thumbnail?.replace(/\\/g, "\\") ?? ''}
+                          src={"/" + model.thumbnail?.replace(/\\/g, "/") ?? ''} // BUG: Prisma/MySQL changes forward slash to backslash; hence the replace()
                           className='w-full h-[calc(100vh-275px)] min-h-[25rem] max-h-[30rem] object-cover relative z-5 rounded-t-md'
                           onError={(e: SyntheticEvent<HTMLImageElement, Event>) => { handleImgError(e.currentTarget, noImage); }}
                         />

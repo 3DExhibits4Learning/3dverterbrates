@@ -43,8 +43,8 @@ export async function POST(request: Request) {
             throw Error("Couldn't write file")
         })
 
-        // Update the thumbnail column for the model in the database (remove 'public' and follwing slash, then escape remaining forward slashes in path before DB entry)
-        const update = await updateThumbUrl(path.slice(7).replace('/', '\/'), uid).catch((e) => {
+        // Update the thumbnail column for the model in the database
+        const update = await updateThumbUrl(path.slice(7), uid).catch((e) => {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
             throw Error("Couldn't update database")
         })
