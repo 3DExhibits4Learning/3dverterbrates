@@ -3,17 +3,17 @@
 
 'use client'
 
-import { ChangeEvent, LegacyRef, MutableRefObject, forwardRef, useRef, useState, useEffect, KeyboardEvent, SetStateAction, Dispatch } from "react"
+import { ChangeEvent, LegacyRef, MutableRefObject, forwardRef, useRef, useState, useEffect, KeyboardEvent } from "react"
 import { useRouter } from "next/navigation"
 
-export default function Autocomplete(props: { options: any[], changeFn: Function, width?: string, value: string, setValue:Dispatch<SetStateAction<string>>, className?: string, listWidth?: string, search?: boolean }) {
+const Autocomplete = forwardRef((props: { options: any[], changeFn: Function, width?: string, defaultValue?: string, className?: string, listWidth?: string, search?: boolean }, ref) => {
+
     // Variable Declarations
 
     const router = useRouter()
 
-    //const valueRef = ref as MutableRefObject<string>
+    const valueRef = ref as MutableRefObject<string>
     const selectedValue = useRef<HTMLInputElement>()
-    const valueRef = useRef<string>()
     const options = useRef<HTMLUListElement>()
     const [optionsVisible, setOptionsVisible] = useState<boolean>(true)
     const [highlightedIndex, setHighlightedIndex] = useState<number>(-1)
@@ -23,7 +23,6 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
     const changeHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         setOptionsVisible(true)
         valueRef.current = e.target.value
-        props.setValue(e.target.value)
         await props.changeFn()
     }
 
@@ -33,7 +32,6 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
         if (selectedValue.current) {
             selectedValue.current.value = option
             valueRef.current = option
-            props.setValue(option)
         }
         setOptionsVisible(false)
     }
@@ -94,8 +92,7 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
 
                 if (highlightedIndex >= 0 && selectedValue.current) {
                     selectedValue.current.value = props.options[highlightedIndex].name
-                    valueRef.current =props.options[highlightedIndex].name
-                    props.setValue(props.options[highlightedIndex].name)
+                    valueRef.current = props.options[highlightedIndex].name
                     setOptionsVisible(false)
 
                     if (props.search) {
@@ -113,7 +110,7 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
             if (optionsVisible) document.addEventListener('click', handleOutsideClick);
             else document.removeEventListener('click', handleOutsideClick)
         }
-    }, [optionsVisible])
+    }, [optionsVisible]) 
 
     // If options have become less than highlighted index onChange, reset index
 
@@ -133,7 +130,7 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
                     className={`${props.className} ${props.width}`}
                     onChange={(e) => changeHandler(e)}
                     onKeyDown={autocompleteKeyHandler}
-                    value={props.value}
+                    defaultValue={props.defaultValue}
                 >
                 </input>
                 {
@@ -148,4 +145,6 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
             </div>
         </>
     )
-} 
+})
+Autocomplete.displayName = 'Autocomplete'
+export default Autocomplete

@@ -3,7 +3,7 @@ import { useRef, LegacyRef, useState } from "react"
 import { Button } from "@nextui-org/react"
 import DataTransferModal from "../Shared/Modals/DataTransferModal"
 import { modelInsertion } from "@/api/types"
-import AutoComplete from "../Shared/Form Fields/AutoComplete"
+import AutoComplete from "../Shared/Form Fields/AutoCompleteRef"
 
 export default function New3DModel() {
 

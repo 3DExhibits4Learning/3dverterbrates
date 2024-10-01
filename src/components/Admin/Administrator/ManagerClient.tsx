@@ -10,8 +10,11 @@ const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
 import AddThumbnail from "./Thumbnails/AddThumbnail";
 import UpdateThumbnailContainer from "./Thumbnails/UpdateThumbnailContainer";
+import { ManagerClientProps, UpdateModelFormContainerProps } from "@/api/types";
+import UpdateModelContainer from "./Model/UpdateModelContainer";
+import { fullModel } from "@/api/types";
 
-export default function ManagerClient(props: { pendingModels: userSubmittal[], projectUid: string, email: string, orgUid: string, user: string, token: string }) {
+export default function ManagerClient(props: ManagerClientProps) {
 
     try {
 
@@ -21,6 +24,7 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         const [transferring, setTransferring] = useState<boolean>(false)
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
+        const [models, setModels] = useState<fullModel[]>()
         const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[]>()
         const [modelsWithThumbnails, setModelsWithThumbnails] = useState<model[]>()
         const [file, setFile] = useState<File>()
@@ -29,11 +33,8 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
 
         // Models are fetched client side due to decimals within their data
         // Wishlist: Create type/query for models without decimal objects and fetch them server side, then add decimals with route handler client side
-        const getModelsThatNeedThumbnails = async () => {
-            setModelsNeedingThumbnails(await fetch('/api/admin/models/noThumb').then(res => res.json()).then(json => json.response).catch((e) => { throw Error(e.message) }))
-        }
-        const getModelsWithThumbnails = async () => {
-            setModelsWithThumbnails(await fetch('/api/admin/models/withThumb').then(res => res.json()).then(json => json.response).catch((e) => { throw Error(e.message) }))
+        const getModels = async () => {
+            setModels(await fetch('/api/admin/models').then(res => res.json()).then(json => json.response as fullModel[]).catch((e) => { throw Error(e.message) }))
         }
 
         const addThumbnail = async (uid: string) => {
@@ -94,33 +95,40 @@ export default function ManagerClient(props: { pendingModels: userSubmittal[], p
         }
 
         useEffect(() => {
-            getModelsThatNeedThumbnails()
-            getModelsWithThumbnails()
+            getModels()
         }, [])
+
+        useEffect(() => {
+            if (models) {
+                setModelsWithThumbnails(models.filter((model) => model.thumbnail !== null ))
+                setModelsNeedingThumbnails(models.filter((model) => model.thumbnail === null))
+            }
+        }, [models])
 
         return (
             <>
                 <Accordion>
-                    <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                    <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
-                            <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <ModelSubmitForm token={props.token} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} user={props.user} />
                             </AccordionItem>
-                            <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Form fields to update 3D Model
+                            <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                <UpdateModelContainer {...props} models={models} />
                             </AccordionItem>
-                            <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
-                    <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                    <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
-                            <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={addThumbnail} />
                             </AccordionItem>
-                            <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                            <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <UpdateThumbnailContainer
+                                    {...props}
                                     modelsWithThumbnails={modelsWithThumbnails}
                                     updateThumbUid={updateThumbUid}
                                     setUpdateThumbUid={setUpdateThumbUid}

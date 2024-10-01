@@ -11,7 +11,12 @@ const ArtistName = forwardRef((props : { handler: Function, edit? : boolean, def
     return (
         <div className={`${topMargin}`}>
             <label className='text-2xl ml-12 '>3D Modeler Name </label><br></br>
-            <input autoComplete='off' onChange={handleArtist} type='text' name='artistName' defaultValue={props.defaultValue} className={`${size} max-w-[500px] rounded-xl mb-4 ml-12 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}></input>
+            <input autoComplete='off' 
+            onChange={handleArtist} 
+            type='text' 
+            name='artistName' 
+            defaultValue={props.defaultValue} 
+            className={`${size} max-w-[500px] rounded-xl mb-4 ml-12 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}></input>
         </div>
     )
 })

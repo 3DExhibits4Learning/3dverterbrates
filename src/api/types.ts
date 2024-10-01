@@ -5,7 +5,7 @@
 
 import { Dispatch} from "react";
 import { SetStateAction } from "react";
-import { specimen, annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation } from "@prisma/client";
+import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags } from "@prisma/client";
 
 export interface SearchHeaderProps {
   headerTitle: string,
@@ -281,24 +281,6 @@ export interface modelInsertion extends modelerInsertion{
   isBase: boolean
 }
 
-export interface specimenWithImageSet extends specimen{
-  image_set: any[]
-}[]
-
-export interface image_set{
-    spec_name: string;
-    spec_acquis_date: Date;
-    set_no: number;
-    imaged_by: string;
-    imaged_date: Date;
-    images_link: string | null;
-    no_of_images: number;
-    uid: string | null;
-}
-
-export interface imageSetWithModel extends image_set{
-  model: any
-}[]
 
 export interface fullAnnotation extends annotations {
   annotation: photo_annotation | video_annotation | model_annotation
@@ -307,5 +289,27 @@ export interface fullAnnotation extends annotations {
 export interface fullUserSubmittal extends userSubmittal{
   tags: string[],
   software: string[]
+}
+
+export interface fullModel extends model{
+  software:software[]
+  tags:tags[]
+}
+
+export interface ManagerClientProps{ 
+  pendingModels: userSubmittal[], 
+  projectUid: string, 
+  email: string, 
+  orgUid: string, 
+  user: string, 
+  token: string 
+}
+
+export interface UpdateModelFormContainerProps extends ManagerClientProps{
+  models:fullModel[] | undefined
+}
+
+export interface UpdateModelFormProps extends ManagerClientProps{
+  model:fullModel
 }
 

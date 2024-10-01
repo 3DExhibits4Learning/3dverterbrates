@@ -30,7 +30,7 @@ export async function POST(request: Request) {
                 user: body.user as string,
             }
         }).catch((e) => {
-            if (process.env.NODE_ENV != 'production') console.error(e.message)
+            if (process.env.LOCAL_ENV != 'production') console.error(e.message)
             throw Error("Couldn't Insert Metadata into Database")
         })
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
                     software: body.software[software]
                 }
             }).catch((e) => {
-                if (process.env.NODE_ENV != 'production') console.error(e.message)
+                if (process.env.LOCAL_ENV != 'production') console.error(e.message)
                 throw Error("Couldn't Insert Software into Database")
             })
         }
@@ -53,11 +53,14 @@ export async function POST(request: Request) {
                     tag: body.tags[tag].value
                 }
             }).catch((e) => {
-                if (process.env.NODE_ENV != 'production') console.error(e.message)
+                if (process.env.LOCAL_ENV != 'production') console.error(e.message)
                 throw Error("Couldn't Insert Tags into Database")
             })
         }
         return Response.json({ data: 'Model added.', response: insert })
     }
-    catch (e: any) { return Response.json({ data: 'error', response: e.message }, { status: 400, statusText: 'Error' }) }
+    catch (e: any) { 
+        if (process.env.LOCAL_ENV != 'production') console.error(e.message)
+        return Response.json({ data: 'error', response: e.message }, { status: 400, statusText: 'Error' }) 
+    }
 }

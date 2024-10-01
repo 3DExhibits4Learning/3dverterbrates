@@ -63,8 +63,19 @@ export const getAccount = async (id: string, provider: string) => {
   return account
 }
 
-
 /***** MODEL QUERIES *****/
+
+/**
+ * @function getFullModels
+ * @description get all full models
+ * 
+ */
+export async function getFullModels() {
+  const models = await prisma.model.findMany({
+    include:{software: true, tags: true}
+  })
+  return models
+}
 
 /**
  * @function getModelUid
@@ -81,6 +92,21 @@ export async function getModel(species: string) {
 }
 
 /**
+ * @function getFullModelByUid
+ * @description returns a full model (with tags and software) with the corresponding UID
+ * 
+ * @param {string} uid of the model
+ */
+export async function getFullModelByUid(uid: string) {
+  const models = await prisma.model.findUnique({
+    where: { uid: uid },
+    include:{software: true, tags: true}
+  })
+
+  return models
+}
+
+/**
  * @function getModelThumbmail
  * @description returns the path of a thumbnail for a 3D model
  * 
@@ -89,7 +115,7 @@ export async function getModel(species: string) {
 export async function getModelThumbnail(uid: string) {
   const models = await prisma.model.findUnique({
     where: { uid: uid },
-    select: {thumbnail: true}
+    select: { thumbnail: true }
   })
 
   return models
@@ -160,7 +186,7 @@ export const getModelsWithThumbnails = async (): Promise<model[]> => {
 
   const models = await prisma.model.findMany({
     where: {
-      thumbnail: {not: null},
+      thumbnail: { not: null },
       base_model: true
     },
     orderBy: {
