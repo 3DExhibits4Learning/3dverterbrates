@@ -5,7 +5,6 @@ import { Button } from "@nextui-org/react";
 import { SetStateAction, Dispatch } from "react";
 
 export default function UpdateThumbnail(props: { setFile: Dispatch<SetStateAction<File>>, file: File | undefined, updateThumbnail: Function, uid: string }) {
-
     return (
         <>
             <section className="flex flex-col">

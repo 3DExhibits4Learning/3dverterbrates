@@ -13,7 +13,6 @@ export default function PhotoInput(props: { setFile: Dispatch<SetStateAction<Fil
                         <span className="text-red-600 ml-1">*</span>
                     }
                 </p>
-
             }
             <input
                 id='formFileInput'
