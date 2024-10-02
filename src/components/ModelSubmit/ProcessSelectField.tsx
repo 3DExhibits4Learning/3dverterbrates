@@ -13,7 +13,7 @@ const ProcessSelect = forwardRef((props: { handler: Function, defaultValue?: str
             const radioButton = document.getElementById(props.defaultValue) as HTMLInputElement
             radioButton.checked = true
         }
-    },[]) // eslint-disable-line react-hooks/exhaustive-deps
+    },[props.defaultValue]) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>

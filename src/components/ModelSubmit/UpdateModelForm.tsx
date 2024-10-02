@@ -1,50 +1,59 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, RefObject } from 'react';
 import axios, { AxiosHeaderValue } from 'axios';
-import ArtistName from './ArtistNameField';
-import SpeciesName from './SpeciesNameField';
 import ProcessSelect from './ProcessSelectField';
-import Software from './SoftwareField';
 import { Button } from "@nextui-org/react";
-import AdditionalSoftware from './AdditionalSoftwareField';
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
 import Leaflet, { LatLngLiteral } from 'leaflet';
 import FormMap from '../Map/Form';
 import DataTransferModal from '../Shared/Modals/DataTransferModal';
-import SpeciesAcquisitionDate from './AcquisitionDate';
 import { UpdateModelFormProps } from '@/api/types';
 import TextInput from '../Shared/Form Fields/TextInput';
 import AutoCompleteWrapper from '../Shared/Form Fields/AutoCompleteWrapper';
+import DateInput from '../Shared/Form Fields/DateInput';
 
 export default function UpdateModelForm(props: UpdateModelFormProps) {
 
-    console.log(props.model.spec_name)
-    console.log(props.model.spec_acquis_date)
-
     // Variable initialization
+
     const model = props.model
+    var uid: string
+    const tagArr = model.tags.map((tagObject) => tagObject.tag)
+    const softwareArr = model.software.map((softwareObject) => softwareObject.software)
+    var tagString = ''
+    var softwareString = ''
+
+    for (let i in tagArr) {
+        tagString += tagArr[i] + ','
+    }
+    for (let i in softwareArr) {
+        softwareString += softwareArr[i] + ','
+    }
+
     const [speciesName, setSpeciesName] = useState<string>(model.spec_name)
+    const [acquisitionDate, setAcquisitionDate] = useState<string | undefined>(model.spec_acquis_date ?? undefined)
+    //@ts-ignore - Decimal appears to be equal to number, contrary to the error
+    const [position, setPosition] = useState<Leaflet.LatLngExpression | null>({ lat: model.lat, lng: model.lng })
+    const [reRenderKey, setReRenderKey] = useState<number>(Math.random())
+    const [reRenderKey1, setReRenderKey1] = useState<number>(Math.random())
+    const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
+    const [uploadProgress, setUploadProgress] = useState<number>(0)
+    const [open, setOpen] = useState<boolean>(false)
+    const [transferring, setTransferring] = useState<boolean>(false)
+    const [result, setResult] = useState<string>('')
+    const [modeler, setModeler] = useState<string>(model.modeled_by)
+
     const artistName = useRef<string>(model.modeled_by)
     const radioValue = useRef<string>(model.build_process)
     const software = useRef<string>(model.software[0].software)
     const file = useRef<File | null>(null)
-    const softwareArray = useRef<Array<string>>(model.software.map((softwareObject) => softwareObject.software).splice(0, 1))
-    const tagArray = useRef<Array<string>>(model.tags.map((tagObject) => tagObject.tag))
-    //@ts-ignore Decimal appears to be equal to number, contrary to the error
+    const softwareArray = useRef<Array<object>>()
+    const tagArray = useRef<Array<object>>()
+    //@ts-ignore - Decimal appears to be equal to number, contrary to the error
     const positionRef = useRef<LatLngLiteral>({ lat: model.lat, lng: model.lng })
     const speciesAcquisitionDate = useRef<HTMLInputElement>()
-
-    const [additionalSoftware, setAdditionalSoftware] = useState(0)
-    const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
-    const [uploadProgress, setUploadProgress] = useState<number>(0)
-    const [position, setPosition] = useState<Leaflet.LatLngExpression | null>(null)
-    const [open, setOpen] = useState<boolean>(false)
-    const [transferring, setTransferring] = useState<boolean>(false)
-    const [result, setResult] = useState<string>('')
-
-    var uid: string
 
     // Handler that is called everytime a field is updated; it checks all mandatory fields for values, enabling the upload button if those fields exist
 
@@ -55,7 +64,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
 
     // This is the database entry handler
     const modelDbEntry = async () => {
-        softwareArray.current.unshift(software.current)
+        //softwareArray.current.unshift(software.current)
 
         const data = {
             email: props.email,
@@ -131,6 +140,11 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
 
     useEffect(() => {
         setSpeciesName(props.model.spec_name)
+        setAcquisitionDate(model.spec_acquis_date ?? undefined)
+        //@ts-ignore - Decimal appears to be equal to number, contrary to the error
+        setPosition({ lat: model.lat, lng: model.lng })
+        setReRenderKey(reRenderKey + 1)
+        setReRenderKey1(reRenderKey1 + 1)
     }, [props.model])
 
     return (
@@ -143,16 +157,15 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                 </div>
                 <Divider className='mb-6' />
                 <AutoCompleteWrapper value={speciesName} setValue={setSpeciesName} />
-                <SpeciesAcquisitionDate ref={speciesAcquisitionDate} defaultValue={props.model.spec_acquis_date as string}/>
+                <DateInput value={acquisitionDate} setValue={setAcquisitionDate} />
                 <FormMap position={position} setPosition={setPosition} ref={positionRef} title />
-                {/* <TagInput ref={tagArray as RefObject<string[]>} /> */}
+                <TagInput key={reRenderKey} ref={tagArray as RefObject<object[]>} defaultValues={tagString} />
                 <Divider className='mt-8' />
                 <h1 className='ml-12 text-3xl mt-4 mb-4'>Model Data</h1>
-                <Divider />
-                <ArtistName ref={artistName} handler={isUploadable} defaultValue={model.modeled_by} />
-                <ProcessSelect ref={radioValue} handler={isUploadable} />
-                <Software ref={software} handler={isUploadable} />
-                <AdditionalSoftware ref={softwareArray} handler={isUploadable} stateVar={additionalSoftware} stateFn={setAdditionalSoftware} />
+                <Divider className='mb-8' />
+                <TextInput value={modeler} setValue={setModeler} title='3D Modeler Name' required leftMargin='ml-12' textSize='text-2xl' />
+                <ProcessSelect ref={radioValue} handler={isUploadable} defaultValue={model.build_process} />
+                <TagInput key={reRenderKey1} ref={softwareArray as RefObject<object[]>} defaultValues={softwareString} title='Enter any software used to create the model' marginTop='mt-12' marginBottom='mb-4'/>
                 <div className='my-6 mx-12'>
                     <p className='text-2xl mb-6'>Select your 3D model file.
                         The supported file formats can be found <a href='https://support.fab.com/s/article/Supported-3D-File-Formats' target='_blank'><u>here</u></a>.
