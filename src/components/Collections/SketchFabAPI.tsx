@@ -35,7 +35,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
 
   const annotationSwitch = document.getElementById("annotationSwitch")
   const annotationSwitchMobile = document.getElementById("annotationSwitchMobileHidden")
-  const scaleSwitch = document.getElementById("scaleSwitch")
+  //const scaleSwitch = document.getElementById("scaleSwitch")
 
   const successObj = {
     success: (api: any) => {

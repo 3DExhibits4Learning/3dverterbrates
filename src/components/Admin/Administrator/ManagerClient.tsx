@@ -101,7 +101,7 @@ export default function ManagerClient(props: ManagerClientProps) {
         useEffect(() => {
             if (models) {
                 setModelsWithThumbnails(models.filter((model) => model.thumbnail !== null ))
-                setModelsNeedingThumbnails(models.filter((model) => model.thumbnail === null))
+                setModelsNeedingThumbnails(models.filter((model) => model.thumbnail === null && model.base_model === true))
             }
         }, [models])
 
@@ -141,14 +141,12 @@ export default function ManagerClient(props: ManagerClientProps) {
                     </AccordionItem>
                     <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <Accordion>
-                            <AccordionItem key='' aria-label={'New Specimen'} title='Upload' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Form fields to upload 3D Model
+                            <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                                Here you can select a model for annotation CRUD (Create, read, update, delete)
                             </AccordionItem>
-                            <AccordionItem key='updateModel' aria-label={'New Specimen'} title='Update' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Form fields to update 3D Model
-                            </AccordionItem>
-                            <AccordionItem key='deleteModel' aria-label={'New Specimen'} title='Delete' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Form fields to delete 3D Model
+                            <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                                Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
+                                the administrator will receive a notification email and must approve the annotations before they are published online.
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
