@@ -1,20 +1,20 @@
 'use client'
 
-import { MutableRefObject, forwardRef, useCallback, ForwardedRef } from 'react'
+import {  SetStateAction, useCallback, Dispatch} from 'react'
 //@ts-ignore
 import Tags from '@yaireo/tagify/dist/react.tagify' // React-wrapper file
 import '@yaireo/tagify/dist/tagify.css' // Tagify CSS
 
-const TagInput = forwardRef((props: { defaultValues?: string, title?: string, marginTop?: string, marginBottom?: string }, ref: ForwardedRef<object[]>) => {
+const TagInput = (props: { defaultValues?: string, title?: string, marginTop?: string, marginBottom?: string, value: { value: string; }[], setValue: Dispatch<SetStateAction<{value: string}[]>> }) => {
 
-    const tags = ref as MutableRefObject<object[]>
+    const tags = props.value
     const title = props.title ?? 'Enter tags to describe your specimen, such as phenotype(parts, locality, etc.)'
 
     const onChange = useCallback((e: any) => {
         // e.detail.tagify.value // Array where each tag includes tagify's (needed) extra properties
         // e.detail.tagify.getCleanValue() // Same as above, without the extra properties (Plain array of string objects {value: '[tag]'})
         // e.detail.value // a string representing the tags
-        tags.current = e.detail.tagify.getCleanValue()
+        props.setValue(e.detail.tagify.getCleanValue())
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
@@ -36,6 +36,5 @@ const TagInput = forwardRef((props: { defaultValues?: string, title?: string, ma
             />
         </>
     )
-})
-TagInput.displayName = 'tags'
+}
 export default TagInput

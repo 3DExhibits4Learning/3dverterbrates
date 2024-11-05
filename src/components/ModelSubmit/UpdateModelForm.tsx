@@ -186,7 +186,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                     color='primary'
                     onClick={handleUpload}
                     onPress={() => document.getElementById('progressModalButton')?.click()}
-                    className='text-white text-xl mb-24 mt-8 ml-12'>Upload 3D Model
+                    className='text-white text-xl mb-24 mt-8 ml-12'>Update 3D Model
                 </Button>
             </form>
         </>

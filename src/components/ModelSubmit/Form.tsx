@@ -1,41 +1,34 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios, { AxiosHeaderValue } from 'axios';
 import ArtistName from './ArtistNameField';
 import SpeciesName from './SpeciesNameField';
 import MobileSelect from './MobileSelectField';
 import ProcessSelect from './ProcessSelectField';
-import Software from './SoftwareField';
 import { Button } from "@nextui-org/react";
-import AdditionalSoftware from './AdditionalSoftwareField';
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
-import Leaflet from 'leaflet';
+import { LatLngLiteral } from 'leaflet';
 import FormMap from '../Map/Form';
 import DataTransferModal from '../Shared/Modals/DataTransferModal';
 import SpeciesAcquisitionDate from './AcquisitionDate';
-import ProgressModal from './ProgressModal';
 
 export default function ModelSubmitForm(props: { token: AxiosHeaderValue | string, email: string, isSketchfabLinked?: boolean, orgUid: string, projectUid: string, user: string }) {
 
     // Variable initialization
 
-    const speciesName = useRef<string>('')
-    const artistName = useRef<string>('')
-    const mobileValue = useRef<string>('')
-    const radioValue = useRef<string>('')
-    const software = useRef<string>('')
-    const file = useRef<File | null>(null)
-    const softwareArray = useRef<Array<string>>([])
-    const tagArray = useRef<object[]>([])
-    const positionRef = useRef<any>({})
-    const speciesAcquisitionDate = useRef<HTMLInputElement>()
+    const [species, setSpecies] = useState<string>('')
+    const [speciesAcquisitionDate, setSpeciesAcquisitionDate] = useState<string>('')
+    const [position, setPosition] = useState<LatLngLiteral | null>(null)
+    const [artist, setArtist] = useState<string>('')
+    const [isMobile, setIsMobile] = useState<string>('')
+    const [buildMethod, setBuildMethod] = useState<string>('')
+    const [software, setSoftware] = useState<{ value: string }[]>([])
+    const [tags, setTags] = useState<{ value: string }[]>([])
+    const [file, setFile] = useState<File | null>(null)
 
-    const [additionalSoftware, setAdditionalSoftware] = useState(0)
     const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
-    const [uploadProgress, setUploadProgress] = useState<number>(0)
-    const [position, setPosition] = useState<Leaflet.LatLngExpression | null>(null)
     const [open, setOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
     const [result, setResult] = useState<string>('')
@@ -45,29 +38,31 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
     // Handler that is called everytime a field is updated; it checks all mandatory fields for values, enabling the upload button if those fields exist
 
     const isUploadable = () => {
-        if (speciesName.current && artistName.current && mobileValue.current && radioValue.current && software.current && file.current && positionRef.current) { setUploadDisabled(false) }
+        if (species && artist && isMobile && buildMethod && software.length && file && position) { setUploadDisabled(false) }
         else { setUploadDisabled(true) }
     }
 
     // This is the database entry handler
     const modelDbEntry = async () => {
-        softwareArray.current.unshift(software.current)
 
-        const data = {
-            email: props.email,
-            artist: artistName.current,
-            species: speciesName.current,
-            methodology: radioValue.current,
-            uid: uid,
-            software: softwareArray.current,
-            tags: tagArray.current,
-            position: positionRef.current,
-            speciesAcquisitionDate: (speciesAcquisitionDate.current as HTMLInputElement).value ?? null,
-            user: props.user
-        }
+        const formSoftware = JSON.stringify(software.filter(obj => obj.value))
+        const formTags = JSON.stringify(software.filter(obj => obj.value))
+        const formPosition = JSON.stringify(position)
+
+        const data = new FormData()
+
+        data.set('artist', artist)
+        data.set('species', species)
+        data.set('buildMethod', buildMethod)
+        data.set('software', formSoftware)
+        data.set('tags', formTags)
+        data.set('position', formPosition)
+        data.set('speciesAcquisitionDate', speciesAcquisitionDate ?? null)
+        data.set('modelFile', file as File)
+
         await fetch('/api/modelSubmit', {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: data
         })
             .then(res => res.json())
             .then(json => {
@@ -89,14 +84,14 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
         setTransferring(true)
 
         // Handler for fileUpload
-        if (!file.current) return
+        if (!file) return
 
         try {
             //Create / set formData
             const data = new FormData()
 
             data.set('orgProject', props.projectUid)
-            data.set('modelFile', file.current)
+            data.set('modelFile', file)
             data.set('visibility', 'private')
             data.set('options', JSON.stringify({ background: { color: "#000000" } }))
 
@@ -104,7 +99,6 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
             const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${props.orgUid}/models`
 
             const res = await axios.post(orgModelUploadEnd, data, {
-                onUploadProgress: (axiosProgressEvent) => setUploadProgress(axiosProgressEvent.progress as number),
                 headers: {
                     'Authorization': props.token as AxiosHeaderValue
                 }
@@ -125,35 +119,49 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
         }
     }
 
+    useEffect(() => {
+
+        if (species && artist && isMobile && buildMethod && software.length && file && position) setUploadDisabled(false) 
+        else setUploadDisabled(true) 
+
+    }, [species, artist, isMobile, buildMethod, software.length, file, position])
+
     return (
         <>
-            {/* <ProgressModal progress={uploadProgress} success={success} errorMsg={errorMsg} /> */}
-            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload progress={uploadProgress} />
+            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload />
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
+
                 <Divider />
+
                 <div className='flex items-center h-[75px]'>
                     <p className='ml-12 text-3xl'>Specimen Data</p>
                 </div>
+
                 <Divider className='mb-6' />
-                <SpeciesName ref={speciesName} handler={isUploadable} />
-                <SpeciesAcquisitionDate ref={speciesAcquisitionDate}/>
-                <FormMap position={position} setPosition={setPosition} ref={positionRef} title />
-                <TagInput ref={tagArray} />
+
+                <SpeciesName value={species} setValue={setSpecies} />
+                <SpeciesAcquisitionDate value={speciesAcquisitionDate} setValue={setSpeciesAcquisitionDate} />
+                <FormMap position={position} setPosition={setPosition} title />
+                <TagInput value={tags} setValue={setTags} />
+
                 <Divider className='mt-8' />
+
                 <h1 className='ml-12 text-3xl mt-4 mb-4'>Model Data</h1>
+
                 <Divider />
-                <ArtistName ref={artistName} handler={isUploadable} />
-                <MobileSelect ref={mobileValue} handler={isUploadable} />
-                <ProcessSelect ref={radioValue} handler={isUploadable} />
-                <Software ref={software} handler={isUploadable} />
-                <AdditionalSoftware ref={softwareArray} handler={isUploadable} stateVar={additionalSoftware} stateFn={setAdditionalSoftware} />
+
+                <ArtistName value={artist} setValue={setArtist} />
+                <MobileSelect value={isMobile} setValue={setIsMobile} />
+                <ProcessSelect value={buildMethod} setValue={setBuildMethod} />
+                <TagInput value={software} setValue={setSoftware} />
+
                 <div className='my-6 mx-12'>
                     <p className='text-2xl mb-6'>Select your 3D model file.
                         The supported file formats can be found <a href='https://support.fab.com/s/article/Supported-3D-File-Formats' target='_blank'><u>here</u></a>.
                         If your format requires more than one file, zip the files then upload the folder. Maximum upload size is 500 MB.</p>
                     <input onChange={(e) => {
                         if (e.target.files?.[0])
-                            file.current = e.target.files[0]
+                            setFile(e.target.files[0])
                         isUploadable()
                     }}
                         type='file'
@@ -162,6 +170,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                     >
                     </input>
                 </div>
+
                 <Button
                     isDisabled={uploadDisabled}
                     color='primary'
@@ -169,6 +178,7 @@ export default function ModelSubmitForm(props: { token: AxiosHeaderValue | strin
                     onPress={() => document.getElementById('progressModalButton')?.click()}
                     className='text-white text-xl mb-24 mt-8 ml-12'>Upload 3D Model
                 </Button>
+
             </form>
         </>
     )

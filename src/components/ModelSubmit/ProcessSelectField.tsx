@@ -1,19 +1,6 @@
-import { MutableRefObject, forwardRef, ForwardedRef, useEffect } from "react"
+import { Dispatch, SetStateAction } from "react"
 
-const ProcessSelect = forwardRef((props: { handler: Function, defaultValue?: string}, ref: ForwardedRef<string>) => {
-    
-    const processRef = ref as MutableRefObject<string>
-    const changeSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-        processRef.current = (e.target as HTMLInputElement).value
-        props.handler()
-    }
-    
-    useEffect(() => {
-        if(props.defaultValue){
-            const radioButton = document.getElementById(props.defaultValue) as HTMLInputElement
-            radioButton.checked = true
-        }
-    },[props.defaultValue]) // eslint-disable-line react-hooks/exhaustive-deps
+const ProcessSelect = (props: {defaultValue?: string, value: string, setValue: Dispatch<SetStateAction<string>>}) => {
 
     return (
         <>
@@ -22,26 +9,26 @@ const ProcessSelect = forwardRef((props: { handler: Function, defaultValue?: str
                 <div className='flex items-center'><label className='text-xl'>Photogrammetry</label></div>
                 <div className='flex items-center'>
                     <input
-                        onChange={(e) => changeSelection(e)} className='mt-1' type='radio' value='photogrammetry' name='modelMethod' id='photogrammetry'>
+                        onChange={(e) => props.setValue(e.target.value)} className='mt-1' type='radio' value='photogrammetry' name='modelMethod' id='photogrammetry'>
                     </input>
                 </div>
                 <div className='flex items-center'>
                     <label className='text-xl mr-4'>X-Ray or Laser Scan</label>
                 </div>
                 <div className='flex items-center'>
-                    <input onChange={(e) => changeSelection(e)} className='mt-1' type='radio' value='scan' name='modelMethod' id='scan'>
+                    <input onChange={(e) => props.setValue(e.target.value)} className='mt-1' type='radio' value='scan' name='modelMethod' id='scan'>
                     </input>
                 </div>
                 <div className='flex items-center'>
                     <label className='text-xl mr-4'>Other</label>
                 </div>
                 <div className='flex items-center'>
-                    <input onChange={(e) => changeSelection(e)} className='mt-1' type='radio' value='other' name='modelMethod' id='other'>
+                    <input onChange={(e) => props.setValue(e.target.value)} className='mt-1' type='radio' value='other' name='modelMethod' id='other'>
                     </input>
                 </div>
             </div>
         </>
     )
-})
-ProcessSelect.displayName = 'ProcessSelect'
+}
+
 export default ProcessSelect

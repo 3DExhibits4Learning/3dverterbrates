@@ -6,7 +6,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css';
 
 
-const FormMap = forwardRef((props: { position: any, setPosition: any, className?: string, title?: boolean, enabler?: Function }, ref) => {
+const FormMap = (props: { position: any, setPosition: any, className?: string, title?: boolean, enabler?: Function }) => {
 
   // This clause ensures that this code doesn't run server side; it will throw an error if it does (it uses the window object)
   if (typeof window !== 'undefined') {
@@ -22,7 +22,6 @@ const FormMap = forwardRef((props: { position: any, setPosition: any, className?
     let tiles = !prefersDarkMode ? lightModeTiles : darkModeTiles
     let attribution = !prefersDarkMode ? openAttribution : esriAttribution
 
-    const positionRef = ref as MutableRefObject<any>
 
     const markerIcon = new L.Icon({
       iconUrl: '../../../marker-icon.png',
@@ -35,7 +34,6 @@ const FormMap = forwardRef((props: { position: any, setPosition: any, className?
       const map = useMapEvents({
         click(e) {
           props.setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
-          positionRef.current = e.latlng
           if (props.enabler) props.enabler()
         }
       })
@@ -61,6 +59,5 @@ const FormMap = forwardRef((props: { position: any, setPosition: any, className?
       </>
     )
   }
-})
-FormMap.displayName = 'FormMap'
+}
 export default FormMap

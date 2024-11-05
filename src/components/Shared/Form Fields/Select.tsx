@@ -25,7 +25,7 @@ export default function Select(props: { value: string, setValue: Dispatch<SetSta
                 {
                     props.models.map((model, index) => {
                         return (
-                            <option key={index} value={model.uid}>{`${toUpperFirstLetter(model.spec_name)}`}</option>
+                            <option key={index} value={model.uid}>{`${toUpperFirstLetter(model.spec_name)} - ${model.uid.slice(0, 5)}`}</option>
                         )
                     })
                 }
