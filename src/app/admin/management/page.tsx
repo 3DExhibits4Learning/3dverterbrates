@@ -13,7 +13,6 @@ export default async function Page() {
 
     const session = await getServerSession(authOptions)
     const email = session?.user?.email as string
-    const user = session.user.name ?? ''
 
     if (!management.includes(email)) {
         return <h1>NOT AUTHORIZED</h1>
@@ -28,10 +27,6 @@ export default async function Page() {
                 <ManagerClient 
                 pendingModels={pendingModels} 
                 projectUid={process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string} 
-                email={email} 
-                orgUid={process.env.SKETCHFAB_ORGANIZATION as string}
-                user={user}
-                token={process.env.SKETCHFAB_API_TOKEN as string} 
                 />
             </main>
             <Foot />

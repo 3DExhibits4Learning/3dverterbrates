@@ -3,7 +3,7 @@ import { SetStateAction, Dispatch } from "react";
 
 export default function DeleteModel(props:{uid: string, setUid: Dispatch<SetStateAction<string>>, deleteModel: Function }) {
     return (
-        <>
+        <section className="w-full flex justify-center">
                 <div className="h-[400px] w-[600px] flex flex-col items-center border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
                     <p className="my-8 text-xl text-center">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
                     <label className='text-xl block mb-2 font-medium'>UID</label>
@@ -22,6 +22,6 @@ export default function DeleteModel(props:{uid: string, setUid: Dispatch<SetStat
                         Delete 3D Model
                     </Button>
                 </div>
-        </>
+        </section>
     )
 }

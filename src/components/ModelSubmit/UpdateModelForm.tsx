@@ -1,25 +1,29 @@
+/**
+ * @file src/components/ModelSubmit/UpdateModelForm.tsx
+ * @fileoverview The form for updating 3D models
+ */
+
 'use client'
 
-import { useState, useRef, useEffect, RefObject } from 'react';
-import axios, { AxiosHeaderValue } from 'axios';
+import { useState, useEffect } from 'react';
 import ProcessSelect from './ProcessSelectField';
 import { Button } from "@nextui-org/react";
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
-import Leaflet, { LatLngLiteral } from 'leaflet';
+import { LatLngLiteral } from 'leaflet';
 import FormMap from '../Map/Form';
 import DataTransferModal from '../Shared/Modals/DataTransferModal';
 import { UpdateModelFormProps } from '@/api/types';
 import TextInput from '../Shared/Form Fields/TextInput';
 import AutoCompleteWrapper from '../Shared/Form Fields/AutoCompleteWrapper';
 import DateInput from '../Shared/Form Fields/DateInput';
+import ModelInput from './ModelInput';
 
+// Main component
 export default function UpdateModelForm(props: UpdateModelFormProps) {
 
     // Variable initialization
-
     const model = props.model
-    var uid: string
     const tagArr = model.tags.map((tagObject) => tagObject.tag)
     const softwareArr = model.software.map((softwareObject) => softwareObject.software)
     var tagString = ''
@@ -32,162 +36,157 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
         softwareString += softwareArr[i] + ','
     }
 
-    const [speciesName, setSpeciesName] = useState<string>(model.spec_name)
-    const [acquisitionDate, setAcquisitionDate] = useState<string | undefined>(model.spec_acquis_date ?? undefined)
-    //@ts-ignore - Decimal appears to be equal to number, contrary to the error
-    const [position, setPosition] = useState<Leaflet.LatLngExpression | null>({ lat: model.lat, lng: model.lng })
-    const [reRenderKey, setReRenderKey] = useState<number>(Math.random())
-    const [reRenderKey1, setReRenderKey1] = useState<number>(Math.random())
-    const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
-    const [uploadProgress, setUploadProgress] = useState<number>(0)
+    // Variable initialization - field states
+    const [species, setSpecies] = useState<string>(model.spec_name)
+    const [speciesAcquisitionDate, setSpeciesAcquisitionDate] = useState<string>(model.spec_acquis_date ? model.spec_acquis_date : '')
+    //@ts-ignore - number and decimal appear to be compatible in this context
+    const [position, setPosition] = useState<LatLngLiteral | null>({ lat: model.lat, lng: model.lng })
+    const [artist, setArtist] = useState<string>(model.modeled_by)
+    const [buildMethod, setBuildMethod] = useState<string>(model.build_process)
+    const [software, setSoftware] = useState<{ value: string }[]>(model.software.map((softwareObject) => ({ value: softwareObject.software })))
+    const [tags, setTags] = useState<{ value: string }[]>(model.tags.map((tagObject) => ({ value: tagObject.tag })))
+    const [file, setFile] = useState<File | null>(null)
+
+    // Data transfer states
+    const [updateDisabled, setUpdateDisabled] = useState<boolean>(true)
     const [open, setOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
     const [result, setResult] = useState<string>('')
-    const [modeler, setModeler] = useState<string>(model.modeled_by)
 
-    const artistName = useRef<string>(model.modeled_by)
-    const radioValue = useRef<string>(model.build_process)
-    const software = useRef<string>(model.software[0].software)
-    const file = useRef<File | null>(null)
-    const softwareArray = useRef<Array<object>>()
-    const tagArray = useRef<Array<object>>()
-    //@ts-ignore - Decimal appears to be equal to number, contrary to the error
-    const positionRef = useRef<LatLngLiteral>({ lat: model.lat, lng: model.lng })
-    const speciesAcquisitionDate = useRef<HTMLInputElement>()
+    // Render states
+    const [reRenderKey, setReRenderKey] = useState<number>(Math.random())
+    const [reRenderKey1, setReRenderKey1] = useState<number>(Math.random())
 
-    // Handler that is called everytime a field is updated; it checks all mandatory fields for values, enabling the upload button if those fields exist
-
-    const isUploadable = () => {
-        if (speciesName && artistName.current && radioValue.current && software.current && file.current && positionRef.current) { setUploadDisabled(false) }
-        else { setUploadDisabled(true) }
-    }
-
-    // This is the database entry handler
-    const modelDbEntry = async () => {
-        //softwareArray.current.unshift(software.current)
-
-        const data = {
-            email: props.email,
-            artist: artistName.current,
-            species: speciesName,
-            methodology: radioValue.current,
-            uid: uid,
-            software: softwareArray.current,
-            tags: tagArray.current,
-            position: positionRef.current,
-            speciesAcquisitionDate: (speciesAcquisitionDate.current as HTMLInputElement).value ?? null,
-            user: props.user
-        }
-        await fetch('/api/modelSubmit', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(json => {
-                setResult(json.data)
-                setTransferring(false)
-            })
-            .catch(e => {
-                setResult(e.message)
-                setTransferring(false)
-            })
-    }
-
-    // Upload handler
-
-    const handleUpload = async (e: React.MouseEvent<HTMLButtonElement>) => {
-
-        e.preventDefault()
-        setOpen(true)
-        setTransferring(true)
-
-        // Handler for fileUpload
-        if (!file.current) return
+    // This is the 'edit 3d model' handler
+    const edit3DModelHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
         try {
-            //Create / set formData
+
+            // Prevent default and set initial data transfer states
+            e.preventDefault()
+            setOpen(true)
+            setTransferring(true)
+
+            // If there is a file, replace the original file in sketchfab
+            if (file) {
+
+                const modelReuploadData = new FormData()
+                modelReuploadData.set('uid', model.uid)
+                modelReuploadData.set('file', file as File)
+
+                await fetch('/api/modelSubmit', {
+                    method: 'PUT',
+                    body: modelReuploadData
+                }).then(res => {
+                    if (!res.ok) throw Error('Bad reupload request')
+                    return res.json()
+                }).catch((e) => {
+                    if (process.env.LOCAL_ENV === 'development') console.error(e.message)
+                    throw Error('Error reuploading model')
+                })
+            }
+
+            // Set edited data
             const data = new FormData()
 
-            data.set('orgProject', props.projectUid)
-            data.set('modelFile', file.current)
-            data.set('visibility', 'private')
-            data.set('options', JSON.stringify({ background: { color: "#000000" } }))
+            const formSoftware = JSON.stringify(software.filter(obj => obj.value))
+            const formTags = JSON.stringify(software.filter(obj => obj.value))
+            const formPosition = JSON.stringify(position)
 
-            // Axios request features upload progress
-            const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${props.orgUid}/models`
+            data.set('artist', artist)
+            data.set('species', species)
+            data.set('buildMethod', buildMethod)
+            data.set('software', formSoftware)
+            data.set('tags', formTags)
+            data.set('position', formPosition)
+            data.set('speciesAcquisitionDate', speciesAcquisitionDate as string)
 
-            const res = await axios.post(orgModelUploadEnd, data, {
-                onUploadProgress: (axiosProgressEvent) => setUploadProgress(axiosProgressEvent.progress as number),
-                headers: {
-                    'Authorization': props.token as AxiosHeaderValue
-                }
-            }).catch((e) => {
-                if (process.env.NODE_ENV === 'development') console.error(e.message)
-                throw Error("Couldn't upload model")
+            // Update model data in the database and set resultant states
+            await fetch('/api/modelSubmit', {
+                method: 'PATCH',
+                body: data
             })
-
-            // Grab uid of model for db for storage
-            uid = res.data.uid
-
-            // We then make a post request to our route handler which creates a db record containing the metadata associated with the model
-            await modelDbEntry()
+                .then(res => res.json())
+                .then(json => {
+                    setResult(json.data)
+                    setTransferring(false)
+                })
+                .catch(e => {
+                    setResult(e.message)
+                    setTransferring(false)
+                })
         }
+        
+        // Typical catch
         catch (e: any) {
-            setResult(e.message)
-            setTransferring(false)
+            if (process.env.LOCAL_ENV === 'development') console.error(e.message)
+            setResult('Error updating model')
         }
     }
 
+    // Set form field states upon changing of the selected 3D model
     useEffect(() => {
-        setSpeciesName(props.model.spec_name)
-        setAcquisitionDate(model.spec_acquis_date ?? undefined)
-        //@ts-ignore - Decimal appears to be equal to number, contrary to the error
+        setSpecies(props.model.spec_name)
+        setSpeciesAcquisitionDate(model.spec_acquis_date ?? '')
+        //@ts-ignore - number and decimal appear to be compatible in this context
         setPosition({ lat: model.lat, lng: model.lng })
         setReRenderKey(reRenderKey + 1)
         setReRenderKey1(reRenderKey1 + 1)
     }, [props.model])
 
+    // Enable/disable the upload button
+    useEffect(() => {
+
+        // Appropriate then stringify initial values for comparison
+        const initialSoftware = model.software.map((softwareObject) => ({ value: softwareObject.software }))
+        const initialTags = model.tags.map((tagObject) => ({ value: tagObject.tag }))
+        const initialPosition = {lat: model.lat, lng: model.lng}
+        const initialFormValues = JSON.stringify([model.spec_name, model.spec_acquis_date, model.modeled_by, model.build_process, initialPosition, initialSoftware, initialTags])
+        const currentFormValues = JSON.stringify([species, speciesAcquisitionDate, artist, buildMethod, position, software, tags])
+
+        // Set upload disabled button state
+        if (species && artist && buildMethod && software.length && position && currentFormValues !== initialFormValues) setUpdateDisabled(false)
+        else setUpdateDisabled(true)
+
+    }, [species, speciesAcquisitionDate, artist, buildMethod, position, software, tags])
+
     return (
         <>
-            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload progress={uploadProgress} />
+            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload />
+
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
+
                 <Divider />
+
                 <div className='flex items-center h-[75px]'>
                     <p className='ml-12 text-3xl'>Specimen Data</p>
                 </div>
+
                 <Divider className='mb-6' />
-                <AutoCompleteWrapper value={speciesName} setValue={setSpeciesName} />
-                <DateInput value={acquisitionDate} setValue={setAcquisitionDate} />
-                <FormMap position={position} setPosition={setPosition} ref={positionRef} title />
-                <TagInput key={reRenderKey} ref={tagArray as RefObject<object[]>} defaultValues={tagString} />
+
+                <AutoCompleteWrapper value={species} setValue={setSpecies} />
+                <DateInput value={speciesAcquisitionDate} setValue={setSpeciesAcquisitionDate} />
+                <FormMap position={position} setPosition={setPosition} title />
+                <TagInput key={reRenderKey} value={tags} setValue={setTags} defaultValues={tagString} />
+
                 <Divider className='mt-8' />
+
                 <h1 className='ml-12 text-3xl mt-4 mb-4'>Model Data</h1>
+
                 <Divider className='mb-8' />
-                <TextInput value={modeler} setValue={setModeler} title='3D Modeler Name' required leftMargin='ml-12' textSize='text-2xl' />
-                <ProcessSelect ref={radioValue} handler={isUploadable} defaultValue={model.build_process} />
-                <TagInput key={reRenderKey1} ref={softwareArray as RefObject<object[]>} defaultValues={softwareString} title='Enter any software used to create the model' marginTop='mt-12' marginBottom='mb-4'/>
-                <div className='my-6 mx-12'>
-                    <p className='text-2xl mb-6'>Select your 3D model file.
-                        The supported file formats can be found <a href='https://support.fab.com/s/article/Supported-3D-File-Formats' target='_blank'><u>here</u></a>.
-                        If your format requires more than one file, zip the files then upload the folder. Maximum upload size is 500 MB.</p>
-                    <input onChange={(e) => {
-                        if (e.target.files?.[0])
-                            file.current = e.target.files[0]
-                        isUploadable()
-                    }}
-                        type='file'
-                        name='file'
-                        id='formFileInput'
-                    >
-                    </input>
-                </div>
+
+                <TextInput value={artist} setValue={setArtist} title='3D Modeler Name' required leftMargin='ml-12' textSize='text-2xl' />
+                <ProcessSelect value={buildMethod} setValue={setBuildMethod} defaultValue={model.build_process} />
+                <TagInput key={reRenderKey1} value={software} setValue={setSoftware} defaultValues={softwareString} title='Enter any software used to create the model' marginTop='mt-12' marginBottom='mb-4' />
+                <ModelInput setFile={setFile} />
+
                 <Button
-                    isDisabled={uploadDisabled}
+                    isDisabled={updateDisabled}
                     color='primary'
-                    onClick={handleUpload}
-                    onPress={() => document.getElementById('progressModalButton')?.click()}
-                    className='text-white text-xl mb-24 mt-8 ml-12'>Update 3D Model
+                    onClick={edit3DModelHandler}
+                    className='text-white text-xl mb-24 mt-8 ml-12'>Save changes
                 </Button>
+            
             </form>
         </>
     )

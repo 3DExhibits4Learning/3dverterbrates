@@ -1,11 +1,26 @@
+/**
+ * @file src/app/api/modelSubmit/route.tsx
+ * @fileoverview These are the route handlers for uploading and editing 3D models
+ */
+
 import { prismaClient } from "@/api/queries";
 import { LatLngLiteral } from "leaflet";
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
 
+// import prisma client
 const prisma = prismaClient()
 
+// Typescript satisfied header (used in POST and PUT methods)
+const requestHeader: HeadersInit = new Headers()
+requestHeader.set('Authorization', process.env.SKETCHFAB_API_TOKEN as string)
+
+/**
+ * @function POST
+ * @description This is the POST route handler, used for the inital model upload from the admin model submit form
+ * 
+ */
 export async function POST(request: Request) {
 
     try {
@@ -36,33 +51,30 @@ export async function POST(request: Request) {
         data.set('visibility', 'private')
         data.set('options', JSON.stringify({ background: { color: "#000000" } }))
         const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${process.env.SKETCHFAB_ORGANIZATION}/models`
-        var modelUid : any
+        var modelUid: any
 
         // Session variables
         const email = session.user?.email
         const user = session.user.name ?? ''
 
-        // Typescript satisfied header
-        const requestHeader: HeadersInit = new Headers()
-        requestHeader.set('Authorization', process.env.SKETCHFAB_API_TOKEN as string)
-
         // Upload model file to sketchfab and instantiate modelUid
         await fetch(orgModelUploadEnd, {
             headers: requestHeader,
+            method: 'POST',
             body: formData
         })
-        .then((res) => {
-            if(!res.ok){
-                console.error(res.statusText)
+            .then((res) => {
+                if (!res.ok) {
+                    console.error(res.statusText)
+                    throw Error('Bad SF request')
+                }
+                return res.json()
+            })
+            .then(json => modelUid = json.uid)
+            .catch((e) => {
+                console.error(e.message)
                 throw Error('Bad SF request')
-            }
-            return res.json()
-        })
-        .then(json => modelUid = json.uid)
-        .catch((e) => {
-            console.error(e.message)
-            throw Error('Bad SF request')
-        })
+            })
 
 
         // Insert data into database
@@ -75,16 +87,16 @@ export async function POST(request: Request) {
                 uid: modelUid,
                 lat: position.lat,
                 lng: position.lng,
-                spec_acquis_date: speciesAcquisitionDate,
+                spec_acquis_date: speciesAcquisitionDate ? speciesAcquisitionDate : null,
                 site_ready: true,
                 user: user,
             }
         }).catch((e) => {
-            if (process.env.LOCAL_ENV !== 'production') console.error(e.message)
+            console.error(e.message)
             throw Error("Couldn't Insert Metadata into Database")
         })
 
-        // Insert software and tag data into database
+        // Insert software into database
         for (let i in software) {
             await prisma.software.create({
                 data: {
@@ -92,10 +104,12 @@ export async function POST(request: Request) {
                     software: software[i]
                 }
             }).catch((e) => {
-                if (process.env.LOCAL_ENV != 'production') console.error(e.message)
+                console.error(e.message)
                 throw Error("Couldn't Insert Software into Database")
             })
         }
+
+        // Insert tags into database
         for (let i in tags) {
             await prisma.tags.create({
                 data: {
@@ -103,14 +117,176 @@ export async function POST(request: Request) {
                     tag: tags[i]
                 }
             }).catch((e) => {
-                if (process.env.LOCAL_ENV != 'production') console.error(e.message)
+                console.error(e.message)
                 throw Error("Couldn't Insert Tags into Database")
             })
         }
+
+        // Typical success return
         return Response.json({ data: 'Model added.', response: insert })
     }
+
+    // Typical fail return 
     catch (e: any) {
-        if (process.env.LOCAL_ENV != 'production') console.error(e.message)
-        return Response.json({ data: 'error', response: e.message }, { status: 400, statusText: 'Error' })
+        console.error(e.message)
+        return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message })
+    }
+}
+
+/**
+ * @function PUT
+ * @description This is the PUT route handler, used to replace the model file in sketchfab
+ * 
+ */
+export async function PUT(request: Request) {
+
+    try {
+
+        // Get form data and initialize variables
+        const data = await request.formData()
+        const modelFile = data.get('modelFile') as File
+        const uid = data.get('uid') as string
+        const reuploadData = new FormData()
+
+        data.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
+        data.set('modelFile', modelFile)
+        data.set('visibility', 'private')
+        data.set('options', JSON.stringify({ background: { color: "#000000" } }))
+        const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${process.env.SKETCHFAB_ORGANIZATION}/models/${uid}`
+
+        // Upload model file to sketchfab and instantiate modelUid
+        const reupload = await fetch(orgModelUploadEnd, {
+            headers: requestHeader,
+            method: 'PUT',
+            body: reuploadData
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    console.error(res.statusText)
+                    throw Error('Bad SF reupload request')
+                }
+            })
+            .then(json => json)
+            .catch((e) => {
+                console.error(e.message)
+                throw Error('Bad SF request')
+            })
+
+        // Typical success return
+        return Response.json({ data: 'Model added.', response: reupload })
+    }
+
+    // Typical fail return 
+    catch (e: any) {
+        console.error(e.message)
+        return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message })
+    }
+
+}
+
+/**
+ * @function PATCH
+ * @description This is the PATCH route handler, used to update the 3D model record in the database
+ * 
+ */
+export async function PATCH(request: Request) {
+
+    try {
+
+        // Get request data and initialize variables
+        const data = await request.formData()
+
+        // Get session data (or redirect if there is no session data)
+        const session = await getServerSession(authOptions)
+        if (!session || !session.user) {
+            redirect('/api/auth/signin')
+        }
+
+        // Data variables
+        const artist = data.get('artist') as string
+        const species = data.get('species') as string
+        const buildMethod = data.get('buildMethod') as string
+        const software: string[] = JSON.parse(data.get('software') as string)
+        const tags: string[] = JSON.parse(data.get('tags') as string)
+        const position: LatLngLiteral = JSON.parse(data.get('position') as string)
+        const speciesAcquisitionDate = data.get('speciesAcquisitionDate') as string
+        const uid = data.get('uid') as string
+
+        // Session variables
+        const email = session.user?.email
+        const user = session.user.name ?? ''
+
+        // Insert data into database
+        const update = await prisma.model.update({
+            where: { uid: uid },
+            data: {
+                modeled_by: artist,
+                spec_name: species,
+                build_process: buildMethod,
+                lat: position.lat,
+                lng: position.lng,
+                spec_acquis_date: speciesAcquisitionDate ? speciesAcquisitionDate : null,
+                email: email,
+                user: user
+            }
+        }).catch((e) => {
+            console.error(e.message)
+            throw Error("Couldn't Insert Metadata into Database")
+        })
+
+        // Delete all software and tags for the provided uid then insert new software and tags into the database
+        const deletionPromises = []
+        const softwareAndTagPromises = []
+
+        // Push sofware deletions
+        deletionPromises.push(prisma.software.deleteMany({
+            where: { uid: uid }
+        }))
+
+        // Push tag deletions
+        deletionPromises.push(prisma.tags.deleteMany({
+            where: { uid: uid }
+        }))
+
+        // Await software and tag deletions
+        await Promise.all(deletionPromises).catch((e) => {
+            console.error(e.message)
+            throw Error("Coulnd't delete software or tags")
+        })
+
+        // Push software updates
+        for (let i in software) {
+            softwareAndTagPromises.push(prisma.software.create({
+                data: {
+                    uid: uid,
+                    software: software[i]
+                }
+            }))
+        }
+
+        // Push tag updates
+        for (let i in tags) {
+            softwareAndTagPromises.push(prisma.tags.create({
+                data: {
+                    uid: uid,
+                    tag: tags[i]
+                }
+            }))
+        }
+
+        // Await software and tag updates
+        await Promise.all(softwareAndTagPromises).catch((e) => {
+            console.error(e.message)
+            throw Error('Error entering software or tags into database')
+        })
+
+        // Typical success response
+        return Response.json({ data: 'Model added.', response: update })
+    }
+
+    // Typical fail response
+    catch (e: any) {
+        console.error(e.message)
+        return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message })
     }
 }

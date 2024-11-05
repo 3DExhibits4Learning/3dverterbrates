@@ -299,10 +299,6 @@ export interface fullModel extends model{
 export interface ManagerClientProps{ 
   pendingModels: userSubmittal[], 
   projectUid: string, 
-  email: string, 
-  orgUid: string, 
-  user: string, 
-  token: string 
 }
 
 export interface UpdateModelFormContainerProps extends ManagerClientProps{

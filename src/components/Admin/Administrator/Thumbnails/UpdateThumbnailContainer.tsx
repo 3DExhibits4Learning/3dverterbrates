@@ -17,7 +17,7 @@ export default function UpdateThumbnailContainer(props: {
     updateThumbnail: Function
 }) {
     return (
-        <>
+        <div className="w-full flex justify-center">
             <section className="flex flex-col w-fit py-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46]">
                 {
                     props.modelsWithThumbnails && props.modelsWithThumbnails.length > 0 &&
@@ -36,6 +36,6 @@ export default function UpdateThumbnailContainer(props: {
                     </>
                 }
             </section>
-        </>
+        </div>
     )
 }

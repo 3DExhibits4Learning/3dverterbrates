@@ -111,7 +111,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                     <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
                             <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <ModelSubmitForm token={props.token} email={props.email} orgUid={props.orgUid} projectUid={props.projectUid} user={props.user} />
+                                <ModelSubmitForm />
                             </AccordionItem>
                             <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <UpdateModelContainer {...props} models={models} />
