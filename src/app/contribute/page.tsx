@@ -17,6 +17,8 @@ const Contribute = () => {
         <p>For financial contributions, click <a href='https://www.justgiving.com/campaign/3dherbarium2024' target='_blank'><u>here</u></a></p>
         <br></br>
         <p>For code contributions, check out our <a href='https://github.com/CPH3DH/3dHerbarium' target='_blank'><u>github</u></a></p>
+        <br></br>
+        <p><a href='/api/auth/signin'><u>admin portal</u></a></p>
       </div>
       <Footer />
     </>

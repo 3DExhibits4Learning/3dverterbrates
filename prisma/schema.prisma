@@ -190,5 +190,5 @@ model video_annotation {
 }
 
 model authorized {
-  username      String      @id
+  email      String      @id
 }

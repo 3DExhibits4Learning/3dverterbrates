@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import SessionProvider from '@/components/Shared/SessionProvider'
 import { redirect } from 'next/navigation'
 import {admin} from '@/utils/devAuthed'
+import { getAuthorizedUsers } from "@/api/queries";
 
 import './globals.css';
 
@@ -13,8 +14,14 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
 
-  const session = await getServerSession();
+  const session = await getServerSession()
+  const authorizedUsers = await getAuthorizedUsers()
+  const authorizedUsersMapped = authorizedUsers.map(user => user.email)
   
+  if(session){
+    if(!session.user?.email || !authorizedUsersMapped.includes(session.user?.email) ) return <h1>NOT AUTHORIZED</h1>
+  }
+
   if (process.env.AUTH == 'true') {
     if (!session || !session.user) {
       redirect('/api/auth/signin')
@@ -25,7 +32,6 @@ export default async function RootLayout({
         return <h1>NOT AUTHORIZED</h1>
       }
     }
-
   }
 
   const theme = cookies().get("theme");

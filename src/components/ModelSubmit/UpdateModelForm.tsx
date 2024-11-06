@@ -1,6 +1,9 @@
 /**
  * @file src/components/ModelSubmit/UpdateModelForm.tsx
  * @fileoverview The form for updating 3D models
+ * 
+ * @todo replace map component with individual (non required) lat and lng fields per request
+ * @todo add red asterisks to mandatory fields
  */
 
 'use client'

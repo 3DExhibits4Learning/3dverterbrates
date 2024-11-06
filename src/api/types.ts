@@ -297,8 +297,7 @@ export interface fullModel extends model{
 }
 
 export interface ManagerClientProps{ 
-  pendingModels: userSubmittal[], 
-  projectUid: string, 
+  stringifiedModels: string
 }
 
 export interface UpdateModelFormContainerProps extends ManagerClientProps{

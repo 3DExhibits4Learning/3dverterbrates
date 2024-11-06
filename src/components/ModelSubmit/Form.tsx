@@ -1,10 +1,14 @@
 /**
  * @file src/components/ModelSubmit/UpdateModelForm.tsx
- * @fileoverview The form for uploading 3D models
+ * @fileoverview client component containing the form for uploading 3D models
+ * 
+ * @todo replace map component with individual (non required) lat and lng fields per request
+ * @todo add red asterisks to mandatory fields
  */
 
 'use client'
 
+// Imports
 import { useState, useEffect } from 'react';
 import ArtistName from './ArtistNameField';
 import SpeciesName from './SpeciesNameField';
@@ -18,6 +22,7 @@ import DataTransferModal from '../Shared/Modals/DataTransferModal';
 import SpeciesAcquisitionDate from './AcquisitionDate';
 import ModelInput from './ModelInput';
 
+// Main component
 export default function ModelSubmitForm() {
 
     // Variable initialization - field states
@@ -35,8 +40,9 @@ export default function ModelSubmitForm() {
     const [open, setOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
     const [result, setResult] = useState<string>('')
+    const [success, setSuccess] = useState<boolean>()
 
-    // This is the 3D model upload handler
+    // 3D model upload handler
     const handle3DModelUpload = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
         try {
@@ -46,9 +52,9 @@ export default function ModelSubmitForm() {
             setOpen(true)
             setTransferring(true)
 
-            // Stringify arrays and objects
-            const formSoftware = JSON.stringify(software.filter(obj => obj.value))
-            const formTags = JSON.stringify(software.filter(obj => obj.value))
+            // Stringify arrays and object
+            const formSoftware = JSON.stringify(software.map(obj => obj.value))
+            const formTags = JSON.stringify(software.map(obj => obj.value))
             const formPosition = JSON.stringify(position)
 
             // Set form data
@@ -62,13 +68,13 @@ export default function ModelSubmitForm() {
             data.set('speciesAcquisitionDate', speciesAcquisitionDate)
             data.set('modelFile', file as File)
 
-            // Upload 3d model to sketchfab and insert model data into database
+            // Upload 3d model to sketchfab and insert model data into database via associated route handler
             await fetch('/api/modelSubmit', {
                 method: 'POST',
                 body: data
             })
                 .then(res => {
-                    if(!res.ok)throw Error(res.statusText)
+                    if (!res.ok) throw Error(res.statusText)
                     return res.json()
                 })
                 .then(json => {
@@ -78,12 +84,14 @@ export default function ModelSubmitForm() {
                 .catch(e => {
                     setResult(e.message)
                     setTransferring(false)
+                    setSuccess(true)
                 })
         }
         // Typical catch
         catch (e: any) {
             setResult(e.message)
             setTransferring(false)
+            setSuccess(false)
         }
     }
 
@@ -97,8 +105,16 @@ export default function ModelSubmitForm() {
 
     return (
         <>
-            <DataTransferModal open={open} transferring={transferring} result={result} loadingLabel='Uploading 3D Model' href='/admin' modelUpload />
-            
+            <DataTransferModal
+                open={open}
+                transferring={transferring}
+                result={result}
+                loadingLabel='Uploading 3D Model'
+                href='/admin'
+                modelUpload
+                success={success}
+            />
+
             <form className='w-full lg:w-3/5 lg:border-2 m-auto lg:border-[#004C46] lg:rounded-md bg-[#D5CB9F] dark:bg-[#212121] lg:mb-16'>
 
                 <Divider />
@@ -122,8 +138,8 @@ export default function ModelSubmitForm() {
 
                 <ArtistName value={artist} setValue={setArtist} />
                 <ProcessSelect value={buildMethod} setValue={setBuildMethod} />
-                <TagInput value={software} setValue={setSoftware} marginTop='mt-12'/>
-                <ModelInput setFile={setFile}/>
+                <TagInput value={software} setValue={setSoftware} marginTop='mt-12' title='Enter any software used in createion of the 3D model (must enter at least 1)' required/>
+                <ModelInput setFile={setFile} />
 
                 <Button
                     isDisabled={uploadDisabled}

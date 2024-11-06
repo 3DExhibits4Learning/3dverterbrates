@@ -18,9 +18,10 @@ requestHeader.set('Authorization', process.env.SKETCHFAB_API_TOKEN as string)
 
 /**
  * @function POST
- * @description This is the POST route handler, used for the inital model upload from the admin model submit form
+ * @description This is the POST route handler, used for the initial model upload from the admin model submit form
  * 
  */
+
 export async function POST(request: Request) {
 
     try {
@@ -46,10 +47,10 @@ export async function POST(request: Request) {
         const modelFile = data.get('modelFile') as File
 
         // Form and fetch Variables 
-        data.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
-        data.set('modelFile', modelFile)
-        data.set('visibility', 'private')
-        data.set('options', JSON.stringify({ background: { color: "#000000" } }))
+        formData.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
+        formData.set('modelFile', modelFile)
+        formData.set('visibility', 'private')
+        formData.set('options', JSON.stringify({ background: { color: "#000000" } }))
         const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${process.env.SKETCHFAB_ORGANIZATION}/models`
         var modelUid: any
 
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
         })
             .then((res) => {
                 if (!res.ok) {
+                    console.log(res)
                     console.error(res.statusText)
                     throw Error('Bad SF request')
                 }
@@ -123,7 +125,7 @@ export async function POST(request: Request) {
         }
 
         // Typical success return
-        return Response.json({ data: 'Model added.', response: insert })
+        return Response.json({ data: 'Model added successfully', response: insert })
     }
 
     // Typical fail return 
@@ -138,6 +140,7 @@ export async function POST(request: Request) {
  * @description This is the PUT route handler, used to replace the model file in sketchfab
  * 
  */
+
 export async function PUT(request: Request) {
 
     try {
@@ -148,10 +151,10 @@ export async function PUT(request: Request) {
         const uid = data.get('uid') as string
         const reuploadData = new FormData()
 
-        data.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
-        data.set('modelFile', modelFile)
-        data.set('visibility', 'private')
-        data.set('options', JSON.stringify({ background: { color: "#000000" } }))
+        reuploadData.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
+        reuploadData.set('modelFile', modelFile)
+        reuploadData.set('visibility', 'private')
+        reuploadData.set('options', JSON.stringify({ background: { color: "#000000" } }))
         const orgModelUploadEnd = `https://api.sketchfab.com/v3/orgs/${process.env.SKETCHFAB_ORGANIZATION}/models/${uid}`
 
         // Upload model file to sketchfab and instantiate modelUid
@@ -193,7 +196,7 @@ export async function PATCH(request: Request) {
 
     try {
 
-        // Get request data and initialize variables
+        // Get request data
         const data = await request.formData()
 
         // Get session data (or redirect if there is no session data)

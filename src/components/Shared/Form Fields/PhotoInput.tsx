@@ -3,10 +3,11 @@
 import { SetStateAction, Dispatch } from "react"
 
 export default function PhotoInput(props: { setFile: Dispatch<SetStateAction<File>>, required?: boolean, title?: string }) {
+    console.log('PhotoInput Render')
     return (
         <>
             {
-                props.title && 
+                props.title &&
                 <p className="text-xl mb-2">{props.title}
                     {
                         props.required &&
@@ -23,8 +24,7 @@ export default function PhotoInput(props: { setFile: Dispatch<SetStateAction<Fil
                         props.setFile(e.target.files[0])
                     }
                 }}
-            >
-            </input>
+            />
         </>
     )
 }

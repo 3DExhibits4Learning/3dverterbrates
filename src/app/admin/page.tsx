@@ -12,7 +12,7 @@ export default async function Page() {
     const authorizedUsers = await getAuthorizedUsers()
     let email = session?.user?.email as string
 
-    if (!authorizedUsers.some(user => user.username === email)) {
+    if (!authorizedUsers.some(user => user.email === email)) {
         return <h1>NOT AUTHORIZED</h1>
     }
     else {

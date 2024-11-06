@@ -1,47 +1,51 @@
 'use client'
 
-import { model, userSubmittal } from "@prisma/client";
-import { SetStateAction, useState, Dispatch, useEffect } from "react";
-import PendingModelsAdmin from "@/components/Admin/PendingModels";
+import { model } from "@prisma/client";
+import { SetStateAction, useState, Dispatch } from "react";
 import DataTransferModal from "../../Shared/Modals/DataTransferModal";
-import { Accordion, AccordionItem, Button } from "@nextui-org/react";
+import { Accordion, AccordionItem } from "@nextui-org/react";
 import dynamic from "next/dynamic";
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
 import DeleteModel from "./Model/DeleteModel";
 import AddThumbnail from "./Thumbnails/AddThumbnail";
 import UpdateThumbnailContainer from "./Thumbnails/UpdateThumbnailContainer";
-import { ManagerClientProps, UpdateModelFormContainerProps } from "@/api/types";
+import { ManagerClientProps } from "@/api/types";
 import UpdateModelContainer from "./Model/UpdateModelContainer";
 import { fullModel } from "@/api/types";
+import AnnotationClient from "../AnnotationClient";
 
 export default function ManagerClient(props: ManagerClientProps) {
 
     try {
 
         // Variable Declarations
+        const models: fullModel[] = JSON.parse(props.stringifiedModels)
+        const modelsWithThumbnails: fullModel[] = models.filter((model) => model.thumbnail !== null)
+        const modelsNeedingThumbnails: fullModel[] = models.filter((model) => model.thumbnail === null && model.base_model === true)
+
+        // Form field state variables
         const [uid, setUid] = useState<string>()
+        const [file, setFile] = useState<File>()
+        const [updateFile, setUpdateFile] = useState<File>()
+        const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
+        const [assignmentUid, setAssignmentUid] = useState<string>('')
+
+
+        // Data transfer state variables
         const [openModal, setOpenModal] = useState<boolean>(false)
         const [transferring, setTransferring] = useState<boolean>(false)
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
-        const [models, setModels] = useState<fullModel[]>()
-        const [modelsNeedingThumbnails, setModelsNeedingThumbnails] = useState<model[]>()
-        const [modelsWithThumbnails, setModelsWithThumbnails] = useState<model[]>()
-        const [file, setFile] = useState<File>()
-        const [updateFile, setUpdateFile] = useState<File>()
-        const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
 
-        // Models are fetched client side due to decimals within their data
-        // Wishlist: Create type/query for models without decimal objects and fetch them server side, then add decimals with route handler client side
-        const getModels = async () => {
-            setModels(await fetch('/api/admin/models').then(res => res.json()).then(json => json.response as fullModel[]).catch((e) => { throw Error(e.message) }))
+        const initializeDataTransfer = (loadingLabel: string) => {
+            setOpenModal(true)
+            setTransferring(true)
+            setLoadingLabel(loadingLabel)
         }
 
         const addThumbnail = async (uid: string) => {
 
-            setOpenModal(true)
-            setTransferring(true)
-            setLoadingLabel("Adding Thumbnail")
+            initializeDataTransfer("Adding Thumbnail")
 
             const data = new FormData()
             data.set('uid', uid)
@@ -60,9 +64,7 @@ export default function ManagerClient(props: ManagerClientProps) {
 
         const updateThumbnail = async (uid: string) => {
 
-            setOpenModal(true)
-            setTransferring(true)
-            setLoadingLabel("Updating Thumbnail")
+            initializeDataTransfer("Updating Thumbnail")
 
             const data = new FormData()
             data.set('uid', uid)
@@ -81,9 +83,7 @@ export default function ManagerClient(props: ManagerClientProps) {
 
         const deleteModel = async (uid: string) => {
 
-            setOpenModal(true)
-            setTransferring(true)
-            setLoadingLabel("Deleting Model and Annotations")
+            initializeDataTransfer("Deleting Model and Annotations")
 
             await fetch(`/api/admin/models/delete?uid=${uid}`, {
                 method: 'DELETE',
@@ -94,19 +94,9 @@ export default function ManagerClient(props: ManagerClientProps) {
                 })
         }
 
-        useEffect(() => {
-            getModels()
-        }, [])
-
-        useEffect(() => {
-            if (models) {
-                setModelsWithThumbnails(models.filter((model) => model.thumbnail !== null ))
-                setModelsNeedingThumbnails(models.filter((model) => model.thumbnail === null && model.base_model === true))
-            }
-        }, [models])
-
         return (
             <>
+                <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel={loadingLabel as string} result={result} href='/admin/management' />
                 <Accordion>
                     <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
@@ -117,7 +107,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                                 <UpdateModelContainer {...props} models={models} />
                             </AccordionItem>
                             <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} />
+                                <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} models={models} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
@@ -142,21 +132,28 @@ export default function ManagerClient(props: ManagerClientProps) {
                     <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <Accordion>
                             <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Here you can select a model for annotation CRUD (Create, read, update, delete)
+                                <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
                             </AccordionItem>
                             <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                                 Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
                                 the administrator will receive a notification email and must approve the annotations before they are published online.
+                                <section className='flex'>
+
+                                </section>
+                            </AccordionItem>
+                        </Accordion>
+                    </AccordionItem>
+                    <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                        <Accordion>
+                            <AccordionItem key='inviteStudents' aria-label={'uploadModel'} title='Invite' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                Invite students to join the project
+                            </AccordionItem>
+                            <AccordionItem key='removeStudents' aria-label='removeStudents' title='Remove' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                Remove students from the project
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
                 </Accordion>
-                <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel={loadingLabel as string} result={result} />
-                {
-                    props.pendingModels &&
-                    //@ts-ignore - Typescript thinks decimal isn't assignable to number (it seems to be)
-                    <PendingModelsAdmin pendingModels={props.pendingModels} />
-                }
             </>
         )
     }

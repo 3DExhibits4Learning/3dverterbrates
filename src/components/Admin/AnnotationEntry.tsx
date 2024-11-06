@@ -439,7 +439,6 @@ const AnnotationEntry = (props: {
             }).then(res => res.json()).then(json => {
                 setResult(json.data)
                 setTransferring(false)
-                if (process.env.NODE_ENV === 'development') console.log(json.response)
             })
         }
     }

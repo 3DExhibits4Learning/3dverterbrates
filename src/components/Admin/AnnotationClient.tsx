@@ -12,7 +12,7 @@ import { fullAnnotation } from "@/api/types"
 import BotanistRefWrapper from "./BotanistModelViewerRef"
 import AreYouSure from "../Shared/Modals/AreYouSure"
 
-export default function BotanyClient(props: { modelsToAnnotate: model[], annotationModels: model[] }) {
+export default function AnnotationClient(props: { modelsToAnnotate: model[], annotationModels: model[] }) {
 
     // Variable declarations
     const [uid, setUid] = useState<string>()
