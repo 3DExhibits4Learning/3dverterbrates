@@ -12,6 +12,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { management } from "@/utils/devAuthed"
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
 import { getFullModels } from "@/api/queries";
+import { getAuthorizedUsers } from "@/api/queries";
 
 // Main component
 export default async function Page() {
@@ -33,6 +34,9 @@ export default async function Page() {
             throw Error("Couldn't get 3D Models from database")
         })
 
+        // Get authorized users
+        const students = (await getAuthorizedUsers()).filter(user => user.role === 'student')
+
         // Decimal objects can't be passed directly to client components
         const stringifiedModels = JSON.stringify(models)
 
@@ -41,7 +45,7 @@ export default async function Page() {
             <>
                 <Header pageRoute="collections" headerTitle='Management' />
                 <main className="flex flex-col !min-h-[calc(100vh-177px)]">
-                    <ManagerClient stringifiedModels={stringifiedModels} />
+                    <ManagerClient stringifiedModels={stringifiedModels} students={students}/>
                 </main>
                 <Foot />
             </>

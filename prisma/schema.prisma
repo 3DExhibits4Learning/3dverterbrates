@@ -191,4 +191,6 @@ model video_annotation {
 
 model authorized {
   email      String      @id
+  role       String      @default("student")
+  name       String      @default("Cal Poly Humboldt Verterbrate Museum")
 }

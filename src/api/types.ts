@@ -5,7 +5,7 @@
 
 import { Dispatch} from "react";
 import { SetStateAction } from "react";
-import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags } from "@prisma/client";
+import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags, authorized } from "@prisma/client";
 
 export interface SearchHeaderProps {
   headerTitle: string,
@@ -298,6 +298,7 @@ export interface fullModel extends model{
 
 export interface ManagerClientProps{ 
   stringifiedModels: string
+  students: authorized[]
 }
 
 export interface UpdateModelFormContainerProps extends ManagerClientProps{

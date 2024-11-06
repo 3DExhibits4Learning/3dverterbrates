@@ -14,6 +14,12 @@ import UpdateModelContainer from "./Model/UpdateModelContainer";
 import { fullModel } from "@/api/types";
 import AnnotationClient from "../AnnotationClient";
 import AnnotationAssignment from "./Annotations/AnnotationAssignment";
+import initializeDataTransfer from "@/functions/dataTransfer/initializeDataTransfer";
+import terminateDataTransfer from "@/functions/dataTransfer/terminateDataTransfer";
+import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
+import addThumbnail from "@/functions/managerClient/addThumbnail";
+import updateThumbnail from "@/functions/managerClient/updateThumbnail";
+import deleteModel from "@/functions/managerClient/deleteModel";
 
 export default function ManagerClient(props: ManagerClientProps) {
 
@@ -21,16 +27,15 @@ export default function ManagerClient(props: ManagerClientProps) {
 
         // Variable Declarations
         const models: fullModel[] = JSON.parse(props.stringifiedModels)
-        const modelsWithThumbnails: fullModel[] = models.filter((model) => model.thumbnail !== null)
-        const modelsNeedingThumbnails: fullModel[] = models.filter((model) => model.thumbnail === null && model.base_model === true)
+        const modelsWithThumbnails: fullModel[] = models.filter(model => model.thumbnail !== null)
+        const modelsNeedingThumbnails: fullModel[] = models.filter(model => model.thumbnail === null && model.base_model === true)
+        const unannotatedModels: fullModel[] = models.filter(model => !model.annotated)
 
         // Form field state variables
         const [uid, setUid] = useState<string>()
         const [file, setFile] = useState<File>()
         const [updateFile, setUpdateFile] = useState<File>()
         const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
-        const [assignmentUid, setAssignmentUid] = useState<string>('')
-
 
         // Data transfer state variables
         const [openModal, setOpenModal] = useState<boolean>(false)
@@ -38,61 +43,16 @@ export default function ManagerClient(props: ManagerClientProps) {
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
 
-        // Initialize data transfer function (Open modal and set transfer states)
-        const initializeDataTransfer = (loadingLabel: string) => {
-            setOpenModal(true)
-            setTransferring(true)
-            setLoadingLabel(loadingLabel)
-        }
+        // Function decalarations - data transfer modal
+        const initializeDataTransferFn = (loadingLabel: string) => initializeDataTransfer(setOpenModal, setTransferring, setLoadingLabel as Dispatch<SetStateAction<string>>, loadingLabel)
+        const terminateDataTransferFn = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
 
-        // Terminate data transfer function (Set modal result states)
-        const terminateDataTransfer = (result: string) => {
-            setResult(result)
-            setTransferring(false)
-        }
+        // Thumbnail functions
+        const addThumbnailFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, addThumbnail, [uid, file], 'Adding Thumbnail')
+        const updateThumbnailFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, updateThumbnail, [uid, updateFile], 'Updating Thumbnail')
 
-        const addThumbnail = async (uid: string) => {
-
-            initializeDataTransfer("Adding Thumbnail")
-
-            const data = new FormData()
-            data.set('uid', uid)
-            data.set('file', file as File)
-
-            await fetch(`/api/thumbnail/add`, {
-                method: 'POST',
-                body: data
-            })
-                .then(res => res.json())
-                .then(res => terminateDataTransfer(res.data))
-        }
-
-        const updateThumbnail = async (uid: string) => {
-
-            initializeDataTransfer("Updating Thumbnail")
-
-            const data = new FormData()
-            data.set('uid', uid)
-            data.set('file', updateFile as File)
-
-            await fetch(`/api/thumbnail/update`, {
-                method: 'POST',
-                body: data
-            })
-                .then(res => res.json())
-                .then(res => terminateDataTransfer(res.data))
-        }
-
-        const deleteModel = async (uid: string) => {
-
-            initializeDataTransfer("Deleting Model and Annotations")
-
-            await fetch(`/api/admin/models/delete?uid=${uid}`, {
-                method: 'DELETE',
-            })
-                .then(res => res.json())
-                .then(res => terminateDataTransfer(res.data))
-        }
+        // Delete model function
+        const deleteModelFn = async(uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, deleteModel, [uid], "Deleting Model and Annotations")
 
         return (
             <>
@@ -107,14 +67,19 @@ export default function ManagerClient(props: ManagerClientProps) {
                                 <UpdateModelContainer {...props} models={models} />
                             </AccordionItem>
                             <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModel} models={models} />
+                                <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModelFn} models={models} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
                     <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
                             <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <AddThumbnail file={file} setFile={setFile as Dispatch<SetStateAction<File>>} modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} addThumbnail={addThumbnail} />
+                                <AddThumbnail
+                                    file={file}
+                                    setFile={setFile as Dispatch<SetStateAction<File>>}
+                                    modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined}
+                                    addThumbnail={addThumbnailFn}
+                                />
                             </AccordionItem>
                             <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <UpdateThumbnailContainer
@@ -124,7 +89,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                                     setUpdateThumbUid={setUpdateThumbUid}
                                     updateFile={updateFile}
                                     setUpdateFile={setUpdateFile as Dispatch<SetStateAction<File>>}
-                                    updateThumbnail={updateThumbnail}
+                                    updateThumbnail={updateThumbnailFn}
                                 />
                             </AccordionItem>
                         </Accordion>
@@ -137,7 +102,12 @@ export default function ManagerClient(props: ManagerClientProps) {
                             <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                                 Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
                                 the administrator will receive a notification email and must approve the annotations before they are published online.
-                                {/* <AnnotationAssignment /> */}
+                                <AnnotationAssignment 
+                                students={props.students} 
+                                unannotatedModels={unannotatedModels} 
+                                initializeDataTransfer={initializeDataTransferFn}
+                                terminateDataTransfer={terminateDataTransferFn}
+                                />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>

@@ -10,6 +10,6 @@ export async function GET() {
         }
     catch (e: any) {
         console.error(e.message)
-        return Response.json({ data: 'error', response: e.message }, { status: 400, statusText: 'Error' })
+        return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message })
     }
 }

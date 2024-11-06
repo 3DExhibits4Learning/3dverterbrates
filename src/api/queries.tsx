@@ -220,12 +220,12 @@ export const getAllAnnotationModels = async (): Promise<model[]> => {
  * @description update the annotator for a 3D model
  * 
  */
-export const updateModelAnnotator = async (uid: string, annotator: string) => {
+export const updateModelAnnotator = async (uid: string, student: string | null) => {
   const models = await prisma.model.update({
     where: { uid: uid },
-    data: { annotator: annotator }
-  });
-  return models;
+    data: { annotator: student }
+  })
+  return models
 };
 
 /**

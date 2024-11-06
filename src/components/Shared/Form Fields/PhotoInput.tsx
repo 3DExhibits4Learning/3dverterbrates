@@ -3,7 +3,6 @@
 import { SetStateAction, Dispatch } from "react"
 
 export default function PhotoInput(props: { setFile: Dispatch<SetStateAction<File>>, required?: boolean, title?: string }) {
-    console.log('PhotoInput Render')
     return (
         <>
             {
