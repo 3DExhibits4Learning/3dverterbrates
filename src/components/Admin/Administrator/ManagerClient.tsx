@@ -13,6 +13,7 @@ import { ManagerClientProps } from "@/api/types";
 import UpdateModelContainer from "./Model/UpdateModelContainer";
 import { fullModel } from "@/api/types";
 import AnnotationClient from "../AnnotationClient";
+import AnnotationAssignment from "./Annotations/AnnotationAssignment";
 
 export default function ManagerClient(props: ManagerClientProps) {
 
@@ -37,10 +38,17 @@ export default function ManagerClient(props: ManagerClientProps) {
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
 
+        // Initialize data transfer function (Open modal and set transfer states)
         const initializeDataTransfer = (loadingLabel: string) => {
             setOpenModal(true)
             setTransferring(true)
             setLoadingLabel(loadingLabel)
+        }
+
+        // Terminate data transfer function (Set modal result states)
+        const terminateDataTransfer = (result: string) => {
+            setResult(result)
+            setTransferring(false)
         }
 
         const addThumbnail = async (uid: string) => {
@@ -56,10 +64,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                 body: data
             })
                 .then(res => res.json())
-                .then(res => {
-                    setResult(res.data)
-                    setTransferring(false)
-                })
+                .then(res => terminateDataTransfer(res.data))
         }
 
         const updateThumbnail = async (uid: string) => {
@@ -75,10 +80,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                 body: data
             })
                 .then(res => res.json())
-                .then(res => {
-                    setResult(res.data)
-                    setTransferring(false)
-                })
+                .then(res => terminateDataTransfer(res.data))
         }
 
         const deleteModel = async (uid: string) => {
@@ -88,10 +90,8 @@ export default function ManagerClient(props: ManagerClientProps) {
             await fetch(`/api/admin/models/delete?uid=${uid}`, {
                 method: 'DELETE',
             })
-                .then(res => res.json()).then(res => {
-                    setResult(res.data)
-                    setTransferring(false)
-                })
+                .then(res => res.json())
+                .then(res => terminateDataTransfer(res.data))
         }
 
         return (
@@ -137,14 +137,15 @@ export default function ManagerClient(props: ManagerClientProps) {
                             <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                                 Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
                                 the administrator will receive a notification email and must approve the annotations before they are published online.
-                                <section className='flex'>
-
-                                </section>
+                                {/* <AnnotationAssignment /> */}
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
                     <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         <Accordion>
+                            <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                Students currently active on the project and their assignments
+                            </AccordionItem>
                             <AccordionItem key='inviteStudents' aria-label={'uploadModel'} title='Invite' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 Invite students to join the project
                             </AccordionItem>
