@@ -20,6 +20,7 @@ import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
 import addThumbnail from "@/functions/managerClient/addThumbnail";
 import updateThumbnail from "@/functions/managerClient/updateThumbnail";
 import deleteModel from "@/functions/managerClient/deleteModel";
+import RemoveStudent from "./Students/RemoveStudent";
 
 export default function ManagerClient(props: ManagerClientProps) {
 
@@ -52,7 +53,7 @@ export default function ManagerClient(props: ManagerClientProps) {
         const updateThumbnailFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, updateThumbnail, [uid, updateFile], 'Updating Thumbnail')
 
         // Delete model function
-        const deleteModelFn = async(uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, deleteModel, [uid], "Deleting Model and Annotations")
+        const deleteModelFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, deleteModel, [uid], "Deleting Model and Annotations")
 
         return (
             <>
@@ -67,7 +68,11 @@ export default function ManagerClient(props: ManagerClientProps) {
                                 <UpdateModelContainer {...props} models={models} />
                             </AccordionItem>
                             <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <DeleteModel uid={uid as string} setUid={setUid as Dispatch<SetStateAction<string>>} deleteModel={deleteModelFn} models={models} />
+                                <DeleteModel
+                                    uid={uid as string}
+                                    setUid={setUid as Dispatch<SetStateAction<string>>}
+                                    deleteModel={deleteModelFn} models={models}
+                                />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
@@ -102,11 +107,11 @@ export default function ManagerClient(props: ManagerClientProps) {
                             <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                                 Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
                                 the administrator will receive a notification email and must approve the annotations before they are published online.
-                                <AnnotationAssignment 
-                                students={props.students} 
-                                unannotatedModels={unannotatedModels} 
-                                initializeDataTransfer={initializeDataTransferFn}
-                                terminateDataTransfer={terminateDataTransferFn}
+                                <AnnotationAssignment
+                                    students={props.students}
+                                    unannotatedModels={unannotatedModels}
+                                    initializeDataTransfer={initializeDataTransferFn}
+                                    terminateDataTransfer={terminateDataTransferFn}
                                 />
                             </AccordionItem>
                         </Accordion>
@@ -120,7 +125,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                                 Invite students to join the project
                             </AccordionItem>
                             <AccordionItem key='removeStudents' aria-label='removeStudents' title='Remove' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                Remove students from the project
+                                <RemoveStudent />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>

@@ -2,6 +2,8 @@
  * @file \src\app\admin\management\page.tsx
  * 
  * @fileoverview server component serving the page for admin management
+ * 
+ * @todo update management auth
  */
 
 // Typical imports
