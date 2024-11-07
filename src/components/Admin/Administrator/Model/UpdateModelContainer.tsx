@@ -28,7 +28,7 @@ export default function UpdateModelContainer(props: UpdateModelFormContainerProp
             </div>
             {
                 model && 
-                <UpdateModelForm {...props} model={model} />
+                <UpdateModelForm model={model} />
             }
         </section>
     )

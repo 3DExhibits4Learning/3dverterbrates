@@ -301,11 +301,11 @@ export interface ManagerClientProps{
   students: authorized[]
 }
 
-export interface UpdateModelFormContainerProps extends ManagerClientProps{
+export interface UpdateModelFormContainerProps{
   models:fullModel[] | undefined
 }
 
-export interface UpdateModelFormProps extends ManagerClientProps{
+export interface UpdateModelFormProps{
   model:fullModel
 }
 

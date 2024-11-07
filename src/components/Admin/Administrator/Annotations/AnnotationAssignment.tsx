@@ -9,12 +9,17 @@
 import { authorized } from "@prisma/client";
 import { fullModel } from "@/api/types";
 import Select from "@/components/Shared/Form Fields/Select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@nextui-org/react";
 import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
 import assignAnnotation from "@/functions/managerClient/assignAnnotation";
+import { DataTransferContext } from "../ManagerClient";
 
-export default function AnnotationAssignment(props: { students: authorized[], unannotatedModels: fullModel[], initializeDataTransfer: Function, terminateDataTransfer: Function }) {
+
+export default function AnnotationAssignment(props: { students: authorized[], unannotatedModels: fullModel[]}) {
+
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
 
     const [student, setStudent] = useState<string>()
     const [assignmentUid, setAssignmentUid] = useState<string>('')
@@ -23,7 +28,7 @@ export default function AnnotationAssignment(props: { students: authorized[], un
     const assignAnnotationFn = async () => {
         const args = annotationAssigned ? [assignmentUid, null] : [assignmentUid, student]
         const label = annotationAssigned ? 'Unassigning model to student for annotation' : 'Assigning model to student for annotation'
-        await dataTransferHandler(props.initializeDataTransfer, props.terminateDataTransfer, assignAnnotation, args, label)
+        await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, assignAnnotation, args, label)
     }
 
     useEffect(() => {

@@ -5,10 +5,21 @@ import PhotoInput from "@/components/Shared/Form Fields/PhotoInput";
 import dynamic from "next/dynamic";
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import { Button } from "@nextui-org/react";
-import { SetStateAction, Dispatch } from "react";
+import { SetStateAction, Dispatch, useState } from "react";
+import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
+import addThumbnail from "@/functions/managerClient/addThumbnail";
+import { useContext } from "react";
+import { DataTransferContext } from "../ManagerClient";
 
 
-export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] | undefined, setFile: Dispatch<SetStateAction<File>>, file: File | undefined, addThumbnail: Function }) {
+export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] | undefined}) {
+
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
+
+    const [file, setFile] = useState<File>()
+
+    const addThumbnailHandler = async (uid: string, file: File) => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, addThumbnail, [uid, file], "Adding thumbnail")
 
     return (
         <>
@@ -25,12 +36,12 @@ export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] |
                             </div>
                             <p className="text-center mb-8 text-xl">Upload Thumbnail:</p>
                             <div className="flex justify-between">
-                                <PhotoInput setFile={props.setFile as Dispatch<SetStateAction<File>>} />
+                                <PhotoInput setFile={setFile as Dispatch<SetStateAction<File>>} />
                                 <Button
-                                    isDisabled={!props.file}
+                                    isDisabled={!file}
                                     className="bg-[#004C46] text-white text-[16px] font-medium rounded-md px-4 h-[34px]"
                                     radius='none'
-                                    onClick={() => { props.addThumbnail(model.uid, props.file as File) }}
+                                    onClick={() => { addThumbnailHandler(model.uid, file as File) }}
                                 >
                                     Submit
                                 </Button>
@@ -39,12 +50,12 @@ export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] |
                     </section>
                 )
             }
-            
+
             {
                 !props.modelsNeedingThumbnails &&
                 <p className="text-xl"> There are no models without thumbnails </p>
             }
-            
+
             {
                 props.modelsNeedingThumbnails && props.modelsNeedingThumbnails.length === 0 &&
                 <p className="text-xl"> There are no models without thumbnails </p>

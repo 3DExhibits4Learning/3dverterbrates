@@ -1,7 +1,7 @@
 'use client'
 
 import { model } from "@prisma/client";
-import { SetStateAction, useState, Dispatch } from "react";
+import { SetStateAction, useState, Dispatch, createContext } from "react";
 import DataTransferModal from "../../Shared/Modals/DataTransferModal";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import dynamic from "next/dynamic";
@@ -16,11 +16,9 @@ import AnnotationClient from "../AnnotationClient";
 import AnnotationAssignment from "./Annotations/AnnotationAssignment";
 import initializeDataTransfer from "@/functions/dataTransfer/initializeDataTransfer";
 import terminateDataTransfer from "@/functions/dataTransfer/terminateDataTransfer";
-import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
-import addThumbnail from "@/functions/managerClient/addThumbnail";
-import updateThumbnail from "@/functions/managerClient/updateThumbnail";
-import deleteModel from "@/functions/managerClient/deleteModel";
 import RemoveStudent from "./Students/RemoveStudent";
+export const DataTransferContext = createContext<any>('');
+import AddStudent from "./Students/AddStudent";
 
 export default function ManagerClient(props: ManagerClientProps) {
 
@@ -32,104 +30,119 @@ export default function ManagerClient(props: ManagerClientProps) {
         const modelsNeedingThumbnails: fullModel[] = models.filter(model => model.thumbnail === null && model.base_model === true)
         const unannotatedModels: fullModel[] = models.filter(model => !model.annotated)
 
-        // Form field state variables
-        const [uid, setUid] = useState<string>()
-        const [file, setFile] = useState<File>()
-        const [updateFile, setUpdateFile] = useState<File>()
-        const [updateThumbUid, setUpdateThumbUid] = useState<string>('')
-
         // Data transfer state variables
         const [openModal, setOpenModal] = useState<boolean>(false)
         const [transferring, setTransferring] = useState<boolean>(false)
         const [result, setResult] = useState<string>('')
         const [loadingLabel, setLoadingLabel] = useState<string>()
 
-        // Function decalarations - data transfer modal
+        // Data transfer functions
         const initializeDataTransferFn = (loadingLabel: string) => initializeDataTransfer(setOpenModal, setTransferring, setLoadingLabel as Dispatch<SetStateAction<string>>, loadingLabel)
         const terminateDataTransferFn = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
-
-        // Thumbnail functions
-        const addThumbnailFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, addThumbnail, [uid, file], 'Adding Thumbnail')
-        const updateThumbnailFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, updateThumbnail, [uid, updateFile], 'Updating Thumbnail')
-
-        // Delete model function
-        const deleteModelFn = async (uid: string) => await dataTransferHandler(initializeDataTransferFn, terminateDataTransferFn, deleteModel, [uid], "Deleting Model and Annotations")
 
         return (
             <>
                 <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel={loadingLabel as string} result={result} href='/admin/management' />
-                <Accordion>
-                    <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                        <Accordion>
-                            <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <ModelSubmitForm />
-                            </AccordionItem>
-                            <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <UpdateModelContainer {...props} models={models} />
-                            </AccordionItem>
-                            <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <DeleteModel
-                                    uid={uid as string}
-                                    setUid={setUid as Dispatch<SetStateAction<string>>}
-                                    deleteModel={deleteModelFn} models={models}
-                                />
-                            </AccordionItem>
-                        </Accordion>
-                    </AccordionItem>
-                    <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                        <Accordion>
-                            <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <AddThumbnail
-                                    file={file}
-                                    setFile={setFile as Dispatch<SetStateAction<File>>}
-                                    modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined}
-                                    addThumbnail={addThumbnailFn}
-                                />
-                            </AccordionItem>
-                            <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <UpdateThumbnailContainer
-                                    {...props}
-                                    modelsWithThumbnails={modelsWithThumbnails}
-                                    updateThumbUid={updateThumbUid}
-                                    setUpdateThumbUid={setUpdateThumbUid}
-                                    updateFile={updateFile}
-                                    setUpdateFile={setUpdateFile as Dispatch<SetStateAction<File>>}
-                                    updateThumbnail={updateThumbnailFn}
-                                />
-                            </AccordionItem>
-                        </Accordion>
-                    </AccordionItem>
-                    <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                        <Accordion>
-                            <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
-                            </AccordionItem>
-                            <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                Here you can assign or unassign a 3D model to a student for annotation. When the student marks the annotations as complete,
-                                the administrator will receive a notification email and must approve the annotations before they are published online.
-                                <AnnotationAssignment
-                                    students={props.students}
-                                    unannotatedModels={unannotatedModels}
-                                    initializeDataTransfer={initializeDataTransferFn}
-                                    terminateDataTransfer={terminateDataTransferFn}
-                                />
-                            </AccordionItem>
-                        </Accordion>
-                    </AccordionItem>
-                    <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                        <Accordion>
-                            <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                Students currently active on the project and their assignments
-                            </AccordionItem>
-                            <AccordionItem key='inviteStudents' aria-label={'uploadModel'} title='Invite' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                Invite students to join the project
-                            </AccordionItem>
-                            <AccordionItem key='removeStudents' aria-label='removeStudents' title='Remove' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <RemoveStudent />
-                            </AccordionItem>
-                        </Accordion>
-                    </AccordionItem>
-                </Accordion>
+
+                <DataTransferContext.Provider value={{ initializeDataTransferFn, terminateDataTransferFn }}>
+
+                    {/* Main admin Accordion */}
+                    <Accordion>
+
+                        {/* AccordionItem holds nested "Models" accordion */}
+                        <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+
+                            {/* "Models" nested accordion */}
+                            <Accordion>
+
+                                {/* Model upload form */}
+                                <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <ModelSubmitForm />
+                                </AccordionItem>
+
+                                {/* Model update form*/}
+                                <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <UpdateModelContainer models={models} />
+                                </AccordionItem>
+
+                                {/* Model delete form*/}
+                                <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <DeleteModel models={models} />
+                                </AccordionItem>
+
+                            </Accordion>
+
+                        </AccordionItem>
+
+                        {/* AccordionItem holds nested "Thumbnails" accordion */}
+                        <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+
+                            {/* "Thumbnails" nested accordion */}
+                            <Accordion>
+
+                                {/* Add thumbnail form */}
+                                <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <AddThumbnail modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} />
+                                </AccordionItem>
+
+                                {/* Update thumbnail form */}
+                                <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <UpdateThumbnailContainer modelsWithThumbnails={modelsWithThumbnails} />
+                                </AccordionItem>
+
+                            </Accordion>
+
+                        </AccordionItem>
+
+                        {/* AccordionItem holds nested "Annotations" accordion */}
+                        <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+
+                            {/* "Annotations" nested accordion */}
+                            <Accordion>
+
+                                {/* Annotation Client */}
+                                <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                                    <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
+                                </AccordionItem>
+                                
+                                {/* Annotation assignment form*/}
+                                <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                                    <AnnotationAssignment students={props.students} unannotatedModels={unannotatedModels} />
+                                </AccordionItem>
+
+                            </Accordion>
+
+                        </AccordionItem>
+
+                        {/* AccordionItem holds nested "Students" accordion */}
+                        <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+
+                            {/* "Students" nested accordion */}
+                            <Accordion>
+
+                                {/* Active students table */}
+                                <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    Students currently active on the project and their assignments
+                                </AccordionItem>
+
+                                {/* Add student form */}
+                                <AccordionItem key='inviteStudents' aria-label={'uploadModel'} title='Invite' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <AddStudent />
+                                </AccordionItem>
+
+                                {/* Remove student form*/}
+                                <AccordionItem key='removeStudents' aria-label='removeStudents' title='Remove' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                    <RemoveStudent />
+
+                                </AccordionItem>
+
+                            </Accordion>
+
+                        </AccordionItem>
+
+                    </Accordion>
+
+                </DataTransferContext.Provider>
             </>
         )
     }

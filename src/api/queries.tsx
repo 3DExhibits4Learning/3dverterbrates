@@ -72,7 +72,7 @@ export const getAccount = async (id: string, provider: string) => {
  */
 export async function getFullModels() {
   const models = await prisma.model.findMany({
-    include:{software: true, tags: true}
+    include: { software: true, tags: true }
   })
   return models
 }
@@ -100,7 +100,7 @@ export async function getModel(species: string) {
 export async function getFullModelByUid(uid: string) {
   const models = await prisma.model.findUnique({
     where: { uid: uid },
-    include:{software: true, tags: true}
+    include: { software: true, tags: true }
   })
 
   return models
@@ -830,4 +830,31 @@ export const getModelsToAnnotate = async () => {
 
   return modelsToAnnotate
 }
+
+
+/**
+ * @function removeStudent
+ * @description remove a student from the 'authorized' database table
+ * 
+ */
+export const removeStudent = async (email: string) => {
+  const remove = await prisma.authorized.delete({
+    where: { email: email }
+  })
+  return remove
+}
+
+/**
+ * @function addStudent
+ * @description add a student to the 'authorized' database table
+ * 
+ */
+export const addStudent = async (email: string, name: string) => {
+  const remove = await prisma.authorized.create({
+    data: { email: email, name: name }
+  })
+  return remove
+}
+
+
 
