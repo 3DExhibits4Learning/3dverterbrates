@@ -11,10 +11,10 @@ import { DataTransferContext } from "../ManagerClient"
 import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler"
 
 
-export default function UpdateThumbnailContainer(props: {modelsWithThumbnails: model[] | undefined}) {
+export default function UpdateThumbnailContainer(props: { modelsWithThumbnails: model[] | undefined }) {
 
-    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
-    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
 
     const [file, setFile] = useState<File>()
     const [uid, setUid] = useState<string>('')
@@ -23,17 +23,21 @@ export default function UpdateThumbnailContainer(props: {modelsWithThumbnails: m
 
     return (
         <div className="w-full flex justify-center">
-            <section className="flex flex-col w-fit py-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46]">
+            <section className="flex flex-col w-1/2 pt-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46]">
                 {
                     props.modelsWithThumbnails && props.modelsWithThumbnails.length > 0 &&
                     <>
-                        <Select value={uid} setValue={setUid} models={props.modelsWithThumbnails} title='Select Model' />
-
+                        <div className="mb-6">
+                            <Select value={uid} setValue={setUid} models={props.modelsWithThumbnails} title='Select Model' />
+                        </div>
+                        
                         {
                             uid &&
                             <div className="my-4">
-                                <div className="w-[500px] h-[500px] mb-8">
-                                    <ModelViewer uid={uid} />
+                                <div className="flex w-full h-[600px] mb-12 justify-center">
+                                    <div className="h-full w-[600px]">
+                                        <ModelViewer uid={uid} />
+                                    </div>
                                 </div>
                                 <UpdateThumbnail uid={uid} file={file} setFile={setFile as Dispatch<SetStateAction<File>>} updateThumbnail={updateThumbnailHandler} />
                             </div>

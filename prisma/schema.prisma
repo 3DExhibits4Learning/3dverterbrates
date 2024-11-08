@@ -65,6 +65,7 @@ model model {
   annotations         annotations[]
   software            software[]
   tags                tags[]
+  assignment          assignment[]
   model_annotation    model_annotation?
 }
 
@@ -190,7 +191,17 @@ model video_annotation {
 }
 
 model authorized {
-  email      String      @id
-  role       String      @default("student")
-  name       String      @default("Cal Poly Humboldt Verterbrate Museum")
+  email            String          @id
+  role             String          @default("student")
+  name             String          @default("Cal Poly Humboldt Verterbrate Museum")
+  assignment       assignment[]    
+}
+
+model assignment {
+  email               String      
+  uid                 String
+  studentEmail        authorized   @relation(fields: [email], references: [email], onDelete: Cascade, onUpdate: Cascade, map: "assignmentFkEmail" )
+  modelUid            model        @relation(fields: [uid], references: [uid], onDelete: Cascade, onUpdate: Cascade, map: "assignmentFkUid" )
+
+  @@unique([email, uid])
 }

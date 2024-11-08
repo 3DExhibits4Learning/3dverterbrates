@@ -18,29 +18,33 @@ import { DataTransferContext } from "../ManagerClient";
 import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
 
 export default function DeleteModel(props: { models: fullModel[] | undefined }) {
-    
+
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
     const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
 
     const [uid, setUid] = useState<string>('')
 
     const deleteModelHandler = async (uid: string) => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, deleteModel, [uid], "Deleting Model and Annotations")
-    
+
     return (
         <section className="w-full flex justify-center">
-            <div className="h-[400px] w-[600px] flex flex-col items-center border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
-                <p className="my-8 text-xl text-center">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
-                {
-                    props.models &&
-                    <Select value={uid} setValue={setUid} models={props.models} title='Select Model' />
-                }
-                <Button
-                    className="w-1/2 text-white"
-                    isDisabled={!uid}
-                    onClick={() => deleteModelHandler}
-                >
-                    Delete 3D Model
-                </Button>
+            <div className="w-1/2 flex flex-col border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
+                <section className="ml-12">
+                    <p className="my-12 text-xl">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
+                    {
+                        props.models &&
+                        <Select value={uid} setValue={setUid} models={props.models} title='Select Model' />
+                    }
+                    <div className="mb-8 mt-12">
+                        <Button
+                            className="text-white"
+                            isDisabled={!uid}
+                            onClick={() => deleteModelHandler}
+                        >
+                            Delete 3D Model
+                        </Button>
+                    </div>
+                </section>
             </div>
         </section>
     )

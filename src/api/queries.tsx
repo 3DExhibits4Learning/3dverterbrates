@@ -226,7 +226,7 @@ export const updateModelAnnotator = async (uid: string, student: string | null) 
     data: { annotator: student }
   })
   return models
-};
+}
 
 /**
  * @function getPendingModels
@@ -855,6 +855,25 @@ export const addStudent = async (email: string, name: string) => {
   })
   return remove
 }
+
+/**
+ * @function assignModelToStudent
+ * @description assign a 3D model to a student for annotation
+ * 
+ */
+export const assignModelToStudent = async (uid: string, email: string) => {
+  return await prisma.assignment.create({ data: { uid: uid, email: email } })
+}
+
+/**
+ * @function unassignModelToStudent
+ * @description unassign a 3D model to a student for annotation
+ * 
+ */
+export const unassignModelToStudent = async (uid: string, email: string) => {
+  return await prisma.assignment.delete({ where: { email_uid: { email: email, uid: uid } } })
+}
+
 
 
 

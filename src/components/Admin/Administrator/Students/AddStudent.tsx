@@ -9,8 +9,8 @@ import addStudent from "@/functions/managerClient/addStudent"
 
 export default function AddStudent() {
 
-    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
-    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
 
     const [email, setEmail] = useState<string>('')
     const [name, setName] = useState<string>('')
@@ -25,11 +25,13 @@ export default function AddStudent() {
     }, [email])
 
     return (
-        <section className="flex justify-center">
-            <div className="flex bg-[#D5CB9F] flex-col w-1/2 rounded-xl border border-[#004C46] items-center py-8">
-                <div className="my-8 flex flex-col w-full items-center"><TextInput value={name} setValue={setName} title='Enter Student Name' /></div>
-                <TextInput value={email} setValue={setEmail} title='Enter Student Email' />
-                <Button className="mt-16 text-xl text-white" isDisabled={buttonDisabled} onPress={addStudentHandler}>Add Student</Button>
+        <section className="flex justify-center mb-8">
+            <div className="flex flex-col bg-[#D5CB9F] w-1/2 rounded-xl border border-[#004C46] py-8">
+                <section className="flex-col ml-12">
+                    <div className="my-8 flex flex-col w-full "><TextInput value={name} setValue={setName} title='Name' /></div>
+                    <div className="my-8 flex flex-col w-full"><TextInput value={email} setValue={setEmail} title='Email' /></div>
+                    <Button className="mt-2 mb-8 text-xl text-white" isDisabled={buttonDisabled} onPress={addStudentHandler}>Add Student</Button>
+                </section>
             </div>
         </section>
     )

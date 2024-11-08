@@ -14,8 +14,8 @@ import { DataTransferContext } from "../ManagerClient";
 
 export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] | undefined}) {
 
-    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
-    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
 
     const [file, setFile] = useState<File>()
 

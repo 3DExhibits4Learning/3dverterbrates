@@ -297,8 +297,11 @@ export interface fullModel extends model{
 }
 
 export interface ManagerClientProps{ 
-  stringifiedModels: string
+  models: string
   students: authorized[]
+  modelsWithThumbnails: string
+  modelsNeedingThumbnails: string
+  unannotatedModels: string
 }
 
 export interface UpdateModelFormContainerProps{

@@ -1,10 +1,11 @@
 'use client'
 
-export default async function assignAnnotation(uid: string, student: string | null) {
+export default async function assignAnnotation(uid: string, student: string | null, email: string) {
 
     const body = {
         uid: uid,
-        student: student
+        student: student,
+        email: email
     }
 
     const result = await fetch(`/api/admin/annotations/assign`, {

@@ -21,12 +21,13 @@ export default async function Page() {
 
     try {
 
-        // Management AUTH redirect
+        // Get session
         const session = await getServerSession(authOptions).catch((e) => {
             console.error(e.message)
             throw Error("Couldn't get session")
         })
 
+        // Management auth redirect
         const email = session?.user?.email as string
         if (!management.includes(email)) return <h1>NOT AUTHORIZED</h1>
 
@@ -36,31 +37,44 @@ export default async function Page() {
             throw Error("Couldn't get 3D Models from database")
         })
 
-        // Get authorized users
-        const students = (await getAuthorizedUsers()).filter(user => user.role === 'student')
+        // Stringified model filters (decimal objects (which are included in models table) can't be passed directly to client)
+        const modelsString = JSON.stringify(models)
+        const modelsWithThumbnails = JSON.stringify(models.filter(model => model.thumbnail !== null))
+        const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null && model.base_model === true))
+        const unannotatedModels = JSON.stringify(models.filter(model => !model.annotated))
 
-        // Decimal objects can't be passed directly to client components
-        const stringifiedModels = JSON.stringify(models)
+        // Get authorized students
+        const students = (await getAuthorizedUsers().catch((e) => {
+            console.error(e.message)
+            throw Error("Couldn't get authorized students from database")
+        })
+        ).filter(user => user.role === 'student')
 
-        // Typical client frame
+        // Typical client return
         return (
             <>
                 <Header pageRoute="collections" headerTitle='Management' />
                 <main className="flex flex-col !min-h-[calc(100vh-177px)]">
-                    <ManagerClient stringifiedModels={stringifiedModels} students={students}/>
+                    <ManagerClient
+                        models={modelsString}
+                        modelsWithThumbnails={modelsWithThumbnails}
+                        modelsNeedingThumbnails={modelsNeedingThumbnails}
+                        unannotatedModels={unannotatedModels}
+                        students={students}
+                    />
                 </main>
                 <Foot />
             </>
         )
     }
-    
+
     // Typical catch
     catch (e: any) {
         return (
             <>
                 <Header pageRoute="collections" headerTitle='Management' />
                 <main className="flex flex-col !min-h-[calc(100vh-177px)]">
-                    `{`Fatal error: ${e.message}`}
+                    {`Critical error: ${e.message}`}
                 </main>
                 <Foot />
             </>
