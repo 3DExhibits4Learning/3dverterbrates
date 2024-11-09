@@ -12,7 +12,7 @@
 import { model } from "@prisma/client";
 import { useState, createContext } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { ManagerClientProps } from "@/api/types";
+import { ManagerClientProps, studentsAndAssignments } from "@/api/types";
 import { fullModel } from "@/api/types";
 
 // Default imports
@@ -28,6 +28,7 @@ import AddThumbnail from "./Thumbnails/AddThumbnail";
 import UpdateThumbnailContainer from "./Thumbnails/UpdateThumbnailContainer";
 import UpdateModelContainer from "./Model/UpdateModelContainer";
 import DataTransferModal from "../../Shared/Modals/DataTransferModal";
+import StudentTable from "./Students/GetStudents";
 
 // Dynamic imports
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
@@ -66,7 +67,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                         <Accordion>
                             {/* Active students table */}
                             <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                Students currently active on the project and their assignments
+                                <StudentTable assignments={props.assignments} models={models} students={props.students as studentsAndAssignments[]}/>
                             </AccordionItem>
                             {/* Add student form */}
                             <AccordionItem key='addStudent' aria-label='addStudent' title='Add' classNames={{ title: 'text-[#004C46] text-2xl' }}>

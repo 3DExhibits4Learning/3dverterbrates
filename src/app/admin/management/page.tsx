@@ -14,7 +14,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { management } from "@/utils/devAuthed"
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
 import { getFullModels } from "@/api/queries";
-import { getAuthorizedUsers } from "@/api/queries";
+import { getStudentsAndAssignments } from "@/api/queries";
+import { getAssignments } from "@/api/queries";
+import serverAsyncErrorHandler from "@/functions/serverError/serverAsyncError";
+import { fullModel, studentsAndAssignments } from "@/api/types";
+import { authorized, assignment } from "@prisma/client";
 
 // Main component
 export default async function Page() {
@@ -22,20 +26,14 @@ export default async function Page() {
     try {
 
         // Get session
-        const session = await getServerSession(authOptions).catch((e) => {
-            console.error(e.message)
-            throw Error("Couldn't get session")
-        })
+        const session = await getServerSession(authOptions).catch((e) => serverAsyncErrorHandler(e.message, "Couldn't get session"))
 
         // Management auth redirect
         const email = session?.user?.email as string
         if (!management.includes(email)) return <h1>NOT AUTHORIZED</h1>
 
         // Get all 3D models
-        const models = await getFullModels().catch((e) => {
-            console.error(e.message)
-            throw Error("Couldn't get 3D Models from database")
-        })
+        const models = await getFullModels().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get 3D Models from database")) as fullModel[]
 
         // Stringified model filters (decimal objects (which are included in models table) can't be passed directly to client)
         const modelsString = JSON.stringify(models)
@@ -44,11 +42,18 @@ export default async function Page() {
         const unannotatedModels = JSON.stringify(models.filter(model => !model.annotated))
 
         // Get authorized students
-        const students = (await getAuthorizedUsers().catch((e) => {
-            console.error(e.message)
-            throw Error("Couldn't get authorized students from database")
-        })
-        ).filter(user => user.role === 'student')
+        // const students = (await getAuthorizedUsers().catch((e) => {
+        //     console.error(e.message)
+        //     throw Error("Couldn't get authorized students from database")
+        // })
+        // ).filter(user => user.role === 'student')
+
+        // Get authorized students
+        const students = await getStudentsAndAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as studentsAndAssignments[]
+
+        // Get assignents
+        const assignments = await getAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as assignment[]
+
 
         // Typical client return
         return (
@@ -61,6 +66,7 @@ export default async function Page() {
                         modelsNeedingThumbnails={modelsNeedingThumbnails}
                         unannotatedModels={unannotatedModels}
                         students={students}
+                        assignments={assignments}
                     />
                 </main>
                 <Foot />

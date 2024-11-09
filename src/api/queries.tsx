@@ -5,6 +5,7 @@
 
 import { model } from "@prisma/client";
 import prisma from '@/utils/prisma'
+import { Prisma } from "@prisma/client";
 
 // Legacy export (so all the resulting imports don't need to be changed)
 export function prismaClient() {
@@ -874,6 +875,22 @@ export const unassignModelToStudent = async (uid: string, email: string) => {
   return await prisma.assignment.delete({ where: { email_uid: { email: email, uid: uid } } })
 }
 
+/**
+ * @function getStudentsAndAssignments
+ * @description get an array of authorized students objecets with assignments included
+ * 
+ */
+export const getStudentsAndAssignments = async () => {
+  return await prisma.authorized.findMany({ where: {role: 'student'}, include: {assignment: true} satisfies Prisma.authorizedInclude })
+}
 
+/**
+ * @function getAssignments
+ * @description get an array of assignment objects
+ * 
+ */
+export const getAssignments = async () => {
+  return await prisma.assignment.findMany()
+}
 
 

@@ -5,7 +5,7 @@
 
 import { Dispatch} from "react";
 import { SetStateAction } from "react";
-import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags, authorized } from "@prisma/client";
+import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
 export interface SearchHeaderProps {
   headerTitle: string,
@@ -302,6 +302,7 @@ export interface ManagerClientProps{
   modelsWithThumbnails: string
   modelsNeedingThumbnails: string
   unannotatedModels: string
+  assignments: assignment[]
 }
 
 export interface UpdateModelFormContainerProps{
@@ -310,5 +311,9 @@ export interface UpdateModelFormContainerProps{
 
 export interface UpdateModelFormProps{
   model:fullModel
+}
+
+export interface studentsAndAssignments extends authorized{
+  assignment: assignment[]
 }
 
