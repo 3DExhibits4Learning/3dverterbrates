@@ -7,15 +7,11 @@ export default function RadioButtons(props: {
     setPhotoChecked: Dispatch<SetStateAction<boolean>>
     setVideoChecked: Dispatch<SetStateAction<boolean>>
     setMediaType: Dispatch<SetStateAction<string>>
-    setUploadChecked: Dispatch<SetStateAction<boolean>>
-    setUrlChecked: Dispatch<SetStateAction<boolean>>
     setModelChecked: Dispatch<SetStateAction<boolean>>
     photoChecked: boolean
     videoChecked: boolean
     modelChecked: boolean
     annotationType: string
-    uploadChecked: boolean
-    urlChecked: boolean
 }) {
 
     return (
@@ -32,6 +28,7 @@ export default function RadioButtons(props: {
                             props.setPhotoChecked(true)
                             props.setVideoChecked(false)
                             props.setModelChecked(false)
+                            props.setMediaType('upload')
                         }}
                         checked={props.photoChecked}
                     >
@@ -48,8 +45,6 @@ export default function RadioButtons(props: {
                             props.setPhotoChecked(false)
                             props.setVideoChecked(true)
                             props.setModelChecked(false)
-                            props.setUploadChecked(false)
-                            props.setUrlChecked(true)
                             props.setMediaType('url')
                         }}
                         checked={props.videoChecked}
@@ -67,51 +62,12 @@ export default function RadioButtons(props: {
                             props.setPhotoChecked(false)
                             props.setVideoChecked(false)
                             props.setModelChecked(true)
-                            props.setUrlChecked(false)
-                            props.setUploadChecked(false)
                             props.setMediaType('model')
                         }}
                         checked={props.modelChecked}
                     >
                     </input>
                 </div>
-                {
-                    props.annotationType === 'photo' &&
-                    <>
-                        <p>URL</p>
-                        <div>
-                            <input
-                                type='radio'
-                                value='url'
-                                name='typeOfPhoto'
-                                onChange={(e) => {
-                                    props.setMediaType(e.target.value)
-                                    props.setUploadChecked(false)
-                                    props.setUrlChecked(true)
-                                }}
-                                checked={props.urlChecked}
-                            >
-                            </input>
-                        </div>
-                        <p className="mr-4">Upload</p>
-                        <div>
-                            <input
-                                type='radio'
-                                value='upload'
-                                name='typeOfPhoto'
-                                onChange={(e) => {
-                                    props.setMediaType(e.target.value)
-                                    props.setUploadChecked(true)
-                                    props.setUrlChecked(false)
-                                    props.setMediaType('upload')
-                                }}
-                                checked={props.uploadChecked}
-                            >
-                            </input>
-                        </div>
-                    </>
-                }
-
             </div>
         </>
     )

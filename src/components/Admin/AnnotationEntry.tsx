@@ -44,8 +44,6 @@ const AnnotationEntry = (props: {
     // Radio Buttons
     const [photoChecked, setPhotoChecked] = useState<boolean>()
     const [videoChecked, setVideoChecked] = useState<boolean>()
-    const [urlChecked, setUrlChecked] = useState<boolean>()
-    const [uploadChecked, setUploadChecked] = useState<boolean>()
     const [modelChecked, setModelChecked] = useState<boolean>()
 
     // Radio button resultant states
@@ -77,6 +75,13 @@ const AnnotationEntry = (props: {
     const [createDisabled, setCreateDisabled] = useState<boolean>(true)
     const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
 
+    // Set imgSrc from NFS storage
+    const setImgSrc = async () => {
+        const annotation = props.activeAnnotation as photo_annotation
+        const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${annotation.url.slice(5)}` : `public${annotation.url}`
+        setImageSource(`/api/nfs?path=${path}`)
+    }
+
     // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
     useEffect(() => {
 
@@ -92,32 +97,18 @@ const AnnotationEntry = (props: {
             setAnnotation(annotation.annotation)
             setAnnotationTitle(props.activeAnnotationTitle)
 
-            // Settings for hosted photo annotations
-            if (props.annotationType == 'photo' && !props.new && (props.activeAnnotation as photo_annotation).photo) {
+            // Set states for photo annotation
+            if (props.annotationType == 'photo') {
                 setMediaType('upload')
                 setVideoChecked(false)
                 setPhotoChecked(true)
-                setUrlChecked(false)
-                setUploadChecked(true)
-                const base64String = Buffer.from((props.activeAnnotation as photo_annotation).photo as Buffer).toString('base64');
-                const dataUrl = `data:image/jpeg;base64,${base64String}`
-                setImageSource(dataUrl)
-            }
-            // Settings for web based photo annotations
-            else if (props.annotationType == 'photo') {
-                setMediaType('url')
-                setVideoChecked(false)
-                setPhotoChecked(true)
-                setUrlChecked(true)
-                setUploadChecked(false)
-                setImageSource((props.activeAnnotation as photo_annotation).url)
+                setImgSrc()
             }
             // Settings for video annotations
             else if (props.annotationType == 'video') {
                 setMediaType('url')
                 setVideoChecked(true)
                 setPhotoChecked(false)
-                setUrlChecked(true)
                 setLength((props.activeAnnotation as video_annotation).length as string)
                 setImageSource((props.activeAnnotation as video_annotation).url)
             }
@@ -147,38 +138,7 @@ const AnnotationEntry = (props: {
         }
 
         // Conditional based on radio button states
-        else if (annotationType == 'photo' && mediaType == 'url') {
-
-            // Switch based on whether the annotation is new or databased
-            switch (props.new) {
-
-                // For databased annotations
-                case false:
-                    const caseAnnotation = props.activeAnnotation as photo_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
-                    const currentValues = [annotationTitle, url, author, license, annotation]
-                    const originalOptionalValues = [caseAnnotation.title, caseAnnotation.website]
-                    const optionalValues = [photoTitle, website]
-
-                    if (currentValues.every(allTruthy) && !allSame(originalValues, currentValues) || isNewPosition && currentValues.every(allTruthy) || currentValues.every(allTruthy) && !allSame(originalOptionalValues, optionalValues)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                // New annotations are the default
-                default:
-
-                    const valueArray = [annotationTitle, url, author, license, annotation, props.position]
-
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
-            }
-        }
-
-        // Conditional based on radio button states
-        else if (annotationType == 'photo' && mediaType == 'upload') {
+        else if (annotationType == 'photo') {
 
             switch (props.new) {
 
@@ -314,23 +274,25 @@ const AnnotationEntry = (props: {
                     data.set('author', author)
                     data.set('license', license)
                     data.set('annotation', annotation)
-                    data.set('annotator', 'Kat Lim')
+                    data.set('annotator', '')
                     if (photoTitle) data.set('photoTitle', photoTitle)
                     if (website) data.set('website', website)
             }
 
             // Shared data (url was formerly the foreign key)
-            data.set('annotation_id', uuidv4())
+            const annotationId = uuidv4()
+            data.set('annotation_id', annotationId)
 
-            if (!file) data.set('url', url)
-            //
-            else {
-                data.set('url', '')
-            }
+            // Directory, path and url data
+            const photo = file as File
+            data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}`)
+            data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+            data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+
 
             // Route handler data
             data.set('mediaType', mediaType as string)
-            if (file) data.set('file', file as File)
+            data.set('file', photo)
 
             // Open transfer modal and set spinner
             setTransferModalOpen(true)
@@ -468,30 +430,14 @@ const AnnotationEntry = (props: {
     }
 
     // This effect updates annotation image visibility and source
-    //https://www.youtube.com/embed/WZtsoVYJ3Iw?si=pgqRvYNm6z8u91as
     useEffect(() => {
 
         // This code shouldn't run for the first annotation
         if (props.index !== 1 && annotationType !== 'model') {
 
-            // Show the new image if a new url is entered
-            if (url && url !== imageSource && mediaType === 'url') {
-                setImageSource(url)
-            }
-
             // Determine image visibility
-            if (annotationType === 'photo' && mediaType === 'url' && url) setImageVisible(true)
-
-            else if (!props.new && mediaType === 'upload' && (props.activeAnnotation as photo_annotation).photo && !file || !props.new && mediaType === 'url' && (props.activeAnnotation as photo_annotation).photo && !url) {
-                const base64String = Buffer.from((props.activeAnnotation as photo_annotation).photo as Buffer).toString('base64');
-                const dataUrl = `data:image/jpeg;base64,${base64String}`
-                setImageSource(dataUrl)
-                setImageVisible(true)
-            }
-
+            if (annotationType === 'photo' && !file && !props.new) setImageVisible(true)
             else setImageVisible(false)
-            
-            if (url?.includes('https://www.youtube.com/embed/')) setImageVisible(false)
         }
 
     }, [props.new, annotationType, mediaType, url, props.activeAnnotation, props.index, file, imageSource])
@@ -527,6 +473,7 @@ const AnnotationEntry = (props: {
         return (
             <>
                 <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel='Saving Changes' closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
+
                 <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <section className="flex justify-around">
                         {
@@ -542,14 +489,10 @@ const AnnotationEntry = (props: {
                                         setPhotoChecked={setPhotoChecked as Dispatch<SetStateAction<boolean>>}
                                         setVideoChecked={setVideoChecked as Dispatch<SetStateAction<boolean>>}
                                         setMediaType={setMediaType as Dispatch<SetStateAction<string>>}
-                                        setUploadChecked={setUploadChecked as Dispatch<SetStateAction<boolean>>}
-                                        setUrlChecked={setUrlChecked as Dispatch<SetStateAction<boolean>>}
                                         setModelChecked={setModelChecked as Dispatch<SetStateAction<boolean>>}
                                         photoChecked={photoChecked as boolean}
                                         videoChecked={videoChecked as boolean}
                                         annotationType={annotationType}
-                                        uploadChecked={uploadChecked as boolean}
-                                        urlChecked={urlChecked as boolean}
                                         modelChecked={modelChecked as boolean}
                                     />
                                 </div>
@@ -557,32 +500,27 @@ const AnnotationEntry = (props: {
                         </section>
                     </section>
                     <section className="w-full h-fit">
+
                         {
-                            annotationType == 'photo' && mediaType && ['url', 'upload'].includes(mediaType) &&
+                            annotationType == 'photo' && mediaType && mediaType === 'upload' &&
                             <section className="mt-4 w-full h-fit">
                                 <div className="flex h-[530px]">
                                     <div className="flex flex-col w-1/2">
                                         <div className="ml-12">
                                             <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
                                         </div>
-                                        {
-                                            mediaType == 'url' &&
-                                            <div className="ml-12">
-                                                <TextInput value={url as string} setValue={setUrl} title='URL' required />
-                                            </div>
-                                        }
-                                        {
-                                            mediaType == 'upload' &&
-                                            <div className="ml-12 mb-4">
-                                                <FileInput setFile={setFile as Dispatch<SetStateAction<File>>} />
-                                            </div>
-                                        }
+
+                                        <div className="ml-12 mb-4">
+                                            <FileInput setFile={setFile as Dispatch<SetStateAction<File>>} />
+                                        </div>
+
                                         <div className="ml-12">
                                             <TextInput value={author as string} setValue={setAuthor} title='Author' required />
                                             <License setLicense={setLicense} license={license} />
                                             <TextInput value={photoTitle as string} setValue={setPhotoTitle} title='Photo Title' />
                                             <TextInput value={website as string} setValue={setWebsite} title='Website' />
                                         </div>
+
                                     </div>
                                     {
                                         imageVisible &&
@@ -594,6 +532,7 @@ const AnnotationEntry = (props: {
                                 </div>
                             </section>
                         }
+
                         {
                             annotationType == 'video' &&
                             <section className="flex my-12">
@@ -620,7 +559,7 @@ const AnnotationEntry = (props: {
                                 <div className="flex ml-12 mt-12 flex-col w-3/5 max-w-[750px] mr-12">
                                     <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
                                     {/* <TextInput value={modelAnnotationUid as string} setValue={setModelAnnotationUid as Dispatch<SetStateAction<string>>} title='UID' required /> */}
-                                    <ModelAnnotationSelect value={modelAnnotationUid} setValue={setModelAnnotationUid} modelAnnotations={props.annotationModels}/>
+                                    <ModelAnnotationSelect value={modelAnnotationUid} setValue={setModelAnnotationUid} modelAnnotations={props.annotationModels} />
                                     <Annotation annotation={annotation} setAnnotation={setAnnotation} />
                                 </div>
                                 {

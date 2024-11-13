@@ -1,3 +1,7 @@
+/**
+ * @file src/app/api/annotations/route.tsx
+ */
+
 import {
     insertFirstAnnotationPosition,
     getFirstAnnotationPostion,
@@ -14,8 +18,10 @@ import {
     updateModelAnnotation,
     deleteModelAnnotation
 } from "@/api/queries"
+import { mkdir, writeFile } from "fs/promises"
+import routeHandlerErrorHandler from "@/functions/serverError/routeHandlerErrorHandler"
 
-
+const route = 'src/app/api/annotations/route.tsx'
 
 // GET request handler
 export async function GET(request: Request) {
@@ -81,14 +87,18 @@ export async function POST(request: Request) {
             // Default case (annotationType == 'photo')
             default:
                 try {
+                    
+                    // Get file, convert to arraybuffer, then buffer
+                    const file = data.get('file') as File
+                    const bytes = await file.arrayBuffer().catch((e) => routeHandlerErrorHandler(route, e.message, 'file.arrayBuffer()', "Couldn't get array buffer")) as ArrayBuffer
+                    const buffer = Buffer.from(bytes)
 
-                    let photoBuffer
+                    // Make the directory
+                    await mkdir(data.get('dir') as string, { recursive: true }).catch((e) => routeHandlerErrorHandler(route, e.message, 'mkdir()', "Couldn't make directory")) 
 
-                    if (data.get('file')) {
-                        const file = data.get('file') as File
-                        const bytes = await file.arrayBuffer()
-                        photoBuffer = Buffer.from(bytes)
-                    }
+                    //@ts-ignore - ts incorrectly thinks that writeFile() can't write buffers
+                    await writeFile(data.get('path') as string, buffer).catch((e) => routeHandlerErrorHandler(route, e.message, 'writeFile()', "Couldn't write file"))
+
 
                     // Optional photo_annotation data initializtion
                     const website = data.get('website') ? data.get('website') : undefined
@@ -96,13 +106,13 @@ export async function POST(request: Request) {
 
                     // Database annotation creation
                     const newAnnotation = await createAnnotation(data.get('uid') as string, data.get('position') as string, data.get('url') as string, parseInt(data.get('annotation_no') as string), data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                    const newPhotoAnnotation = await createPhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined, photoBuffer)
+                    const newPhotoAnnotation = await createPhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined)
 
                     // Successful response returns message as the data value and response objects from prisma as the response values
                     return Response.json({ data: 'Annotation created', response: { newAnnotation, newPhotoAnnotation } })
                 }
                 // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+                catch (e: any) { return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message }) }
         }
     }
 }
@@ -145,7 +155,7 @@ export async function PATCH(request: Request) {
 
                         const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
                         const newVideoAnnotation = await createVideoAnnotation(data.get('url') as string, data.get('length') as string, data.get('annotation_id') as string)
-                        
+
                         // Successful response returns message as the data value and response objects from prisma as the response values
                         return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newVideoAnnotation })
                     }
@@ -153,7 +163,7 @@ export async function PATCH(request: Request) {
                     // Database annotation update
                     const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
                     const updatedVideoAnnotation = await updateVideoAnnotation(data.get('url') as string, data.get('length') as string, data.get('annotation_id') as string)
-                    
+
                     // Successful response returns message as the data value and response objects from prisma as the response values
                     return Response.json({ data: 'Annotation updated', response: updatedAnnotation, updatedVideoAnnotation })
                 }
@@ -175,7 +185,7 @@ export async function PATCH(request: Request) {
 
                         const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
                         const newModelAnnotation = await createModelAnnotation(data.get('modelAnnotationUid') as string, data.get('annotation') as string, data.get('annotation_id') as string)
-                        
+
                         // Successful response returns message as the data value and response objects from prisma as the response values
                         return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newModelAnnotation })
                     }
@@ -183,7 +193,7 @@ export async function PATCH(request: Request) {
                     // Database annotation update
                     const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
                     const updatedModelAnnotation = await updateModelAnnotation(data.get('modelAnnotationUid') as string, data.get('annotation') as string, data.get('annotation_id') as string)
-                    
+
                     // Successful response returns message as the data value and response objects from prisma as the response values
                     return Response.json({ data: 'Annotation updated', response: updatedAnnotation, updatedModelAnnotation })
                 }
@@ -192,8 +202,8 @@ export async function PATCH(request: Request) {
 
             // Default case (annotationType == 'photo')
             default:
-                
-            try {
+
+                try {
 
                     // Optional photo_annotation data initializtion
                     let photoBuffer
@@ -216,14 +226,14 @@ export async function PATCH(request: Request) {
                         if (data.get('previousMedia') === 'video') deletion = await deleteVideoAnnotation(data.get('annotation_id') as string)
                         else deletion = await deleteModelAnnotation(data.get('annotation_id') as string)
 
-                        const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string,  data.get('url') as string)
+                        const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
                         const newPhotoAnnotation = await createPhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined, photoBuffer)
-                        
+
                         return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newPhotoAnnotation })
                     }
 
                     // Database annotation update
-                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string,  data.get('url') as string)
+                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
                     const updatedPhotoAnnotation = await updatePhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined, photoBuffer)
 
                     // Successful response returns message as the data value and response objects from prisma as the response values
