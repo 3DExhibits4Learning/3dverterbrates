@@ -58,44 +58,42 @@ export default function AnnotationAssignment(props: { students: authorized[], un
     }, [assignmentUid, student])
 
     return (
-        <article className="flex justify-center">
-            <div className="flex flex-col w-1/2 bg-[#D5CB9F] min-h-[400px] rounded-xl border border-[#004C46] mb-8">
-                <section className="flex justify-center w-full h-3/4 flex-col ml-12">
+        <>
+        <section className="flex justify-center w-full h-3/4 flex-col ml-12">
 
-                    <section className="flex flex-col w-1/2 mt-8">
-                        <Select value={assignmentUid} setValue={setAssignmentUid} models={props.unannotatedModels} title='Select Model' />
-                    </section>
+            <section className="flex flex-col w-1/2 mt-8">
+                <Select value={assignmentUid} setValue={setAssignmentUid} models={props.unannotatedModels} title='Select Model' />
+            </section>
 
-                    <section className="flex flex-col w-1/2 mt-8">
-                        <p className="text-xl font-medium">Select Student</p>
-                        <select
-                            onChange={(e) => setNameAndEmailStates(e.target.value.slice(0, -18), e.target.value.slice(-18)) /* Email string is expected to be 18 characters long*/}
-                            className={`w-4/5 min-w-[300px] max-w-[500px] rounded-xl mb-4 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}
-                        >
-                            <option hidden key={'defaultStudentOption'} value='select'>Select a student</option>
-                            
-                            {
-                                props.students.map((student, index) =>
-                                    <option key={index} value={`${student.name}${student.email}`}>{`${student.name}\u00A0\u00A0-\u00A0\u00A0(${student.email})`}</option>
-                                )
-                            }
+            <section className="flex flex-col w-1/2 mt-8">
+                <p className="text-xl font-medium">Select Student</p>
+                <select
+                    onChange={(e) => setNameAndEmailStates(e.target.value.slice(0, -18), e.target.value.slice(-18)) /* Email string is expected to be 18 characters long*/}
+                    className={`w-4/5 min-w-[300px] max-w-[500px] rounded-xl mb-4 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}
+                >
+                    <option hidden key={'defaultStudentOption'} value='select'>Select a student</option>
 
-                        </select>
-                    </section>
+                    {
+                        props.students.map((student, index) =>
+                            <option key={index} value={`${student.name}${student.email}`}>{`${student.name}\u00A0\u00A0-\u00A0\u00A0(${student.email})`}</option>
+                        )
+                    }
 
-                </section>
+                </select>
+            </section>
+
+        </section>
 
                 {
-                    annotationAssigned &&
-                    <p className="tmb-4 text-xl ml-12 mb-8">* This model is already assigned to this student, click below to unassign the model</p>
-                }
+        annotationAssigned &&
+            <p className="tmb-4 text-xl ml-12 mb-8">* This model is already assigned to this student, click below to unassign the model</p>
+    }
 
-                <section className="flex ml-12">
-                    <Button className="text-white text-xl py-2 mb-8" onPress={assignAnnotationHandler} isDisabled={!(assignmentUid && student)}>
-                        {annotationAssigned ? 'Unassign model' : 'Assign model'}
-                    </Button>
-                </section>
-            </div>
-        </article>
+    <section className="flex ml-12">
+        <Button className="text-white text-xl py-2 mb-8" onPress={assignAnnotationHandler} isDisabled={!(assignmentUid && student)}>
+            {annotationAssigned ? 'Unassign model' : 'Assign model'}
+        </Button>
+    </section>
+    </>
     )
 }

@@ -294,15 +294,15 @@ export interface fullUserSubmittal extends userSubmittal{
 export interface fullModel extends model{
   software:software[]
   tags:tags[]
+  assignment: assignment
 }
 
 export interface ManagerClientProps{ 
   models: string
-  students: authorized[]
   modelsWithThumbnails: string
   modelsNeedingThumbnails: string
   unannotatedModels: string
-  assignments: assignment[]
+  studentsAssignmentsAndModels: string
 }
 
 export interface UpdateModelFormContainerProps{
@@ -314,6 +314,18 @@ export interface UpdateModelFormProps{
 }
 
 export interface studentsAndAssignments extends authorized{
+  assignment: assignment[]
+}
+
+export interface studentsAssignmentsAndModels extends studentsAndAssignments{
+  models: model[]
+}
+
+export interface assignmentsWithName extends assignment{
+  name: string
+}
+
+export interface modelsAndAssignments extends model{
   assignment: assignment[]
 }
 

@@ -15,10 +15,11 @@ import { management } from "@/utils/devAuthed"
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
 import { getFullModels } from "@/api/queries";
 import { getStudentsAndAssignments } from "@/api/queries";
-import { getAssignments } from "@/api/queries";
+import { getAssignments, getModelsWithAssignments } from "@/api/queries";
 import serverAsyncErrorHandler from "@/functions/serverError/serverAsyncError";
 import { fullModel, studentsAndAssignments } from "@/api/types";
-import { authorized, assignment } from "@prisma/client";
+import { assignment } from "@prisma/client";
+import createStudentsAssignmentsAndModels from "@/functions/managerClient/createStudentsAssignmentsAndModels";
 
 // Main component
 export default async function Page() {
@@ -41,18 +42,14 @@ export default async function Page() {
         const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null && model.base_model === true))
         const unannotatedModels = JSON.stringify(models.filter(model => !model.annotated))
 
-        // Get authorized students
-        // const students = (await getAuthorizedUsers().catch((e) => {
-        //     console.error(e.message)
-        //     throw Error("Couldn't get authorized students from database")
-        // })
-        // ).filter(user => user.role === 'student')
-
-        // Get authorized students
+        // Get students and assignments
         const students = await getStudentsAndAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as studentsAndAssignments[]
 
-        // Get assignents
+        // Get assignents (deprecated)
         const assignments = await getAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as assignment[]
+
+        // create custom data object for admin "current assignments" table
+        const studentsAssignmentsAndModels = JSON.stringify(createStudentsAssignmentsAndModels(students, models))
 
 
         // Typical client return
@@ -65,8 +62,7 @@ export default async function Page() {
                         modelsWithThumbnails={modelsWithThumbnails}
                         modelsNeedingThumbnails={modelsNeedingThumbnails}
                         unannotatedModels={unannotatedModels}
-                        students={students}
-                        assignments={assignments}
+                        studentsAssignmentsAndModels={studentsAssignmentsAndModels}
                     />
                 </main>
                 <Foot />

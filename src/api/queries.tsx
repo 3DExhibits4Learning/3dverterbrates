@@ -73,7 +73,7 @@ export const getAccount = async (id: string, provider: string) => {
  */
 export async function getFullModels() {
   const models = await prisma.model.findMany({
-    include: { software: true, tags: true }
+    include: { software: true, tags: true, assignment: true }
   })
   return models
 }
@@ -891,6 +891,15 @@ export const getStudentsAndAssignments = async () => {
  */
 export const getAssignments = async () => {
   return await prisma.assignment.findMany()
+}
+
+/**
+ * @function getModelsWithAssignments
+ * @description get an array of assignment objects
+ * 
+ */
+export const getModelsWithAssignments = async () => {
+  return await prisma.model.findMany({include: {assignment: true}})
 }
 
 

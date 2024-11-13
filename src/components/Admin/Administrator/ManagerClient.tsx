@@ -12,7 +12,7 @@
 import { model } from "@prisma/client";
 import { useState, createContext } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { ManagerClientProps, studentsAndAssignments } from "@/api/types";
+import { ManagerClientProps, studentsAndAssignments, studentsAssignmentsAndModels } from "@/api/types";
 import { fullModel } from "@/api/types";
 
 // Default imports
@@ -29,6 +29,8 @@ import UpdateThumbnailContainer from "./Thumbnails/UpdateThumbnailContainer";
 import UpdateModelContainer from "./Model/UpdateModelContainer";
 import DataTransferModal from "../../Shared/Modals/DataTransferModal";
 import StudentTable from "./Students/GetStudents";
+import AdminItemContainer from "./ItemContainer";
+import Assignments from "./Assignments/Assignments";
 
 // Dynamic imports
 const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
@@ -44,6 +46,7 @@ export default function ManagerClient(props: ManagerClientProps) {
     const modelsNeedingThumbnails: fullModel[] = JSON.parse(props.modelsNeedingThumbnails)
     const modelsWithThumbnails: fullModel[] = JSON.parse(props.modelsWithThumbnails)
     const unannotatedModels: fullModel[] = JSON.parse(props.unannotatedModels)
+    const studentsAssignmentsAndModels: studentsAssignmentsAndModels[] = JSON.parse(props.studentsAssignmentsAndModels)
 
     // Data transfer state variables
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -59,15 +62,17 @@ export default function ManagerClient(props: ManagerClientProps) {
         <>
             <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel={loadingLabel as string} result={result} href='/admin/management' />
             <DataTransferContext.Provider value={{ initializeDataTransferHandler, terminateDataTransferHandler }}>
+
                 {/* Main admin Accordion */}
                 <Accordion>
+
                     {/* AccordionItem holds nested "Students" accordion */}
                     <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         {/* "Students" nested accordion */}
                         <Accordion>
                             {/* Active students table */}
                             <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <StudentTable assignments={props.assignments} models={models} students={props.students as studentsAndAssignments[]}/>
+                                <StudentTable assignments={props.assignments} models={models} students={props.students as studentsAndAssignments[]} />
                             </AccordionItem>
                             {/* Add student form */}
                             <AccordionItem key='addStudent' aria-label='addStudent' title='Add' classNames={{ title: 'text-[#004C46] text-2xl' }}>
@@ -79,6 +84,25 @@ export default function ManagerClient(props: ManagerClientProps) {
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
+
+                    {/* AccordionItem holds nested "Assignments" accordion */}
+                    <AccordionItem key={'assignments'} aria-label={'assignments'} title='Assignments' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                        {/* "Assignments" nested accordion */}
+                        <Accordion>
+                            {/* Add thumbnail form */}
+                            <AccordionItem key='assignModels' aria-label={'assignModels'} title='Assign' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                <AdminItemContainer >
+                                    {/* Annotation assignment form*/}
+                                        <AnnotationAssignment students={props.students} unannotatedModels={unannotatedModels} />
+                                </AdminItemContainer>
+                            </AccordionItem>
+                            {/* Update thumbnail form */}
+                            <AccordionItem key='currentAssignments' aria-label={'currentAssignments'} title='Current' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                <Assignments studentsAssignmentsAndModels={studentsAssignmentsAndModels}/>
+                            </AccordionItem>
+                        </Accordion>
+                    </AccordionItem>
+
                     {/* AccordionItem holds nested "Models" accordion */}
                     <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         {/* "Models" nested accordion */}
@@ -97,20 +121,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
-                    {/* AccordionItem holds nested "Annotations" accordion */}
-                    <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                        {/* "Annotations" nested accordion */}
-                        <Accordion>
-                            {/* Annotation Client */}
-                            <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
-                            </AccordionItem>
-                            {/* Annotation assignment form*/}
-                            <AccordionItem key='AnnotationAssignment' aria-label={'AnnotationAssignment'} title='Assignment' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                <AnnotationAssignment students={props.students} unannotatedModels={unannotatedModels} />
-                            </AccordionItem>
-                        </Accordion>
-                    </AccordionItem>
+
                     {/* AccordionItem holds nested "Thumbnails" accordion */}
                     <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         {/* "Thumbnails" nested accordion */}
@@ -125,6 +136,18 @@ export default function ManagerClient(props: ManagerClientProps) {
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
+
+                    {/* AccordionItem holds nested "Annotations" accordion */}
+                    <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                        {/* "Annotations" nested accordion */}
+                        <Accordion>
+                            {/* Annotation Client */}
+                            <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
+                                <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
+                            </AccordionItem>
+                        </Accordion>
+                    </AccordionItem>
+
                 </Accordion>
             </DataTransferContext.Provider>
         </>

@@ -45,28 +45,29 @@ model annotations {
 }
 
 model model {
-  uid                 String        @id @db.VarChar(100)
-  spec_name           String        @db.VarChar(100)
-  spec_acquis_date    String?       @db.VarChar(20)
-  modeled_by          String        @db.VarChar(25)
-  site_ready          Boolean       @default(false)
-  pref_comm_name      String        @default("") @db.VarChar(100)
-  base_model          Boolean?      @default(true)
-  annotated           Boolean?      @default(false)
-  annotationPosition  String?       @db.VarChar(250)
-  build_process       String        @default("Photogrammetry") @db.VarChar(50)
-  thumbnail           String?       @db.VarChar(500)
-  annotator           String?       @db.VarChar(75)
-  annotatorId         String?       @db.VarChar(50) 
-  lat                 Decimal?      
-  lng                 Decimal?
-  email               String        @db.VarChar(100)
-  user                String        @db.VarChar(100)
-  annotations         annotations[]
-  software            software[]
-  tags                tags[]
-  assignment          assignment[]
-  model_annotation    model_annotation?
+  uid                   String        @id @db.VarChar(100)
+  spec_name             String        @db.VarChar(100)
+  spec_acquis_date      String?       @db.VarChar(20)
+  modeled_by            String        @db.VarChar(25)
+  site_ready            Boolean       @default(false)
+  pref_comm_name        String        @default("") @db.VarChar(100)
+  base_model            Boolean?      @default(true)
+  annotated             Boolean       @default(false)
+  annotationsApproved   Boolean       @default(false)
+  annotationPosition    String?       @db.VarChar(250)
+  build_process         String        @default("Photogrammetry") @db.VarChar(50)
+  thumbnail             String?       @db.VarChar(500)
+  annotator             String?       @db.VarChar(75)
+  annotatorId           String?       @db.VarChar(50) 
+  lat                   Decimal?      
+  lng                   Decimal?
+  email                 String        @db.VarChar(100)
+  user                  String        @db.VarChar(100)
+  annotations           annotations[]
+  software              software[]
+  tags                  tags[]
+  assignment            assignment?
+  model_annotation      model_annotation?
 }
 
 model model_annotation {
@@ -199,8 +200,9 @@ model authorized {
 
 model assignment {
   email               String      
-  uid                 String
+  uid                 String       @unique
   studentEmail        authorized   @relation(fields: [email], references: [email], onDelete: Cascade, onUpdate: Cascade, map: "assignmentFkEmail" )
+  name                String?      
   modelUid            model        @relation(fields: [uid], references: [uid], onDelete: Cascade, onUpdate: Cascade, map: "assignmentFkUid" )
 
   @@unique([email, uid])
