@@ -2,7 +2,7 @@
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Shared/Foot';
 import dynamic from 'next/dynamic';
-import { useIsClient } from "@/utils/isClient";
+import { useIsClient } from "@/functions/utils/isClient";
 
 const HomeModel = dynamic(() => import('@/components/Home/model'),
   { ssr: false });

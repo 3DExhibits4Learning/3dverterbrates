@@ -4,7 +4,7 @@
  */
 
 import { model } from "@prisma/client";
-import prisma from '@/utils/prisma'
+import prisma from '@/functions/utils/prisma'
 import { Prisma } from "@prisma/client";
 
 // Legacy export (so all the resulting imports don't need to be changed)

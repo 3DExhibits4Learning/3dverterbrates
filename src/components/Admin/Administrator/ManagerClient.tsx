@@ -12,7 +12,7 @@
 import { model } from "@prisma/client";
 import { useState, createContext } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { ManagerClientProps, studentsAndAssignments, studentsAssignmentsAndModels } from "@/api/types";
+import { ManagerClientProps, studentsAssignmentsAndModels } from "@/api/types";
 import { fullModel } from "@/api/types";
 
 // Default imports
@@ -72,7 +72,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                         <Accordion>
                             {/* Active students table */}
                             <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <StudentTable assignments={props.assignments} models={models} students={props.students as studentsAndAssignments[]} />
+                                <StudentTable studentsAssignmentsAndModels={studentsAssignmentsAndModels} />
                             </AccordionItem>
                             {/* Add student form */}
                             <AccordionItem key='addStudent' aria-label='addStudent' title='Add' classNames={{ title: 'text-[#004C46] text-2xl' }}>
@@ -93,7 +93,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                             <AccordionItem key='assignModels' aria-label={'assignModels'} title='Assign' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <AdminItemContainer >
                                     {/* Annotation assignment form*/}
-                                        <AnnotationAssignment students={props.students} unannotatedModels={unannotatedModels} />
+                                        <AnnotationAssignment students={studentsAssignmentsAndModels} unannotatedModels={unannotatedModels} />
                                 </AdminItemContainer>
                             </AccordionItem>
                             {/* Update thumbnail form */}

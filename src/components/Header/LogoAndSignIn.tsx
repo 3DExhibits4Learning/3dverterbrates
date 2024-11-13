@@ -8,7 +8,7 @@ import { NavbarContent, Button, Dropdown, DropdownTrigger, DropdownMenu, Dropdow
 import Image from "next/image"
 import { signIn, signOut, useSession, } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import {admin} from "@/utils/devAuthed"
+import {admin} from "@/functions/utils/devAuthed"
 
 export default function LogoAndSignIn() {
     const { data: session } = useSession();

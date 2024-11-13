@@ -10,9 +10,9 @@ import { useEffect, useState, useRef, LegacyRef } from 'react';
 import AnnotationModal from '@/components/Collections/AnnotationModal';
 import { setViewerWidth, annotationControl, boolRinse, addCommas, arrayFromObjects } from './SketchfabDom';
 import ModelAnnotation from './AnnotationModel';
-import { toUpperFirstLetter } from '@/utils/toUpperFirstLetter';
+import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
 import { model, model_annotation, photo_annotation } from '@prisma/client';
-import Herbarium from '@/utils/HerbariumClass';
+import Herbarium from '@/functions/utils/HerbariumClass';
 import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/api/types';
 
 const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model: model, images: GbifImageResponse[], imageTitle: string }) => {

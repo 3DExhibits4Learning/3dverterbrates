@@ -1,7 +1,7 @@
 'use client'
 
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { toUpperFirstLetter } from "@/utils/toUpperFirstLetter";
+import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter";
 import { PublishedModelProps, ModelsWithTagsAndSoftware } from "@/api/types";
 import EditModal from "./EditModal";
 import { useState } from "react";

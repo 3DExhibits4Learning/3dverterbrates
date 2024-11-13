@@ -4,7 +4,7 @@ import ModelerDash from "@/components/Admin/ModelerDash";
 import { getSpecimenWithoutPhotos, getSpecimenToModel } from "@/api/queries";
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { management, modeler } from "@/utils/devAuthed"
+import { management, modeler } from "@/functions/utils/devAuthed"
 
 export default async function Page() {
 

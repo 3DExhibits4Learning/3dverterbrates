@@ -7,11 +7,11 @@
 
 import { handlePlantIdSubmit } from '@/api/fetchFunctions';
 import { PlantIdApiResponse, PlantIdSuggestion } from '@/api/types';
-import { trimString } from '@/utils/trimString';
+import { trimString } from '@/functions/utils/trimString';
 import Header from '@/components/Header/Header';
 import React, { useState } from 'react';
 import PageWrapper from '@/components/Shared/PageWrapper';
-import { useIsClient } from '@/utils/isClient';
+import { useIsClient } from '@/functions/utils/isClient';
 import Foot from '@/components/Shared/Foot';
 
 var searchTerm: string | null;

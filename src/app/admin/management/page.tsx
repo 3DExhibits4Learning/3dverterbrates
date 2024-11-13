@@ -11,7 +11,7 @@ import Header from "@/components/Header/Header";
 import Foot from "@/components/Shared/Foot";
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { management } from "@/utils/devAuthed"
+import { management } from "@/functions/utils/devAuthed"
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
 import { getFullModels } from "@/api/queries";
 import { getStudentsAndAssignments } from "@/api/queries";
@@ -48,7 +48,7 @@ export default async function Page() {
         // Get assignents (deprecated)
         const assignments = await getAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as assignment[]
 
-        // create custom data object for admin "current assignments" table
+        // Create custom data object for admin "current assignments" table
         const studentsAssignmentsAndModels = JSON.stringify(createStudentsAssignmentsAndModels(students, models))
 
 

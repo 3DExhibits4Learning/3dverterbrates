@@ -2,7 +2,7 @@
 
 import { SetStateAction, Dispatch } from "react"
 import { model } from "@prisma/client"
-import { toUpperFirstLetter } from "@/utils/toUpperFirstLetter"
+import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 
 export default function ModelAnnotationSelect(props: { value: string, setValue: Dispatch<SetStateAction<string>>, modelAnnotations: model[] }) {
     return (

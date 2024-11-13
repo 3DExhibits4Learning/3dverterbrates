@@ -1,8 +1,8 @@
 "use client"
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 import { boolRinse, addCommas, arrayFromObjects} from './SketchfabDom';
-import { toUpperFirstLetter } from '@/utils/toUpperFirstLetter';
-import Herbarium from "@/utils/HerbariumClass";
+import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
+import Herbarium from "@/functions/utils/HerbariumClass";
 import { GbifResponse } from "@/api/types";
 import { photo_annotation } from "@prisma/client";
 

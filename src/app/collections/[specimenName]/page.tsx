@@ -12,7 +12,7 @@ import Foot from '@/components/Shared/Foot'
 import dynamic from "next/dynamic";
 import { model } from "@prisma/client";
 const Header = dynamic(() => import('@/components/Header/Header'), { ssr: false })
-const CollectionsWrapper = dynamic(() => import('@/utils/CollectionsWrapper'), { ssr: false })
+const CollectionsWrapper = dynamic(() => import('@/functions/utils/CollectionsWrapper'), { ssr: false })
 
 export default async function Page({ params }: { params: { specimenName: string } }) {
 

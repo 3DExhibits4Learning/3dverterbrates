@@ -1,4 +1,4 @@
-import { citationHandler } from "@/utils/modelAnnotations"
+import { citationHandler } from "@/functions/utils/modelAnnotations"
 
 const comments = [
     {

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { getServerSession } from 'next-auth'
 import SessionProvider from '@/components/Shared/SessionProvider'
 import { redirect } from 'next/navigation'
-import {admin} from '@/utils/devAuthed'
+import {admin} from '@/functions/utils/devAuthed'
 import { getAuthorizedUsers } from "@/api/queries";
 
 import './globals.css';

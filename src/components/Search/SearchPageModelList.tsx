@@ -1,10 +1,10 @@
 import noImage from '../../../public/noImage.png'
-import { handleImgError } from '@/utils/imageHandler'
+import { handleImgError } from '@/functions/utils/imageHandler'
 import { SyntheticEvent } from 'react'
 import { model } from '@prisma/client'
 import { fullUserSubmittal } from '@/api/types'
 import { Chip } from '@nextui-org/react'
-import { toUpperFirstLetter } from '@/utils/toUpperFirstLetter'
+import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter'
 
 type SearchPageModelListProps = {
   models: model[]

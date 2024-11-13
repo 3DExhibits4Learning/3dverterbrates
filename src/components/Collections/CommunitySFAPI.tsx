@@ -7,12 +7,12 @@
 
 import { useEffect, useState } from 'react'
 import { boolRinse, addCommas } from './SketchfabDom'
-import { toUpperFirstLetter } from '@/utils/toUpperFirstLetter'
+import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter'
 import dynamic from 'next/dynamic'
 import { Chip } from '@nextui-org/react';
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import Image from 'next/image';
-import CommunityHerbarium from '@/utils/Community3dModel';
+import CommunityHerbarium from '@/functions/utils/Community3dModel';
 import { userSubmittal } from '@prisma/client';
 import { GbifImageResponse, GbifResponse } from '@/api/types';
 

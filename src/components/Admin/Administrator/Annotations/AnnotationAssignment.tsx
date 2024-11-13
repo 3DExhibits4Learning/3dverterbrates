@@ -10,7 +10,7 @@
 
 // Imports
 import { authorized } from "@prisma/client";
-import { fullModel } from "@/api/types";
+import { fullModel, studentsAssignmentsAndModels } from "@/api/types";
 import { useState, useEffect, useContext } from "react";
 import { Button } from "@nextui-org/react";
 import { DataTransferContext } from "../ManagerClient";
@@ -19,7 +19,7 @@ import assignAnnotation from "@/functions/managerClient/assignAnnotation";
 import Select from "@/components/Shared/Form Fields/Select";
 
 // Main component
-export default function AnnotationAssignment(props: { students: authorized[], unannotatedModels: fullModel[] }) {
+export default function AnnotationAssignment(props: { students: studentsAssignmentsAndModels[], unannotatedModels: fullModel[] }) {
 
     // Data transfer context
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler

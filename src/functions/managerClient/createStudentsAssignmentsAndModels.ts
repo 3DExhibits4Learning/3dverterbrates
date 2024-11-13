@@ -15,8 +15,10 @@ export default function createStudentsAssignmentsAndModels(students: studentsAnd
             // Create an array to contain the models with same uid's of the assignments
             studentsAssignmentsAndModels[i].models = []
 
-            // Iterate through the assignments, adding the models into the array per iteration
+            // Iterate through the assignments
             for (let j in studentsAssignmentsAndModels[i].assignment) {
+                
+                // add model into the array per iteration
                 studentsAssignmentsAndModels[i].models.push(models.find(model => model.uid === studentsAssignmentsAndModels[i].assignment[j].uid))
             }
         }
