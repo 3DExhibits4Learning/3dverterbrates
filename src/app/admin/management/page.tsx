@@ -7,19 +7,19 @@
  */
 
 // Typical imports
-import Header from "@/components/Header/Header";
-import Foot from "@/components/Shared/Foot";
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { management } from "@/functions/utils/devAuthed"
-import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
+import { fullModel, studentsAndAssignments } from "@/api/types";
 import { getFullModels } from "@/api/queries";
 import { getStudentsAndAssignments } from "@/api/queries";
-import { getAssignments, getModelsWithAssignments } from "@/api/queries";
+
+// Default imports
+import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
 import serverAsyncErrorHandler from "@/functions/serverError/serverAsyncError";
-import { fullModel, studentsAndAssignments } from "@/api/types";
-import { assignment } from "@prisma/client";
 import createStudentsAssignmentsAndModels from "@/functions/managerClient/createStudentsAssignmentsAndModels";
+import Header from "@/components/Header/Header";
+import Foot from "@/components/Shared/Foot";
 
 // Main component
 export default async function Page() {
@@ -44,9 +44,6 @@ export default async function Page() {
 
         // Get students and assignments
         const students = await getStudentsAndAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as studentsAndAssignments[]
-
-        // Get assignents (deprecated)
-        const assignments = await getAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as assignment[]
 
         // Create custom data object for admin "current assignments" table
         const studentsAssignmentsAndModels = JSON.stringify(createStudentsAssignmentsAndModels(students, models))

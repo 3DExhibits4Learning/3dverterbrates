@@ -1,7 +1,7 @@
 'use client'
 
 import { Accordion, AccordionItem } from "@nextui-org/react"
-import { useEffect, useState, useRef, useDebugValue } from "react"
+import { useEffect, useState, useRef } from "react"
 import { model } from "@prisma/client"
 import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import AnnotationEntry from "./AnnotationEntry"
@@ -90,6 +90,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
             setActiveAnnotation(undefined)
             setRepositionEnabled(false)
         }
+        
         getAnnotationsObj()
 
     }, [uid, annotationSavedOrDeleted])

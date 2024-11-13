@@ -4,6 +4,8 @@
  * @fileoverview client wrapper for the administrator page; it's simply a nested <Accordion>
  * 
  * @todo add <AccordionItem> that allows administrator to mark or unmark a 3d model as annotated; or add it as a modelUpdate form field
+ * 
+ * @todo check if and what error is generated upon duplicate assignment of a model due to db constraint violation
  */
 
 'use client'
@@ -60,7 +62,10 @@ export default function ManagerClient(props: ManagerClientProps) {
 
     return (
         <>
+            {/* Data transfer (fetch or query) modal */}
             <DataTransferModal open={openModal} setOpen={setOpenModal} transferring={transferring} loadingLabel={loadingLabel as string} result={result} href='/admin/management' />
+            
+            {/* Data transfer handlers context provider */}
             <DataTransferContext.Provider value={{ initializeDataTransferHandler, terminateDataTransferHandler }}>
 
                 {/* Main admin Accordion */}
@@ -93,12 +98,12 @@ export default function ManagerClient(props: ManagerClientProps) {
                             <AccordionItem key='assignModels' aria-label={'assignModels'} title='Assign' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <AdminItemContainer >
                                     {/* Annotation assignment form*/}
-                                        <AnnotationAssignment students={studentsAssignmentsAndModels} unannotatedModels={unannotatedModels} />
+                                    <AnnotationAssignment students={studentsAssignmentsAndModels} unannotatedModels={unannotatedModels} />
                                 </AdminItemContainer>
                             </AccordionItem>
                             {/* Update thumbnail form */}
                             <AccordionItem key='currentAssignments' aria-label={'currentAssignments'} title='Current' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <Assignments studentsAssignmentsAndModels={studentsAssignmentsAndModels}/>
+                                <Assignments studentsAssignmentsAndModels={studentsAssignmentsAndModels} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>

@@ -13,7 +13,6 @@ import { studentsAssignmentsAndModels } from "@/api/types"
 export default function Assignments(props: { studentsAssignmentsAndModels: studentsAssignmentsAndModels[] }) {
 
     const sam = props.studentsAssignmentsAndModels // sam = students, assignments and models
-    console.log(sam)
 
     return (
         <section className="flex w-full items-center flex-col">

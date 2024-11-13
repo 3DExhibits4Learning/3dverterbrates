@@ -9,7 +9,6 @@
 'use client'
 
 // Imports
-import { authorized } from "@prisma/client";
 import { fullModel, studentsAssignmentsAndModels } from "@/api/types";
 import { useState, useEffect, useContext } from "react";
 import { Button } from "@nextui-org/react";
