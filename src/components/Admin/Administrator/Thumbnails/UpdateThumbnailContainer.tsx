@@ -6,9 +6,9 @@ import dynamic from "next/dynamic"
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import UpdateThumbnail from "./UpdateThumbnail"
 import { SetStateAction, Dispatch, useContext, useState } from "react"
-import updateThumbnail from "@/functions/managerClient/updateThumbnail"
+import updateThumbnail from "@/functions/client/managerClient/updateThumbnail"
 import { DataTransferContext } from "../ManagerClient"
-import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler"
+import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
 
 
 export default function UpdateThumbnailContainer(props: { modelsWithThumbnails: model[] | undefined }) {

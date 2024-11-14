@@ -492,7 +492,7 @@ export const createPhotoAnnotation = async (url: string, author: string, license
  * @description creates a database record for a 3d model photo annotation
  * 
  */
-export const updatePhotoAnnotation = async (url: string, author: string, license: string, annotator: string, annotation: string, annotation_id: string, website?: string, title?: string, photo?: Buffer | null) => {
+export const updatePhotoAnnotation = async (url: string, author: string, license: string, annotator: string, annotation: string, annotation_id: string, website?: string, title?: string) => {
 
   const updatedAnnotation = await prisma.photo_annotation.update({
     where: {
@@ -506,7 +506,6 @@ export const updatePhotoAnnotation = async (url: string, author: string, license
       annotation: annotation,
       website: website ? website : '',
       title: title ? title : '',
-      photo: photo
     }
   })
   return updatedAnnotation

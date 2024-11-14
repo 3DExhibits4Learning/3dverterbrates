@@ -6,7 +6,7 @@
 
 import { NextRequest } from "next/server"
 import { updateModelAnnotator, assignModelToStudent, unassignModelToStudent } from "@/api/queries"
-import routeHandlerErrorHandler from "@/functions/serverError/routeHandlerErrorHandler"
+import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 
 const route = 'src/app/api/admin/annotations/assign/route.tsx'
 

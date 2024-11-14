@@ -6,7 +6,7 @@
 
 // Imports
 import { readFile } from "fs/promises"
-import routeHandlerErrorHandler from "@/functions/serverError/routeHandlerErrorHandler"
+import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 
 /**
  * @function GET

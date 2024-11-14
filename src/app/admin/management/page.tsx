@@ -16,8 +16,8 @@ import { getStudentsAndAssignments } from "@/api/queries";
 
 // Default imports
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
-import serverAsyncErrorHandler from "@/functions/serverError/serverAsyncError";
-import createStudentsAssignmentsAndModels from "@/functions/managerClient/createStudentsAssignmentsAndModels";
+import serverAsyncErrorHandler from "@/functions/server/serverError/serverAsyncError";
+import createStudentsAssignmentsAndModels from "@/functions/client/managerClient/createStudentsAssignmentsAndModels";
 import Header from "@/components/Header/Header";
 import Foot from "@/components/Shared/Foot";
 

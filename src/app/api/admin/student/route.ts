@@ -6,7 +6,7 @@
 import { removeStudent, addStudent } from "@/api/queries"
 import { getAuthorizedUsers } from "@/api/queries"
 import { authorized } from "@prisma/client"
-import routeHandlerErrorHandler from "@/functions/serverError/routeHandlerErrorHandler"
+import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 
 // Route path
 const route = 'src/app/api/admin/student/route.ts'

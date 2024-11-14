@@ -1,7 +1,16 @@
 /**
  * @file src/app/api/annotations/route.tsx
+ * 
+ * @fileoverview route for annotation creation, update and delete operations; also gets first annotation position
+ * 
+ * @function GET
+ * @function POST
+ * @function PATCH
+ * @function DELETE
+ * 
  */
 
+// Importing lots of queries
 import {
     insertFirstAnnotationPosition,
     getFirstAnnotationPostion,
@@ -18,43 +27,71 @@ import {
     updateModelAnnotation,
     deleteModelAnnotation
 } from "@/api/queries"
-import { mkdir, writeFile } from "fs/promises"
-import routeHandlerErrorHandler from "@/functions/serverError/routeHandlerErrorHandler"
 
+// More imports
+import { mkdir, writeFile, unlink } from "fs/promises"
+import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
+import routeHandlerTypicalCatch from "@/functions/server/serverError/routeHandlerTypicalCatch"
+import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"
+
+// Global-scope route for console error reference
 const route = 'src/app/api/annotations/route.tsx'
 
-// GET request handler
+/**
+ * @function GET
+ * @param request http request
+ * @description gets first annotation position
+ * @returns typical response; includes first annotation postion
+ */
 export async function GET(request: Request) {
 
     // Grab searchParams
     const { searchParams } = new URL(request.url)
 
-    // Return first annotation position if it exists; typical try-catch return
+    // Return first annotation position if it exists
     try {
+
+        // Get first annotation position
         const firstAnnotationPosition = await getFirstAnnotationPostion(searchParams.get('uid') as string)
-        return Response.json({ data: 'Annotation Position retrieved', response: firstAnnotationPosition })
+            .catch((e) => routeHandlerErrorHandler(route, e.message, 'GET insertFirstAnnotationPosition()', "Couldn't get first annotation position"))
+
+        // Typical response
+        return routeHandlerTypicalResponse('Annotation Position retrieved', firstAnnotationPosition)
     }
-    catch (e: any) { return Response.json({ data: "Couldn't enter position", response: e.message }, { status: 400, statusText: "Couldn't enter position" }) }
+
+    // Typical catch
+    catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 }
 
-
-
-
-// POST request handler
+/**
+ * @function POST
+ * @param request http request
+ * @description creates new annotation
+ * @returns typical response
+ */
 export async function POST(request: Request) {
+
+    // Get formData
     const data = await request.formData()
 
-    // First annotation handler; always taxonomy and description, insert position with typical try-catch return
+    // First annotation handler
     if (data.get('index') == '1') {
-        let update
+
         try {
-            update = await insertFirstAnnotationPosition(data.get('uid') as string, data.get('position') as string)
-            return Response.json({ data: 'Annotation Created', response: update })
+
+            // Update model record with first annotation position
+            const update = await insertFirstAnnotationPosition(data.get('uid') as string, data.get('position') as string)
+                .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST insertFirstAnnotationPosition()', "Couldn't insert first annotation position"))
+
+            // Typical response
+            return routeHandlerTypicalResponse('Annotation Created', update)
         }
-        catch (e: any) { return Response.json({ data: "Couldn't enter position", response: update }, { status: 400, statusText: "Couldn't enter position" }) }
+
+        // Typical catch
+        catch (e: any) { return routeHandlerTypicalCatch(e.message) }
     }
 
-    // Else the annotation must be photo or video (or 3D model coming soon)
+    // Else the annotation must be photo, video or 3d model
     else {
 
         // Conditional based on annotationType
@@ -64,55 +101,115 @@ export async function POST(request: Request) {
             case 'video':
                 try {
 
-                    // Database annotation creation
-                    const newAnnotation = await createAnnotation(data.get('uid') as string, data.get('position') as string, data.get('url') as string, parseInt(data.get('annotation_no') as string), data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                    const newVideoAnnotation = await createVideoAnnotation(data.get('url') as string, data.get('length') as string, data.get('annotation_id') as string)
-                    return Response.json({ data: 'Annotation created', response: newAnnotation, newVideoAnnotation })
+                    // Annotation creation
+                    const newAnnotation = await createAnnotation(
+                        data.get('uid') as string,
+                        data.get('position') as string,
+                        data.get('url') as string,
+                        parseInt(data.get('annotation_no') as string),
+                        data.get('annotation_type') as string,
+                        data.get('annotation_id') as string,
+                        data.get('title') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createAnnotation()', "Couldn't create annotation"))
+
+                    // Video annotation creation
+                    const newVideoAnnotation = await createVideoAnnotation(
+                        data.get('url') as string,
+                        data.get('length') as string,
+                        data.get('annotation_id') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createVideoAnnotation()', "Couldn't create video annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation created', { newAnnotation, newVideoAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 
             // annotationType = 'video' handler
             case 'model':
                 try {
 
-                    // Database annotation creation
-                    const newAnnotation = await createAnnotation(data.get('uid') as string, data.get('position') as string, data.get('url') as string, parseInt(data.get('annotation_no') as string), data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                    const newModelAnnotation = await createModelAnnotation(data.get('modelAnnotationUid') as string, data.get('annotation') as string, data.get('annotation_id') as string)
-                    return Response.json({ data: 'Annotation created', response: newAnnotation, newModelAnnotation })
+                    // Annotation creation
+                    const newAnnotation = await createAnnotation(
+                        data.get('uid') as string,
+                        data.get('position') as string,
+                        data.get('url') as string,
+                        parseInt(data.get('annotation_no') as string),
+                        data.get('annotation_type') as string,
+                        data.get('annotation_id') as string,
+                        data.get('title') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createAnnotation()', "Couldn't create annotation"))
+
+                    // Model annotation creation
+                    const newModelAnnotation = await createModelAnnotation(
+                        data.get('modelAnnotationUid') as string,
+                        data.get('annotation') as string,
+                        data.get('annotation_id') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createModelAnnotation()', "Couldn't create model annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation created', { newAnnotation, newModelAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 
             // Default case (annotationType == 'photo')
             default:
                 try {
-                    
-                    // Get file, convert to arraybuffer, then buffer
+
+                    // Get file
                     const file = data.get('file') as File
-                    const bytes = await file.arrayBuffer().catch((e) => routeHandlerErrorHandler(route, e.message, 'file.arrayBuffer()', "Couldn't get array buffer")) as ArrayBuffer
+
+                    // Convert to arrayBuffer
+                    const bytes = await file.arrayBuffer()
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'file.arrayBuffer()', "Couldn't get array buffer")) as ArrayBuffer
+
+                    // Convert to buffer
                     const buffer = Buffer.from(bytes)
 
                     // Make the directory
-                    await mkdir(data.get('dir') as string, { recursive: true }).catch((e) => routeHandlerErrorHandler(route, e.message, 'mkdir()', "Couldn't make directory")) 
+                    await mkdir(data.get('dir') as string, { recursive: true })
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST mkdir()', "Couldn't make directory"))
 
                     //@ts-ignore - ts incorrectly thinks that writeFile() can't write buffers
-                    await writeFile(data.get('path') as string, buffer).catch((e) => routeHandlerErrorHandler(route, e.message, 'writeFile()', "Couldn't write file"))
+                    await writeFile(data.get('path') as string, buffer)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST writeFile()', "Couldn't write file"))
 
 
                     // Optional photo_annotation data initializtion
                     const website = data.get('website') ? data.get('website') : undefined
                     const title = data.get('photoTitle') ? data.get('title') : undefined
 
-                    // Database annotation creation
-                    const newAnnotation = await createAnnotation(data.get('uid') as string, data.get('position') as string, data.get('url') as string, parseInt(data.get('annotation_no') as string), data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                    const newPhotoAnnotation = await createPhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined)
+                    // Create annotation record
+                    const newAnnotation = await createAnnotation(
+                        data.get('uid') as string,
+                        data.get('position') as string,
+                        data.get('url') as string,
+                        parseInt(data.get('annotation_no') as string),
+                        data.get('annotation_type') as string,
+                        data.get('annotation_id') as string,
+                        data.get('title') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createAnnotation()', "Couldn't create annotation"))
 
-                    // Successful response returns message as the data value and response objects from prisma as the response values
-                    return Response.json({ data: 'Annotation created', response: { newAnnotation, newPhotoAnnotation } })
+                    // Create photo annotation record
+                    const newPhotoAnnotation = await createPhotoAnnotation(
+                        data.get('url') as string,
+                        data.get('author') as string,
+                        data.get('license') as string,
+                        data.get('annotator') as string,
+                        data.get('annotation') as string,
+                        data.get('annotation_id') as string,
+                        website as string | undefined,
+                        title as string | undefined)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createPhotoAnnotation()', "Couldn't create photo annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation created', { newAnnotation, newPhotoAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message }) }
+
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
         }
     }
 }
@@ -120,18 +217,33 @@ export async function POST(request: Request) {
 
 
 
-// Patch request handler
+/**
+ * @function PATCH
+ * @param request http request
+ * @description updates a 3d model annotation
+ * @returns typical response
+ */
 export async function PATCH(request: Request) {
+
+    // Get function-scope formData
     const data = await request.formData()
+        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH request.formData()', "Couldn't get FormData")) as FormData
 
     // First annotation handler; always taxonomy and description, insert position with typical try-catch return
     if (data.get('index') == '1') {
-        let update
+
         try {
-            update = await insertFirstAnnotationPosition(data.get('uid') as string, data.get('position') as string)
-            return Response.json({ data: 'Annotation Updated', response: update })
+
+            // Update first annotation position
+            const update = await insertFirstAnnotationPosition(data.get('uid') as string, data.get('position') as string)
+                .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH insertFirstAnnotationPosition()', "Couldn't insert first annotation position"))
+
+            // Typical response
+            return routeHandlerTypicalResponse('Annotation Updated', { update })
         }
-        catch (e: any) { return Response.json({ data: "Couldn't enter position", response: update }, { status: 400, statusText: "Couldn't enter position" }) }
+
+        // Typical catch
+        catch (e: any) { routeHandlerTypicalCatch(e.message) }
     }
 
     // Else the annotation must be photo or video (or 3D model coming soon)
@@ -150,25 +262,62 @@ export async function PATCH(request: Request) {
 
                         let deletion
 
-                        if (data.get('previousMedia') === 'photo') deletion = await deletePhotoAnnotation(data.get('annotation_id') as string)
-                        else deletion = await deleteModelAnnotation(data.get('annotation_id') as string)
+                        // Delete photo annotation (if it was a photo annotation)
+                        if (data.get('previousMedia') === 'photo') {
 
-                        const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
-                        const newVideoAnnotation = await createVideoAnnotation(data.get('url') as string, data.get('length') as string, data.get('annotation_id') as string)
+                            // Eliminate uploaded photo
+                            await unlink(`public${data.get('oldUrl')}`)
+                                .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH unlink()', "Couldn't delete old annotation"))
+
+                            // Delete photo annotation record
+                            deletion = await deletePhotoAnnotation(data.get('annotation_id') as string)
+                                .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deletePhotoAnnotation()', "Couldn't delete photo annotation"))
+                        }
+
+                        // Else delete the model annotation
+                        else deletion = await deleteModelAnnotation(data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deleteModelAnnotation()', "Couldn't delete model annotation"))
+
+                        // Annotation update
+                        const updatedAnnotation = await updateAnnotation(
+                            data.get('uid') as string,
+                            data.get('position') as string,
+                            data.get('annotation_type') as string,
+                            data.get('annotation_id') as string,
+                            data.get('title') as string,
+                            data.get('url') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedAnnotation()', "Couldn't update annotation"))
+
+                        // Video annotation creation
+                        const newVideoAnnotation = await createVideoAnnotation(
+                            data.get('url') as string,
+                            data.get('length') as string,
+                            data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH newVideoAnnotation()', "Couldn't update video annotation"))
 
                         // Successful response returns message as the data value and response objects from prisma as the response values
                         return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newVideoAnnotation })
                     }
 
-                    // Database annotation update
-                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
-                    const updatedVideoAnnotation = await updateVideoAnnotation(data.get('url') as string, data.get('length') as string, data.get('annotation_id') as string)
+                    // Annotation update
+                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string,
+                        data.get('position') as string, data.get('annotation_type') as string,
+                        data.get('annotation_id') as string, data.get('title') as string,
+                        data.get('url') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedAnnotation()', "Couldn't update annotation"))
 
-                    // Successful response returns message as the data value and response objects from prisma as the response values
-                    return Response.json({ data: 'Annotation updated', response: updatedAnnotation, updatedVideoAnnotation })
+                    // Video annotation update
+                    const updatedVideoAnnotation = await updateVideoAnnotation(
+                        data.get('url') as string,
+                        data.get('length') as string,
+                        data.get('annotation_id') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedVideoAnnotation()', "Couldn't update video annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation updated', { updatedAnnotation, updatedVideoAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 
             // annotationType = 'model' handler
             case 'model':
@@ -180,25 +329,63 @@ export async function PATCH(request: Request) {
 
                         let deletion
 
-                        if (data.get('previousMedia') === 'photo') deletion = await deletePhotoAnnotation(data.get('annotation_id') as string)
+                        // Delete the photo annotation (if the previous media was a photo)
+                        if (data.get('previousMedia') === 'photo') {
+
+                            // Eliminate uploaded photo
+                            await unlink(`public${data.get('oldUrl')}`)
+                                .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH unlink()', "Couldn't delete old annotation"))
+
+                            // Delete photo annotation record
+                            deletion = await deletePhotoAnnotation(data.get('annotation_id') as string)
+                                .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deletePhotoAnnotation()', "Couldn't delete photo annotation"))
+                        }
+
+                        // Or else delete the video annotation
                         else deletion = await deleteVideoAnnotation(data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deleteVideoAnnotation()', "Couldn't delete video annotation"))
 
-                        const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                        const newModelAnnotation = await createModelAnnotation(data.get('modelAnnotationUid') as string, data.get('annotation') as string, data.get('annotation_id') as string)
+                        // Annotation update
+                        const updatedAnnotation = await updateAnnotation(
+                            data.get('uid') as string,
+                            data.get('position') as string,
+                            data.get('annotation_type') as string,
+                            data.get('annotation_id') as string,
+                            data.get('title') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedAnnotation()', "Couldn't update annotation"))
 
-                        // Successful response returns message as the data value and response objects from prisma as the response values
-                        return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newModelAnnotation })
+                        // Create new model annotation
+                        const newModelAnnotation = await createModelAnnotation(
+                            data.get('modelAnnotationUid') as string,
+                            data.get('annotation') as string,
+                            data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH newModelAnnotation()', "Couldn't create new model annotation"))
+
+                        // Typical response
+                        return routeHandlerTypicalResponse('Annotation updated', { deletion, updatedAnnotation, newModelAnnotation })
                     }
 
-                    // Database annotation update
-                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string)
-                    const updatedModelAnnotation = await updateModelAnnotation(data.get('modelAnnotationUid') as string, data.get('annotation') as string, data.get('annotation_id') as string)
+                    // Annotation update
+                    const updatedAnnotation = await updateAnnotation(
+                        data.get('uid') as string,
+                        data.get('position') as string,
+                        data.get('annotation_type') as string,
+                        data.get('annotation_id') as string,
+                        data.get('title') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedAnnotation()', "Couldn't update annotation"))
 
-                    // Successful response returns message as the data value and response objects from prisma as the response values
-                    return Response.json({ data: 'Annotation updated', response: updatedAnnotation, updatedModelAnnotation })
+                    // Model annotation update
+                    const updatedModelAnnotation = await updateModelAnnotation(
+                        data.get('modelAnnotationUid') as string,
+                        data.get('annotation') as string,
+                        data.get('annotation_id') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedModelAnnotation()', "Couldn't update model annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation updated', { updatedAnnotation, updatedModelAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 
             // Default case (annotationType == 'photo')
             default:
@@ -206,15 +393,30 @@ export async function PATCH(request: Request) {
                 try {
 
                     // Optional photo_annotation data initializtion
-                    let photoBuffer
-
                     if (data.get('file')) {
-                        const file = data.get('file') as File
-                        const bytes = await file.arrayBuffer()
-                        photoBuffer = Buffer.from(bytes)
-                    }
-                    else if (data.get('mediaType') === 'url') photoBuffer = null
 
+                        // Get file
+                        const file = data.get('file') as File
+
+                        // Convert file => arrayBuffer => buffer
+                        const bytes = await file.arrayBuffer()
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH file.arrayBuffer()', "Couldn't get array buffer")) as ArrayBuffer
+                        const photoBuffer = Buffer.from(bytes)
+
+                        // Make directory
+                        await mkdir(data.get('dir') as string, { recursive: true })
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH mkdir()', "Couldn't make directory"))
+
+                        //@ts-ignore - ts incorreclty thinks buffers can't be written with writeFile()
+                        await writeFile(data.get('path') as string, photoBuffer)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH writeFile()', "Couldn't write file"))
+                    }
+
+                    // Eliminate previous photo uploaded to data storage container if it exists
+                    if (data.get('oldUrl') && data.get('file')) await unlink(`public${data.get('oldUrl')}`)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH unlink()', "Couldn't delete old annotation"))
+
+                    // Remaining optional fields
                     const website = data.get('website') ? data.get('website') : undefined
                     const title = data.get('photoTitle') ? data.get('title') : undefined
 
@@ -223,24 +425,69 @@ export async function PATCH(request: Request) {
 
                         let deletion
 
+                        // Delete video annotation (if it was a video)
                         if (data.get('previousMedia') === 'video') deletion = await deleteVideoAnnotation(data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deleteVideoAnnotation()', "Couldn't delete previous video annotation"))
+
+                        // Or else delete the model annotation
                         else deletion = await deleteModelAnnotation(data.get('annotation_id') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH deleteModelAnnotation()', "Couldn't delete previous model annotation"))
 
-                        const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
-                        const newPhotoAnnotation = await createPhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined, photoBuffer)
+                        // Update annotation
+                        const updatedAnnotation = await updateAnnotation(
+                            data.get('uid') as string,
+                            data.get('position') as string,
+                            data.get('annotation_type') as string,
+                            data.get('annotation_id') as string,
+                            data.get('title') as string,
+                            data.get('url') as string)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatedAnnotation()', "Couldn't update annotation"))
 
-                        return Response.json({ data: 'Annotation updated', response: deletion, updatedAnnotation, newPhotoAnnotation })
+                        // Create new photo annotation
+                        const newPhotoAnnotation = await createPhotoAnnotation(
+                            data.get('url') as string,
+                            data.get('author') as string,
+                            data.get('license') as string,
+                            data.get('annotator') as string,
+                            data.get('annotation') as string,
+                            data.get('annotation_id') as string,
+                            website as string | undefined,
+                            title as string | undefined)
+                            .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH createPhotoAnnotation()', "Couldn't create photo annotation"))
+
+                        // Typical response
+                        return routeHandlerTypicalResponse('Annotation updated', { deletion, updatedAnnotation, newPhotoAnnotation })
                     }
 
-                    // Database annotation update
-                    const updatedAnnotation = await updateAnnotation(data.get('uid') as string, data.get('position') as string, data.get('annotation_type') as string, data.get('annotation_id') as string, data.get('title') as string, data.get('url') as string)
-                    const updatedPhotoAnnotation = await updatePhotoAnnotation(data.get('url') as string, data.get('author') as string, data.get('license') as string, data.get('annotator') as string, data.get('annotation') as string, data.get('annotation_id') as string, website as string | undefined, title as string | undefined, photoBuffer)
+                    // Update annotation
+                    const updatedAnnotation = await updateAnnotation(
+                        data.get('uid') as string,
+                        data.get('position') as string,
+                        data.get('annotation_type') as string,
+                        data.get('annotation_id') as string,
+                        data.get('title') as string,
+                        data.get('url') as string)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updateAnnotation()', "Couldn't update annotation"))
 
-                    // Successful response returns message as the data value and response objects from prisma as the response values
-                    return Response.json({ data: 'Annotation updated', response: { updatedAnnotation, updatedPhotoAnnotation } })
+                    // Update photo annotation
+                    console.log('URL: ', data.get('url'))
+                    const updatedPhotoAnnotation = await updatePhotoAnnotation(
+                        data.get('url') as string,
+                        data.get('author') as string,
+                        data.get('license') as string,
+                        data.get('annotator') as string,
+                        data.get('annotation') as string,
+                        data.get('annotation_id') as string,
+                        website as string | undefined,
+                        title as string | undefined)
+                        .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updatePhotoAnnotation()', "Couldn't update photo annotation"))
+
+                    // Typical response
+                    return routeHandlerTypicalResponse('Annotation updated', { updatedAnnotation, updatedPhotoAnnotation })
                 }
-                // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-                catch (e: any) { return Response.json({ data: 'Prisma Error', response: e.message }, { status: 400, statusText: 'Prisma Error' }) }
+
+                // Typical catch
+                catch (e: any) { return routeHandlerTypicalCatch(e.message) }
         }
     }
 }
@@ -248,18 +495,32 @@ export async function PATCH(request: Request) {
 
 
 
-// Delete request handler
+/**
+ * @function DELETE
+ * @param request http request
+ * @description deletes a 3d model annotation
+ * @returns typical response
+ */
 export async function DELETE(request: Request) {
 
     try {
+
         // Get request data
         const data = await request.json()
+            .catch((e) => routeHandlerErrorHandler(route, e.message, 'DELETE request.json()', "Couln't get request body json"))
+
+        // Eliminate previous photo uploaded to data storage container if it exists
+        if (data.oldUrl) await unlink(`public${data.oldUrl}`)
+            .catch((e) => routeHandlerErrorHandler(route, e.message, 'DELETE unlink()', "Couldn't delete old annotation"))
 
         // Delete the annotation, typical return 
-        const deletion = deleteAnnotation(data.annotation_id, data.uid)
-        return Response.json({ data: 'Annotation deleted', response: deletion })
+        const deletion = await deleteAnnotation(data.annotation_id, data.uid)
+            .catch((e) => routeHandlerErrorHandler(route, e.message, 'DELETE deleteAnnotation()', "Couldn't delete annotation"))
+
+        // Typical response
+        return routeHandlerTypicalResponse('Annotation deleted', deletion)
 
     }
     // Catch returns 400 status with 3rd party error message as response value; data and statusText are generic error messages
-    catch (e: any) { return Response.json({ data: 'Deletion Error', response: e.message }, { status: 400, statusText: 'Deletion Error' }) }
+    catch (e: any) { return routeHandlerTypicalCatch(e.message) }
 }

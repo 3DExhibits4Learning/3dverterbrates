@@ -4,8 +4,8 @@ import TextInput from "@/components/Shared/Form Fields/TextInput"
 import { useState, useEffect, useContext } from "react"
 import { Button } from "@nextui-org/react"
 import { DataTransferContext } from "../ManagerClient"
-import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler"
-import addStudent from "@/functions/managerClient/addStudent"
+import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
+import addStudent from "@/functions/client/managerClient/addStudent"
 
 export default function AddStudent() {
 

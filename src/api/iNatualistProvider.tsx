@@ -14,7 +14,6 @@ function iNaturalistProvider(options: OAuthUserConfig<Record<string, any>>): OAu
             async request(context) {
 
                 // iNaturalist JWT's expire after 24 hours
-
                 const getExpirationDate = () => {
                     const date = new Date()
                     const dateWithoutMilleseconds = Math.round(date.getTime() / 1000)
@@ -23,7 +22,6 @@ function iNaturalistProvider(options: OAuthUserConfig<Record<string, any>>): OAu
                 }
 
                 // POST request object to send to older api
-
                 const credentials = {
                     'client_id': process.env.INATURALIST_ID,
                     'client_secret': process.env.INATURALIST_SECRET,
@@ -33,7 +31,6 @@ function iNaturalistProvider(options: OAuthUserConfig<Record<string, any>>): OAu
                 }
 
                 // Fetching oauth access_token from older api
-
                 const old_token = await fetch("https://www.inaturalist.org/oauth/token", {
                     method: 'POST',
                     headers: {
@@ -45,7 +42,6 @@ function iNaturalistProvider(options: OAuthUserConfig<Record<string, any>>): OAu
                     .then(json => json.access_token)
 
                 // Fetching oauth api_token from newer api
-
                 const tokens : TokenSet = {
                     access_token: await fetch("https://www.inaturalist.org/users/api_token", {
                         headers: {

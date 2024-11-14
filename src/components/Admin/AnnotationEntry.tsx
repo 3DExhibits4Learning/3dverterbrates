@@ -14,25 +14,9 @@ import Annotation from "./Annotation"
 import dynamic from "next/dynamic"
 const ModelViewer = dynamic(() => import('../Shared/ModelViewer'), { ssr: false })
 import ModelAnnotationSelect from "./AnnotationFields/ModelAnnotationSelect"
+import { AnnotationEntryProps } from "@/api/types"
 
-const AnnotationEntry = (props: {
-    activeAnnotation?: photo_annotation | video_annotation | model_annotation | undefined,
-    specimenName?: string,
-    annotationType?: string,
-    index: number,
-    new: boolean,
-    setActiveAnnotationIndex: Dispatch<SetStateAction<number | 'new' | undefined>>,
-    position: string | undefined,
-    uid: string | undefined
-    activeAnnotationPosition?: string
-    setRepositionEnabled: Dispatch<SetStateAction<boolean>>
-    repositionEnabled: boolean
-    setPosition3D?: Dispatch<SetStateAction<string | undefined>>
-    activeAnnotationTitle?: string
-    setAnnotationSavedOrDeleted: Dispatch<SetStateAction<boolean>>
-    annotationSavedOrDeleted: boolean
-    annotationModels: model[]
-}) => {
+const AnnotationEntry = (props: AnnotationEntryProps) => {
 
     /***** Variable declarations *****/
 
@@ -81,140 +65,6 @@ const AnnotationEntry = (props: {
         const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${annotation.url.slice(5)}` : `public${annotation.url}`
         setImageSource(`/api/nfs?path=${path}`)
     }
-
-    // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
-    useEffect(() => {
-
-        // Populate fields if there is an annotation pulled from the db
-        if (props.annotationType && props.activeAnnotation) {
-            const annotation = props.activeAnnotation as photo_annotation
-            setAnnotationType(props.annotationType)
-            setUrl(annotation.url)
-            setAuthor(annotation.author)
-            setLicense(annotation.license)
-            setPhotoTitle(annotation.title as string)
-            setWebsite(annotation.website as string)
-            setAnnotation(annotation.annotation)
-            setAnnotationTitle(props.activeAnnotationTitle)
-
-            // Set states for photo annotation
-            if (props.annotationType == 'photo') {
-                setMediaType('upload')
-                setVideoChecked(false)
-                setPhotoChecked(true)
-                setImgSrc()
-            }
-            // Settings for video annotations
-            else if (props.annotationType == 'video') {
-                setMediaType('url')
-                setVideoChecked(true)
-                setPhotoChecked(false)
-                setLength((props.activeAnnotation as video_annotation).length as string)
-                setImageSource((props.activeAnnotation as video_annotation).url)
-            }
-            else if (props.annotationType == 'model') {
-                setMediaType('model')
-                setModelAnnotationUid((props.activeAnnotation as model_annotation).uid as string)
-                setModelChecked(true)
-                setVideoChecked(false)
-                setPhotoChecked(false)
-            }
-        }
-    }, [props.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
-
-    // This effect enables the 'save changes' button for databased annoations if all required fields are populated and at least one differs from the data from the database
-    // For new annotations, it enables the 'create annotation' button if all required fields are populated
-    useEffect(() => {
-
-        if (props.index == 1) {
-            if (props.position) {
-                setCreateDisabled(false)
-                setSaveDisabled(false)
-            }
-            else {
-                setSaveDisabled(true)
-                setCreateDisabled(true)
-            }
-        }
-
-        // Conditional based on radio button states
-        else if (annotationType == 'photo') {
-
-            switch (props.new) {
-
-                // For databased annotations
-                case false:
-                    const caseAnnotation = props.activeAnnotation as photo_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
-                    const currentValues = [annotationTitle, author, license, annotation]
-                    const originalOptionalValues = [caseAnnotation.title, caseAnnotation.website]
-                    const optionalValues = [photoTitle, website]
-
-                    if (currentValues.every(allTruthy) && !allSame(originalValues, currentValues) || currentValues.every(allTruthy) && file || isNewPosition && currentValues.every(allTruthy) || currentValues.every(allTruthy) && !allSame(originalOptionalValues, optionalValues)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                // New annotations are the default
-                default:
-                    const valueArray = [annotationTitle, file, author, license, annotation, props.position]
-
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
-            }
-        }
-
-        // Conditional based on radio button states
-        else if (annotationType == 'video') {
-
-            switch (props.new) {
-
-                case false:
-                    const caseAnnotation = props.activeAnnotation as video_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
-                    const currentValues = [annotationTitle, url, length]
-
-                    if (currentValues.every(allTruthy) && !allSame(originalValues, currentValues) || isNewPosition && currentValues.every(allTruthy)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                default:
-                    const valueArray = [annotationTitle, url, length, props.position]
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
-            }
-        }
-
-        // Conditional based on radio button states
-        else if (annotationType == 'model') {
-
-            switch (props.new) {
-
-                case false:
-                    const caseAnnotation = props.activeAnnotation as model_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
-                    const currentValues = [annotationTitle, modelAnnotationUid, annotation]
-
-                    if (currentValues.every(allTruthy) && !allSame(originalValues, currentValues) || isNewPosition && currentValues.every(allTruthy)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                default:
-                    const valueArray = [annotationTitle, modelAnnotationUid, annotation, props.position]
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
-            }
-        }
-
-    }, [annotationTitle, props.position, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This is the createAnnotaion function, calling the appropriate route handler when the 'save changes' button is depressed
     const createAnnotation = async () => {
@@ -338,6 +188,7 @@ const AnnotationEntry = (props: {
         // Handler for annotations with non-hosted photos
         else {
 
+            // Media transition data
             if (props.annotationType !== annotationType) {
                 data.set('mediaTransition', 'true')
                 data.set('previousMedia', props.annotationType as string)
@@ -371,7 +222,7 @@ const AnnotationEntry = (props: {
                     data.set('author', author)
                     data.set('license', license)
                     data.set('annotation', annotation)
-                    data.set('annotator', 'Kat Lim')
+                    data.set('annotator', '') // NEEDS TO BE DELETED THROUGH TO QUERY
                     if (photoTitle) data.set('photoTitle', photoTitle)
                     if (website) data.set('website', website)
             }
@@ -379,16 +230,24 @@ const AnnotationEntry = (props: {
             // Shared data (url was formerly the foreign key)
             // Note that the url is the url necessary from the collections page; also note the old path must be inlcuded for deletion; also note that a new id is not generated for update
             data.set('annotation_id', (props.activeAnnotation as photo_annotation | video_annotation).annotation_id)
+            data.set('specimenName', props.specimenName as string)
 
-            if (!file || mediaType === 'url') data.set('url', url)
-            else {
-                data.set('specimenName', props.specimenName as string)
-                data.set('url', '')
+            // Set relevant form data if there is a new photo file
+            if (file) {
+                const photo = file as File
+                const annotation = props.activeAnnotation as photo_annotation
+                data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}`)
+                data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}/${photo.name}`)
+                data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}/${photo.name}`)
+                data.set('file', photo)
+                if (props.annotationType === 'photo') data.set('oldUrl', (props.activeAnnotation as photo_annotation).url)
             }
+
+            // Else if the databased annotation is a photo, the url should be the same
+            else if (props.annotationType === 'photo') data.set('url', (props.activeAnnotation as photo_annotation).url)
 
             // Route handler data
             data.set('mediaType', mediaType as string)
-            if (file) data.set('file', file as File)
 
             // Open transfer modal and set spinner
             setTransferModalOpen(true)
@@ -401,6 +260,7 @@ const AnnotationEntry = (props: {
             }).then(res => res.json()).then(json => {
                 setResult(json.data)
                 setTransferring(false)
+                if (process.env.NODE_ENV === 'development') console.log(json.response)
             })
         }
     }
@@ -408,10 +268,11 @@ const AnnotationEntry = (props: {
     // Delete annotation function
     const deleteAnnotation = async () => {
 
-        // fetch obj
+        // request body
         const requestObj = {
             annotation_id: props.activeAnnotation?.annotation_id,
             modelUid: props.uid,
+            oldUrl: props.annotationType === 'photo' ? (props.activeAnnotation as photo_annotation).url : ''
         }
 
         // Open transfer modal and set spinner
@@ -442,10 +303,159 @@ const AnnotationEntry = (props: {
 
     }, [props.new, annotationType, mediaType, url, props.activeAnnotation, props.index, file, imageSource])
 
+    // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
+    useEffect(() => {
+
+        // Populate fields if there is an annotation pulled from the db
+        if (props.annotationType && props.activeAnnotation) {
+
+            // Set states for photo annotation
+            if (props.annotationType == 'photo') {
+
+                const annotation = props.activeAnnotation as photo_annotation
+
+                setAnnotationType(props.annotationType)
+                setUrl(annotation.url)
+                setAuthor(annotation.author)
+                setLicense(annotation.license)
+                setPhotoTitle(annotation.title as string)
+                setWebsite(annotation.website as string)
+                setAnnotation(annotation.annotation)
+                setAnnotationTitle(props.activeAnnotationTitle)
+                setImgSrc()
+
+                setMediaType('upload')
+                setPhotoChecked(true)
+                setVideoChecked(false)
+                setModelChecked(false)
+            }
+
+            // Set for video annotation
+            else if (props.annotationType == 'video') {
+
+                setLength((props.activeAnnotation as video_annotation).length as string)
+                setImageSource((props.activeAnnotation as video_annotation).url)
+
+                setMediaType('url')
+                setVideoChecked(true)
+                setPhotoChecked(false)
+                setModelChecked(false)
+            }
+
+            // Set states for model annotation
+            else if (props.annotationType == 'model') {
+
+                setModelAnnotationUid((props.activeAnnotation as model_annotation).uid as string)
+                setAnnotation((props.activeAnnotation as model_annotation).annotation)
+
+                setMediaType('model')
+                setModelChecked(true)
+                setVideoChecked(false)
+                setPhotoChecked(false)
+            }
+        }
+    }, [props.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // This effect enables the 'save changes' button for databased annoations if all required fields are populated and at least one differs from the data from the database
+    // For new annotations, it enables the 'create annotation' button if all required fields are populated
+    useEffect(() => {
+
+        if (props.index == 1) {
+            if (props.position) {
+                setCreateDisabled(false)
+                setSaveDisabled(false)
+            }
+            else {
+                setSaveDisabled(true)
+                setCreateDisabled(true)
+            }
+        }
+
+        // Conditional based on radio button states
+        else if (annotationType == 'photo') {
+
+            switch (props.new) {
+
+                // For databased annotations
+                case false:
+
+                    const caseAnnotation = props.activeAnnotation as photo_annotation
+                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
+                    const currentValues = [annotationTitle, author, license, annotation]
+                    const originalOptionalValues = [caseAnnotation.title, caseAnnotation.website]
+                    const optionalValues = [photoTitle, website]
+
+                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || file || isNewPosition || !allSame(originalOptionalValues, optionalValues))) setSaveDisabled(false)
+                    else setSaveDisabled(true)
+
+                    break
+
+                // New annotations are the default
+                default:
+                    const valueArray = [annotationTitle, file, author, license, annotation, props.position]
+
+                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
+                    else setCreateDisabled(true)
+
+                    break
+            }
+        }
+
+        // Conditional based on radio button states
+        else if (annotationType == 'video') {
+
+            switch (props.new) {
+
+                case false:
+                    const caseAnnotation = props.activeAnnotation as video_annotation
+                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
+                    const currentValues = [annotationTitle, url, length]
+
+                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
+                    else setSaveDisabled(true)
+
+                    break
+
+                default:
+                    const valueArray = [annotationTitle, url, length, props.position]
+                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
+                    else setCreateDisabled(true)
+
+                    break
+            }
+        }
+
+        // Conditional based on radio button states
+        else if (annotationType == 'model') {
+
+            switch (props.new) {
+
+                case false:
+                    const caseAnnotation = props.activeAnnotation as model_annotation
+                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
+                    const currentValues = [annotationTitle, modelAnnotationUid, annotation]
+
+                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
+                    else setSaveDisabled(true)
+
+                    break
+
+                default:
+                    const valueArray = [annotationTitle, modelAnnotationUid, annotation, props.position]
+                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
+                    else setCreateDisabled(true)
+
+                    break
+            }
+        }
+
+    }, [annotationTitle, props.position, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid]) // eslint-disable-line react-hooks/exhaustive-deps
+
     if (props.index == 1) {
         return (
             <>
                 <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel={loadingLabel as string} closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
+                
                 <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <p className="text-2xl mb-4 mt-2 ml-12">Annotation {props.index} <span className="ml-8">(This annotation is always taxonomy and description)</span></p>
                     <section className="flex justify-between mt-4 mb-8">
@@ -469,6 +479,7 @@ const AnnotationEntry = (props: {
             </>
         )
     }
+
     else {
         return (
             <>
@@ -500,7 +511,6 @@ const AnnotationEntry = (props: {
                         </section>
                     </section>
                     <section className="w-full h-fit">
-
                         {
                             annotationType == 'photo' && mediaType && mediaType === 'upload' &&
                             <section className="mt-4 w-full h-fit">
@@ -532,7 +542,6 @@ const AnnotationEntry = (props: {
                                 </div>
                             </section>
                         }
-
                         {
                             annotationType == 'video' &&
                             <section className="flex my-12">

@@ -3,7 +3,7 @@
  * @fileoverview contains the type definitions of the API calls used throughout the application.
  */
 
-import { Dispatch} from "react";
+import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
@@ -39,7 +39,7 @@ export interface iNatSpecimenLeader {
   user: string;
 };
 
-export interface GbifResponse{
+export interface GbifResponse {
   usageKey?: number;
   scientificName?: string;
   canonicalName?: string;
@@ -66,7 +66,7 @@ export interface GbifResponse{
   alternatives?: any[];
 };
 
-export interface GbifMediaResponse{
+export interface GbifMediaResponse {
   offset: number;
   limit: number;
   endOfRecords: boolean;
@@ -74,7 +74,7 @@ export interface GbifMediaResponse{
   results: any[];
 };
 
-export interface GbifImageResponse{
+export interface GbifImageResponse {
   author: string | null;
   license?: string;
   year?: number;
@@ -83,7 +83,7 @@ export interface GbifImageResponse{
   url: string;
 };
 
-export interface GbifProfile{
+export interface GbifProfile {
   habitat?: string;
   extinct?: string;
   terrestrial?: string;
@@ -91,14 +91,14 @@ export interface GbifProfile{
   freshwater?: string;
 };
 
-export interface SpeciesListInfo{
+export interface SpeciesListInfo {
   name: string;
   imgUrl: string;
   photoBy: string;
   license: string;
 };
 
-export interface CommonNameInfo{
+export interface CommonNameInfo {
   id: number;
   rank: string;
   iconic_taxon_id: number;
@@ -114,7 +114,7 @@ export interface CommonNameInfo{
   preferred_common_name: string;
 };
 
-export interface PlantIdSuggestion{
+export interface PlantIdSuggestion {
   id: number;
   plant_name: string;
   probability: number;
@@ -154,7 +154,7 @@ export interface PlantIdSuggestion{
   };
 };
 
-export interface PlantIdApiResponseSuccess{
+export interface PlantIdApiResponseSuccess {
   id: number;
   custom_id: null;
   meta_data: {
@@ -179,7 +179,7 @@ export interface PlantIdApiResponseSuccess{
   is_plant_probability: number;
 };
 
-export interface PlantIdApiResponseError{
+export interface PlantIdApiResponseError {
   id: number;
   custom_id: null;
   meta_data: {
@@ -208,21 +208,21 @@ export type PlantIdApiResponse = PlantIdApiResponseSuccess | PlantIdApiResponseE
 
 
 export interface Models {
-    confirmation: string;
-    email: string;
-    artistName: string;
-    speciesName: string;
-    createdWithMobile: boolean;
-    methodology: string;
-    modeluid: string;
-    dateTime: Date;
-    status: string;
-    thumbnail: string
-    lat: number
-    lng: number
+  confirmation: string;
+  email: string;
+  artistName: string;
+  speciesName: string;
+  createdWithMobile: boolean;
+  methodology: string;
+  modeluid: string;
+  dateTime: Date;
+  status: string;
+  thumbnail: string
+  lat: number
+  lng: number
 }[]
 
-export interface ModelsWithTagsAndSoftware extends Models{
+export interface ModelsWithTagsAndSoftware extends Models {
   software: string[]
   tags: string
 
@@ -237,7 +237,7 @@ export interface PublishedModelProps {
   setActiveSpeciesName: Dispatch<SetStateAction<string>>
 }
 
-export interface userUpdateProps{
+export interface userUpdateProps {
   confirmation: string,
   artist: string,
   species: string,
@@ -255,25 +255,25 @@ export interface PendingModelProps {
   setActiveSpeciesName: Dispatch<SetStateAction<string>>
 }
 
-export interface modelerInsertion{
+export interface modelerInsertion {
   requestType: 'specimenEntry' | 'imageEntry' | 'modelEntry',
   species: string
   acquisitionDate: string
 }
 
-export interface specimenInsertion extends modelerInsertion{
+export interface specimenInsertion extends modelerInsertion {
   procurer: string,
   isLocal: boolean,
   genus: string
 }
 
-export interface imageInsertion extends modelerInsertion{
+export interface imageInsertion extends modelerInsertion {
   imagedBy: string,
   imagedDate: string,
   numberOfImages: string
 }
 
-export interface modelInsertion extends modelerInsertion{
+export interface modelInsertion extends modelerInsertion {
   commonName: string,
   uid: string,
   modeler: string,
@@ -286,18 +286,18 @@ export interface fullAnnotation extends annotations {
   annotation: photo_annotation | video_annotation | model_annotation
 }
 
-export interface fullUserSubmittal extends userSubmittal{
+export interface fullUserSubmittal extends userSubmittal {
   tags: string[],
   software: string[]
 }
 
-export interface fullModel extends model{
-  software:software[]
-  tags:tags[]
+export interface fullModel extends model {
+  software: software[]
+  tags: tags[]
   assignment: assignment
 }
 
-export interface ManagerClientProps{ 
+export interface ManagerClientProps {
   models: string
   modelsWithThumbnails: string
   modelsNeedingThumbnails: string
@@ -305,27 +305,47 @@ export interface ManagerClientProps{
   studentsAssignmentsAndModels: string
 }
 
-export interface UpdateModelFormContainerProps{
-  models:fullModel[] | undefined
+export interface UpdateModelFormContainerProps {
+  models: fullModel[] | undefined
 }
 
-export interface UpdateModelFormProps{
-  model:fullModel
+export interface UpdateModelFormProps {
+  model: fullModel
 }
 
-export interface studentsAndAssignments extends authorized{
+export interface studentsAndAssignments extends authorized {
   assignment: assignment[]
 }
 
-export interface studentsAssignmentsAndModels extends studentsAndAssignments{
+export interface studentsAssignmentsAndModels extends studentsAndAssignments {
   models: model[]
 }
 
-export interface assignmentsWithName extends assignment{
+export interface assignmentsWithName extends assignment {
   name: string
 }
 
-export interface modelsAndAssignments extends model{
+export interface modelsAndAssignments extends model {
   assignment: assignment[]
 }
+
+export interface AnnotationEntryProps {
+  activeAnnotation?: photo_annotation | video_annotation | model_annotation | undefined,
+  specimenName?: string,
+  annotationType?: string,
+  index: number,
+  new: boolean,
+  setActiveAnnotationIndex: Dispatch<SetStateAction<number | 'new' | undefined>>,
+  position: string | undefined,
+  uid: string | undefined
+  activeAnnotationPosition?: string
+  setRepositionEnabled: Dispatch<SetStateAction<boolean>>
+  repositionEnabled: boolean
+  setPosition3D?: Dispatch<SetStateAction<string | undefined>>
+  activeAnnotationTitle?: string
+  setAnnotationSavedOrDeleted: Dispatch<SetStateAction<boolean>>
+  annotationSavedOrDeleted: boolean
+  annotationModels: model[]
+}
+
 

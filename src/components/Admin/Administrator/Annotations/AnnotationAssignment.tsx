@@ -13,8 +13,8 @@ import { fullModel, studentsAssignmentsAndModels } from "@/api/types";
 import { useState, useEffect, useContext } from "react";
 import { Button } from "@nextui-org/react";
 import { DataTransferContext } from "../ManagerClient";
-import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
-import assignAnnotation from "@/functions/managerClient/assignAnnotation";
+import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler";
+import assignAnnotation from "@/functions/client/managerClient/assignAnnotation";
 import Select from "@/components/Shared/Form Fields/Select";
 
 // Main component

@@ -6,8 +6,8 @@ import dynamic from "next/dynamic";
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import { Button } from "@nextui-org/react";
 import { SetStateAction, Dispatch, useState } from "react";
-import dataTransferHandler from "@/functions/dataTransfer/dataTransferHandler";
-import addThumbnail from "@/functions/managerClient/addThumbnail";
+import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler";
+import addThumbnail from "@/functions/client/managerClient/addThumbnail";
 import { useContext } from "react";
 import { DataTransferContext } from "../ManagerClient";
 

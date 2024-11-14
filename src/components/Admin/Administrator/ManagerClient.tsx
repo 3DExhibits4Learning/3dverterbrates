@@ -20,8 +20,8 @@ import { fullModel } from "@/api/types";
 // Default imports
 import AnnotationClient from "../AnnotationClient";
 import AnnotationAssignment from "./Annotations/AnnotationAssignment";
-import initializeDataTransfer from "@/functions/dataTransfer/initializeDataTransfer";
-import terminateDataTransfer from "@/functions/dataTransfer/terminateDataTransfer";
+import initializeDataTransfer from "@/functions/client/dataTransfer/initializeDataTransfer";
+import terminateDataTransfer from "@/functions/client/dataTransfer/terminateDataTransfer";
 import RemoveStudent from "./Students/RemoveStudent";
 import AddStudent from "./Students/AddStudent";
 import dynamic from "next/dynamic";
