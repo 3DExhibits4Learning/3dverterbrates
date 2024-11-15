@@ -148,7 +148,12 @@ export default function ManagerClient(props: ManagerClientProps) {
                         <Accordion>
                             {/* Annotation Client */}
                             <AccordionItem key='AnnotateModel' aria-label={'AnnotateModel'} title='Models' classNames={{ title: 'text-[ #004C46] text-2xl' }}>
-                                <AnnotationClient modelsToAnnotate={models.filter(model => model.base_model)} annotationModels={models.filter(model => !model.base_model)} />
+                                <AnnotationClient 
+                                modelsToAnnotate={models.filter(model => model.base_model)} 
+                                annotationModels={models.filter(model => !model.base_model)}
+                                admin={props.admin} 
+                                students={studentsAssignmentsAndModels}
+                                />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>

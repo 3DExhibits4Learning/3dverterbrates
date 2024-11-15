@@ -16,6 +16,7 @@ import { DataTransferContext } from "../ManagerClient";
 import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler";
 import assignAnnotation from "@/functions/client/managerClient/assignAnnotation";
 import Select from "@/components/Shared/Form Fields/Select";
+import StudentSelect from "../Students/SelectStudents";
 
 // Main component
 export default function AnnotationAssignment(props: { students: studentsAssignmentsAndModels[], unannotatedModels: fullModel[] }) {
@@ -37,8 +38,8 @@ export default function AnnotationAssignment(props: { students: studentsAssignme
 
     // Set name and email states
     const setNameAndEmailStates = (name: string, email: string) => {
-        setEmail(email)
         setStudent(name)
+        setEmail(email)
     }
 
     // Annotation assign (or unassign) handler
@@ -64,22 +65,7 @@ export default function AnnotationAssignment(props: { students: studentsAssignme
                 <Select value={assignmentUid} setValue={setAssignmentUid} models={props.unannotatedModels} title='Select Model' />
             </section>
 
-            <section className="flex flex-col w-1/2 mt-8">
-                <p className="text-xl font-medium">Select Student</p>
-                <select
-                    onChange={(e) => setNameAndEmailStates(e.target.value.slice(0, -18), e.target.value.slice(-18)) /* Email string is expected to be 18 characters long*/}
-                    className={`w-4/5 min-w-[300px] max-w-[500px] rounded-xl mb-4 dark:bg-[#27272a] dark:hover:bg-[#3E3E47] h-[42px] px-4 text-[14px] outline-[#004C46]`}
-                >
-                    <option hidden key={'defaultStudentOption'} value='select'>Select a student</option>
-
-                    {
-                        props.students.map((student, index) =>
-                            <option key={index} value={`${student.name}${student.email}`}>{`${student.name}\u00A0\u00A0-\u00A0\u00A0(${student.email})`}</option>
-                        )
-                    }
-
-                </select>
-            </section>
+            <StudentSelect setNameAndEmailStates={setNameAndEmailStates} students={props.students}/>
 
         </section>
 

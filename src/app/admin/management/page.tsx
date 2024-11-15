@@ -9,10 +9,10 @@
 // Typical imports
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { management } from "@/functions/utils/devAuthed"
 import { fullModel, studentsAndAssignments } from "@/api/types";
-import { getFullModels } from "@/api/queries";
-import { getStudentsAndAssignments } from "@/api/queries";
+import { getFullModels, getStudentsAndAssignments } from "@/api/queries";
+import { authorized } from "@prisma/client";
+import { getAuthorizedUsers } from "@/api/queries";
 
 // Default imports
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
@@ -29,9 +29,12 @@ export default async function Page() {
         // Get session
         const session = await getServerSession(authOptions).catch((e) => serverAsyncErrorHandler(e.message, "Couldn't get session"))
 
-        // Management auth redirect
+        // Get authorized users
+        const authorizedUsers = await getAuthorizedUsers().catch((e) => serverAsyncErrorHandler(e.message, "Couldn't get authorized users")) as authorized[]
+
+        // Authorized user redirect
         const email = session?.user?.email as string
-        if (!management.includes(email)) return <h1>NOT AUTHORIZED</h1>
+        if (!authorizedUsers.find(user => user.email === email && user.role === 'admin')) return <h1>NOT AUTHORIZED</h1>
 
         // Get all 3D models
         const models = await getFullModels().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get 3D Models from database")) as fullModel[]
@@ -48,7 +51,6 @@ export default async function Page() {
         // Create custom data object for admin "current assignments" table
         const studentsAssignmentsAndModels = JSON.stringify(createStudentsAssignmentsAndModels(students, models))
 
-
         // Typical client return
         return (
             <>
@@ -60,6 +62,7 @@ export default async function Page() {
                         modelsNeedingThumbnails={modelsNeedingThumbnails}
                         unannotatedModels={unannotatedModels}
                         studentsAssignmentsAndModels={studentsAssignmentsAndModels}
+                        admin={true}
                     />
                 </main>
                 <Foot />

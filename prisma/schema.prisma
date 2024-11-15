@@ -89,8 +89,7 @@ model photo_annotation {
   license       String      @db.VarChar(75)
   annotator     String      @db.VarChar(25)
   annotation    String      @db.VarChar(4000)
-  annotation_id String      @id @db.VarChar(36)
-  photo         Bytes?       
+  annotation_id String      @id @db.VarChar(36)     
   annotations   annotations @relation(fields: [annotation_id], references: [annotation_id], onDelete: Cascade, map: "photoFk1")
 }
 

@@ -2,7 +2,6 @@
  * @file src/app/api/annotations/route.tsx
  * 
  * @fileoverview route for annotation creation, update and delete operations; also gets first annotation position
- * 
  * @function GET
  * @function POST
  * @function PATCH
@@ -28,8 +27,14 @@ import {
     deleteModelAnnotation
 } from "@/api/queries"
 
-// More imports
+// Typical imports
 import { mkdir, writeFile, unlink } from "fs/promises"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getAuthorizedUsers } from "@/api/queries"
+import { authorized } from "@prisma/client"
+
+// Default imports
 import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 import routeHandlerTypicalCatch from "@/functions/server/serverError/routeHandlerTypicalCatch"
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"
@@ -70,6 +75,16 @@ export async function GET(request: Request) {
  * @returns typical response
  */
 export async function POST(request: Request) {
+
+    // Get session (mainly just for name, quick auth check while we're here)
+    const session = await getServerSession(authOptions).catch((e) => routeHandlerErrorHandler(route, e.message, 'POST getServerSession', "Couldn't get session"))
+
+    // Get authorized users
+    const authorizedUsers = await getAuthorizedUsers().catch((e) => routeHandlerErrorHandler(route, e.message, 'POST getAuthorizedUsers', "Couldn't get authorized users")) as authorized[]
+
+    // Authorized user redirect
+    const email = session?.user?.email as string
+    if (!authorizedUsers.find(user => user.email === email)) return <h1>NOT AUTHORIZED</h1>
 
     // Get formData
     const data = await request.formData()
@@ -197,7 +212,7 @@ export async function POST(request: Request) {
                         data.get('url') as string,
                         data.get('author') as string,
                         data.get('license') as string,
-                        data.get('annotator') as string,
+                        session.user.name ? session.user.name : 'student',
                         data.get('annotation') as string,
                         data.get('annotation_id') as string,
                         website as string | undefined,
@@ -214,9 +229,6 @@ export async function POST(request: Request) {
     }
 }
 
-
-
-
 /**
  * @function PATCH
  * @param request http request
@@ -224,6 +236,16 @@ export async function POST(request: Request) {
  * @returns typical response
  */
 export async function PATCH(request: Request) {
+
+    // Get session (mainly just for name, quick auth check while we're here)
+    const session = await getServerSession(authOptions).catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH getServerSession', "Couldn't get session"))
+
+    // Get authorized users
+    const authorizedUsers = await getAuthorizedUsers().catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH getAuthorizedUsers', "Couldn't get authorized users")) as authorized[]
+
+    // Authorized user redirect
+    const email = session?.user?.email as string
+    if (!authorizedUsers.find(user => user.email === email)) return <h1>NOT AUTHORIZED</h1>
 
     // Get function-scope formData
     const data = await request.formData()
@@ -448,7 +470,7 @@ export async function PATCH(request: Request) {
                             data.get('url') as string,
                             data.get('author') as string,
                             data.get('license') as string,
-                            data.get('annotator') as string,
+                            session.user.name ? session.user.name : 'student',
                             data.get('annotation') as string,
                             data.get('annotation_id') as string,
                             website as string | undefined,
@@ -470,12 +492,11 @@ export async function PATCH(request: Request) {
                         .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH updateAnnotation()', "Couldn't update annotation"))
 
                     // Update photo annotation
-                    console.log('URL: ', data.get('url'))
                     const updatedPhotoAnnotation = await updatePhotoAnnotation(
                         data.get('url') as string,
                         data.get('author') as string,
                         data.get('license') as string,
-                        data.get('annotator') as string,
+                        session.user.name ? session.user.name : 'student',
                         data.get('annotation') as string,
                         data.get('annotation_id') as string,
                         website as string | undefined,
@@ -491,9 +512,6 @@ export async function PATCH(request: Request) {
         }
     }
 }
-
-
-
 
 /**
  * @function DELETE

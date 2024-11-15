@@ -1,3 +1,13 @@
+/**
+ * @file src/components/Admin/AnnotationEntry.tsx
+ * 
+ * @fileoverview interface for annotation CRUD operations
+ * 
+ * @todo extract and export create, update, delete and setImgSrc functions
+ * @todo create functions/wrappers to set group states in useEffect()
+ * @todo convert data transfer states to context
+ */
+
 'use client'
 
 import { useState, useEffect, SetStateAction, Dispatch } from "react"
@@ -124,7 +134,6 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                     data.set('author', author)
                     data.set('license', license)
                     data.set('annotation', annotation)
-                    data.set('annotator', '')
                     if (photoTitle) data.set('photoTitle', photoTitle)
                     if (website) data.set('website', website)
             }
@@ -155,7 +164,6 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }).then(res => res.json()).then(json => {
                 setResult(json.data)
                 setTransferring(false)
-                if (process.env.NODE_ENV === 'development') console.log(json.response)
             })
         }
     }
@@ -203,26 +211,24 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             // Set relevant data based on annotationType
             switch (annotationType) {
 
+                // Video_annotation table data
                 case 'video':
-                    // Video_annotation table data
                     data.set('length', length)
 
                     break
 
+                // Model_annotation table data
                 case 'model':
-                    // Model_annotation table data
                     data.set('modelAnnotationUid', modelAnnotationUid as string)
                     data.set('annotation', annotation)
 
                     break
 
+                // Photo_annotation table data
                 default:
-
-                    // Photo_annotation table data
                     data.set('author', author)
                     data.set('license', license)
                     data.set('annotation', annotation)
-                    data.set('annotator', '') // NEEDS TO BE DELETED THROUGH TO QUERY
                     if (photoTitle) data.set('photoTitle', photoTitle)
                     if (website) data.set('website', website)
             }
@@ -360,18 +366,23 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // For new annotations, it enables the 'create annotation' button if all required fields are populated
     useEffect(() => {
 
+        // For first annotation (always tax and description)
         if (props.index == 1) {
+
+            // Enable button if an annotation position has been selected
             if (props.position) {
                 setCreateDisabled(false)
                 setSaveDisabled(false)
             }
+
+            // Else disbale it
             else {
                 setSaveDisabled(true)
                 setCreateDisabled(true)
             }
         }
 
-        // Conditional based on radio button states
+        // Conditional based on radio button state
         else if (annotationType == 'photo') {
 
             switch (props.new) {
@@ -379,12 +390,18 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 // For databased annotations
                 case false:
 
+                    // Type assertion for brevity
                     const caseAnnotation = props.activeAnnotation as photo_annotation
+
+                    // Required value arrays for comparison
                     const originalValues = [props.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
                     const currentValues = [annotationTitle, author, license, annotation]
+
+                    // Optional value arrays for comparison
                     const originalOptionalValues = [caseAnnotation.title, caseAnnotation.website]
                     const optionalValues = [photoTitle, website]
 
+                    // If all required fields are populated and: they are different from the original, there is a new file, there is a new annotation position, or optional values have changed, enable "save changes"
                     if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || file || isNewPosition || !allSame(originalOptionalValues, optionalValues))) setSaveDisabled(false)
                     else setSaveDisabled(true)
 
@@ -392,8 +409,11 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
                 // New annotations are the default
                 default:
+
+                    // Required fields
                     const valueArray = [annotationTitle, file, author, license, annotation, props.position]
 
+                    // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
                     else setCreateDisabled(true)
 
@@ -401,23 +421,30 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }
         }
 
-        // Conditional based on radio button states
+        // Conditional based on radio button state
         else if (annotationType == 'video') {
 
             switch (props.new) {
 
                 case false:
+
+                    // Type assertion, required value arrays
                     const caseAnnotation = props.activeAnnotation as video_annotation
                     const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
                     const currentValues = [annotationTitle, url, length]
 
+                    // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
                     if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
                     else setSaveDisabled(true)
 
                     break
 
                 default:
+
+                    // Required fields
                     const valueArray = [annotationTitle, url, length, props.position]
+
+                    // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
                     else setCreateDisabled(true)
 
@@ -431,17 +458,24 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             switch (props.new) {
 
                 case false:
+
+                    // Type assertion, required value arrays
                     const caseAnnotation = props.activeAnnotation as model_annotation
                     const originalValues = [props.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
                     const currentValues = [annotationTitle, modelAnnotationUid, annotation]
 
+                    // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
                     if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
                     else setSaveDisabled(true)
 
                     break
 
                 default:
+
+                    // Required fields
                     const valueArray = [annotationTitle, modelAnnotationUid, annotation, props.position]
+
+                    // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
                     else setCreateDisabled(true)
 
@@ -455,7 +489,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         return (
             <>
                 <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel={loadingLabel as string} closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
-                
+
                 <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <p className="text-2xl mb-4 mt-2 ml-12">Annotation {props.index} <span className="ml-8">(This annotation is always taxonomy and description)</span></p>
                     <section className="flex justify-between mt-4 mb-8">

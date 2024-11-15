@@ -469,19 +469,18 @@ export const updateAnnotation = async (uid: string, position: string, annotation
  * @description creates a database record for a 3d model photo annotation
  * 
  */
-export const createPhotoAnnotation = async (url: string, author: string, license: string, annotator: string, annotation: string, annotation_id: string, website?: string, title?: string, photo?: Buffer | null) => {
+export const createPhotoAnnotation = async (url: string, author: string, license: string, annotator: string, annotation: string, annotation_id: string, website?: string, title?: string) => {
 
   const newAnnotation = await prisma.photo_annotation.create({
     data: {
       url: url,
       author: author,
       license: license,
-      annotator: annotator,
+      annotator: annotator ,
       annotation_id: annotation_id,
       annotation: annotation,
       website: website ? website : '',
       title: title ? title : '',
-      photo: photo
     }
   })
   return newAnnotation
@@ -901,4 +900,21 @@ export const getModelsWithAssignments = async () => {
   return await prisma.model.findMany({include: {assignment: true}})
 }
 
+/**
+ * @function approveAnnotations
+ * @description approve 3d model annotations
+ * 
+ */
+
+export const approveAnnotations = async (uid: string) => {
+return await prisma.model.update({where: {uid: uid}, data: {annotationsApproved: true}})
+}
+/**
+ * @function unapproveAnnotations
+ * @description unapprove 3d model annotations
+ * 
+ */
+export const unapproveAnnotations = async (uid: string) => {
+  return await prisma.model.update({where: {uid: uid}, data: {annotationsApproved: false}})
+  }
 

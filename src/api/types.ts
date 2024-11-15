@@ -303,6 +303,7 @@ export interface ManagerClientProps {
   modelsNeedingThumbnails: string
   unannotatedModels: string
   studentsAssignmentsAndModels: string
+  admin: boolean
 }
 
 export interface UpdateModelFormContainerProps {
