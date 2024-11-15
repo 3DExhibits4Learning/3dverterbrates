@@ -12,7 +12,7 @@ import Foot from '@/components/Shared/Foot'
 import dynamic from "next/dynamic";
 import { model } from "@prisma/client";
 const Header = dynamic(() => import('@/components/Header/Header'), { ssr: false })
-const CollectionsWrapper = dynamic(() => import('@/functions/utils/CollectionsWrapper'), { ssr: false })
+const CollectionsWrapper = dynamic(() => import('@/components/Collections/CollectionsWrapper'), { ssr: false })
 
 export default async function Page({ params }: { params: { specimenName: string } }) {
 
@@ -29,17 +29,16 @@ export default async function Page({ params }: { params: { specimenName: string 
   promises.push(fetchSpecimenGbifInfo(params.specimenName), getModel(decodedSpecimenName))
 
   await Promise.all(promises).then(results => {
-    gMatch = results[0] as { hasInfo: boolean; data?: GbifResponse },
-    _3dmodel = results[1] as model[],
-    images = fetchHSCImages(params.specimenName)
-    noModelData = { title: 'Images from the Cal Poly Humboldt Vascular Plant Herbarium', images: images }
-  })
+    
+    gMatch = results[0] as { hasInfo: boolean; data?: GbifResponse }
+    _3dmodel = results[1] as model[]
 
-  // Fetch general GBIF images if the HSC (CPH Vascular plant herbarium) doens't have any for the search specimen
-  if (!images.length && gMatch.hasInfo) {
-    images = await fetchGbifImages(gMatch.data.usageKey, gMatch.data.rank)
-    noModelData = { title: 'Images from the Global Biodiversity Information Facility', images: images }
-  }
+    if (gMatch.hasInfo) return fetchGbifImages(gMatch.data.usageKey, gMatch.data.rank)
+  })
+    .then(res => {
+      images = res
+      noModelData = { title: 'Images from the Cal Poly Humboldt Vascular Plant Herbarium', images: images }
+    })
 
   // If there is a 3d model for the searched specimen or image data for the specimen searched, continue
   if (_3dmodel.length || images) { }

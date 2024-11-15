@@ -9,7 +9,7 @@ export default function createStudentsAssignmentsAndModels(students: studentsAnd
     // Iterate the copy
     for (let i in studentsAssignmentsAndModels) {
 
-        // If the student has one or more assignments
+        // If the student has any assignments
         if (studentsAssignmentsAndModels[i].assignment.length) {
 
             // Create an array to contain the models with same uid's of the assignments

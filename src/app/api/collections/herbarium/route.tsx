@@ -1,4 +1,4 @@
-import { getSoftwares, getImageSet } from '@/api/queries'
+import { getSoftwares } from '@/api/queries'
 import { fetchGbifProfile, fetchGbifVernacularNames, fetchWikiSummary, fetchHSCImages } from "@/api/fetchFunctions";
 
 export async function GET(request: Request) {
@@ -15,7 +15,6 @@ export async function GET(request: Request) {
         const promises = [
             fetchGbifVernacularNames(usageKey),
             getSoftwares(uid),
-            getImageSet(uid),
             fetchGbifProfile(usageKey),
             fetchWikiSummary(specimenName),
         ]

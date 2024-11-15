@@ -2,24 +2,22 @@
 
 import { GbifImageResponse, GbifMediaResponse, GbifProfile } from "@/api/types"
 import ModelAnnotations from "./ModelAnnotationsClass"
-import { software, image_set, model, annotations, photo_annotation, model_annotation } from "@prisma/client"
+import { software, model, annotations, photo_annotation, model_annotation } from "@prisma/client"
 
 export default class Herbarium {
 
   commonNames: string[]
   wikiSummary: any
   software: software[]
-  image_set: image_set[]
   images: GbifImageResponse[]
   annotations: ModelAnnotations
   model: model
   profile: GbifProfile
   imageSectionTitle: string
 
-  private constructor(commonNames: string[], software: software[], image_set: image_set[], images: GbifImageResponse[], profile: GbifProfile, wikiSummary: any, imageSectionTitle: string, model: model, annotations: ModelAnnotations) {
+  private constructor(commonNames: string[], software: software[], images: GbifImageResponse[], profile: GbifProfile, wikiSummary: any, imageSectionTitle: string, model: model, annotations: ModelAnnotations) {
     this.commonNames = commonNames
     this.software = software
-    this.image_set = image_set
     this.images = images
     this.annotations = annotations
     this.model = model
@@ -45,7 +43,7 @@ export default class Herbarium {
       annotations = res[1]
     })
 
-    return new Herbarium(data[0], data[1], data[2], images, data[3], data[4], title, model, annotations)
+    return new Herbarium(data[0], data[1], images, data[2], data[3], title, model, annotations)
   }
 
   getAnnotator() {

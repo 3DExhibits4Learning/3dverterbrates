@@ -1,4 +1,7 @@
 /**
+ * 
+ * @deprecated
+ * 
  * @file src\components\Admin\Administrator\Annotations\AnnotationAssignment.tsx
  * 
  * @fileoverview client component interface for administrators to assign 3D models to students for annotation

@@ -10,7 +10,7 @@ import Inaturalist from '@/components/Collections/iNaturalist'
 import dynamic from 'next/dynamic'
 import CommunitySFAPI from '@/components/Collections/CommunitySFAPI'
 import CommunityModelWithoutGmatch from '@/components/Collections/CommunityWithoutGmatch';
-import { isMobileOrTablet } from './isMobile';
+import { isMobileOrTablet } from '../../functions/utils/isMobile';
 const SketchfabApi = dynamic(() => import('@/components/Collections/SketchFabAPI'), { ssr: false })
 import { model, userSubmittal } from '@prisma/client';
 import { GbifResponse, GbifImageResponse } from '@/api/types';
@@ -29,7 +29,7 @@ export default function MainWrap(props: {
   var modelHeight = isMobileOrTablet() ? "calc(100vh - 160px)" : "calc(100vh - 104.67px)"
 
   const [isSelected, setIsSelected] = useState(true)
-  const [scaleSelected, setScaleSelected] = useState(false)
+  //const [scaleSelected, setScaleSelected] = useState(false)
   const [viewWidthInPx, setViewWidthInPx] = useState(window.outerWidth)
   const [viewportHeightInPx, setViewportHeightInPx] = useState(window.outerHeight + 200)
   const [swiperHeight, setSwiperHeight] = useState(window.outerHeight - 96)
@@ -75,7 +75,7 @@ export default function MainWrap(props: {
   return <>
 
     {
-      !!props.model.length &&
+      !!props.model.length && props.gMatch.hasInfo && 
       <>
         <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
           <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>

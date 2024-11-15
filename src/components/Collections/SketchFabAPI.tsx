@@ -1,6 +1,9 @@
 /**
  * @file SketchFabAPI.tsx
  * @fileoverview Client component which renders the 3D models and annotations.
+ * 
+ * @todo extract jsx sections as individual components
+ * @todo extract stand alone functions
  */
 
 "use client";
@@ -31,11 +34,9 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   const sRef = useRef<Herbarium>()
   const modelViewer = useRef<HTMLIFrameElement>()
   const annotationDiv = useRef<HTMLDivElement>()
-  const material = useRef<any>()
 
   const annotationSwitch = document.getElementById("annotationSwitch")
   const annotationSwitchMobile = document.getElementById("annotationSwitchMobileHidden")
-  //const scaleSwitch = document.getElementById("scaleSwitch")
 
   const successObj = {
     success: (api: any) => {
@@ -69,15 +70,6 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
     annotationControl(api, annotations, (event.target as HTMLInputElement).checked)
   }
 
-  // Experimental Scale Listener
-  // const scaleSwitchListener = (event: Event) => {
-  //   material.current.channels.Opacity.enable = true;
-  //   material.current.channels.Opacity.type = 'alphaBlend';
-  //   material.current.channels.Opacity.factor = (event.target as HTMLInputElement).checked ? 1 : 0
-  //   api.setMaterial(material.current, function () {
-  //   })
-  // }
-
   // This effect initializes the sketchfab client and instantiates the specimen:Herbarium object; it also ensures the page begins from the top upon load
   useEffect(() => {
 
@@ -97,7 +89,9 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
       sRef.current = await Herbarium.model(props.gMatch.data?.usageKey as number, props.model, props.images, props.imageTitle)
       setS(sRef.current)
       setAnnotations(sRef.current.annotations.annotations)
+      console.log(sRef.current.software)
     }
+
     instantiateHerbarium()
 
     document.body.scrollTop = document.documentElement.scrollTop = 0;
@@ -107,18 +101,6 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   useEffect(() => {
 
     if (s && annotations && api) {
-      
-      // For Experimental Scale - strategy should be switched from opacity control to api.show/api.hide
-
-      // api.getSceneGraph(function (err: any, result: any) {
-      //   // get the id from that log
-      //   console.log(result)
-      // })
-
-      // api.getMaterialList((err: any, materials: any) => {
-      //   material.current = materials[1];
-      //     (scaleSwitch as HTMLInputElement).addEventListener('change', scaleSwitchListener)
-      // })
       
       // Create the first annotation if it exists
       if (s.model.annotationPosition) {
@@ -165,14 +147,11 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   // This effect sets the imgSrc if necessary upon change of annotation index
   useEffect(() => {
 
-    if (!!index && annotations && annotations[index - 1].annotation_type == 'photo' && annotations && (annotations[index - 1].annotation as photo_annotation)?.photo) {
-      const base64String = Buffer.from((annotations[index - 1].annotation as photo_annotation).photo as Buffer).toString('base64');
-      const dataUrl = `data:image/jpeg;base64,${base64String}`
-      setImgSrc(dataUrl)
+    if (!!index && annotations && annotations[index - 1].annotation_type == 'photo') {
+      const path = `public${annotations[index - 1].url}`
+      setImgSrc(`/api/nfs?path=${path}`)
     }
-    else if (!!index && annotations) {
-      setImgSrc(annotations[index - 1].url as string)
-    }
+
   }, [index]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -234,7 +213,6 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
                     <div className='w-[65%] py-[20px] justify-center items-center text-center'>
                       <p>Build method: {s.model.build_process}</p>
                       <p>Created with: {arrayFromObjects(s.software)}</p>
-                      {/* <p>Images: {s.image_set[0].no_of_images}</p> */}
                       <p>Modeler: {s.model.modeled_by}</p>
                       <p>Annotator: {s.getAnnotator()}</p>
                     </div>

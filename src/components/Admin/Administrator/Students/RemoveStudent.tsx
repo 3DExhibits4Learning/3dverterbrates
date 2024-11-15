@@ -24,7 +24,7 @@ export default function RemoveStudent() {
     }, [email])
 
     return (
-        <section className="flex justify-center">
+        <section className="flex justify-center mb-16">
             <div className="flex bg-[#D5CB9F] flex-col w-1/2 rounded-xl border border-[#004C46] py-8">
                 <section className="ml-12 flex-col">
                     <TextInput value={email} setValue={setEmail} title='Email' />

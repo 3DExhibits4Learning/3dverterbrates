@@ -16,8 +16,7 @@ export default function StudentTable(props: { studentsAssignmentsAndModels: stud
 
     return (
         <section className="flex w-full items-center flex-col">
-            <p className="text-3xl font-medium mb-4">Active Students</p>
-            <div className="flex w-1/2 rounded-lg overflow-hidden mb-12">
+            <div className="flex w-1/2 rounded-lg overflow-hidden mb-16">
                 <table className="w-full bg-[#D5CB9F]">
                     <tr>
                         <th className="text-xl border-b border-[#004C46] border-r py-4">Name</th>
