@@ -1,7 +1,7 @@
 'use client'
 
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { specimenWithImageSet } from "@/api/interface";
+import { specimenWithImageSet } from "@/interface/interface";
 
 export default function SpecimenToPhotograph(props: { unphotographedSpecimen: specimenWithImageSet[]}) {
     return(

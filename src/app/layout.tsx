@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import SessionProvider from '@/components/Shared/SessionProvider'
 import { redirect } from 'next/navigation'
 import {admin} from '@/functions/utils/devAuthed'
-import { getAuthorizedUsers } from "@/api/queries";
+import { getAuthorizedUsers } from "@/functions/server/queries";
 
 import './globals.css';
 

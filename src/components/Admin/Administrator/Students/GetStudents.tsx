@@ -8,7 +8,7 @@
 
 'use client'
 
-import { studentsAssignmentsAndModels } from "@/api/interface"
+import { studentsAssignmentsAndModels } from "@/interface/interface"
 
 export default function StudentTable(props: { studentsAssignmentsAndModels: studentsAssignmentsAndModels[] }) {
 

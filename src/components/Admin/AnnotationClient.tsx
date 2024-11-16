@@ -13,7 +13,7 @@
 import { Accordion, AccordionItem } from "@nextui-org/react"
 import { useEffect, useState, useRef, useContext } from "react"
 import { model } from "@prisma/client"
-import { fullAnnotation, studentsAssignmentsAndModels } from "@/api/interface"
+import { fullAnnotation, studentsAssignmentsAndModels } from "@/interface/interface"
 import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import { Button } from "@nextui-org/react"
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client"

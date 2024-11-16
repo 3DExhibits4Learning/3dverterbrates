@@ -1,4 +1,4 @@
-import { getPublishedUserSubmittals, getSubmittalSoftware, getSubmittalTags } from "@/api/queries"
+import { getPublishedUserSubmittals, getSubmittalSoftware, getSubmittalTags } from "@/functions/server/queries"
 
 export async function GET(request: Request) {
 

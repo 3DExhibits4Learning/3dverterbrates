@@ -1,6 +1,6 @@
 'use client'
 
-import { studentsAssignmentsAndModels } from "@/api/interface"
+import { studentsAssignmentsAndModels } from "@/interface/interface"
 
 export default function StudentSelect(props:{setNameAndEmailStates: Function, students: studentsAssignmentsAndModels[]}) {
     return (

@@ -25,13 +25,13 @@ import {
     createModelAnnotation,
     updateModelAnnotation,
     deleteModelAnnotation
-} from "@/api/queries"
+} from "@/functions/server/queries"
 
 // Typical imports
 import { mkdir, writeFile, unlink } from "fs/promises"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { getAuthorizedUsers } from "@/api/queries"
+import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
 
 // Default imports

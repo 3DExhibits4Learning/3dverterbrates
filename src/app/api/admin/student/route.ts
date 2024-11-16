@@ -3,8 +3,8 @@
  */
 
 // Imports
-import { removeStudent, addStudent } from "@/api/queries"
-import { getAuthorizedUsers } from "@/api/queries"
+import { removeStudent, addStudent } from "@/functions/server/queries"
+import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
 import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 

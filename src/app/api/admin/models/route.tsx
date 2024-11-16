@@ -1,4 +1,4 @@
-import { getFullModels } from "@/api/queries"
+import { getFullModels } from "@/functions/server/queries"
 
 export async function GET() {
     try {

@@ -11,7 +11,7 @@
 import { Button } from "@nextui-org/react";
 import { useState } from "react";
 import Select from "@/components/Shared/Form Fields/Select";
-import { fullModel } from "@/api/interface";
+import { fullModel } from "@/interface/interface";
 import deleteModel from "@/functions/client/managerClient/deleteModel";
 import { useContext } from "react";
 import { DataTransferContext } from "../ManagerClient";

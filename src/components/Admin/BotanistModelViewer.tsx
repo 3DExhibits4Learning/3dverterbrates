@@ -2,7 +2,7 @@
 
 import Sketchfab from '@sketchfab/viewer-api';
 import { MutableRefObject, useEffect, useRef, Dispatch, SetStateAction, forwardRef, ForwardedRef, useState } from 'react';
-import { fullAnnotation } from '@/api/interface';
+import { fullAnnotation } from '@/interface/interface';
 
 const BotanistModelViewer = forwardRef((props: {
     uid: string,

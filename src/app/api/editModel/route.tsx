@@ -1,4 +1,4 @@
-import { prismaClient } from "@/api/queries";
+import { prismaClient } from "@/functions/server/queries";
 
 const prisma = prismaClient()
 

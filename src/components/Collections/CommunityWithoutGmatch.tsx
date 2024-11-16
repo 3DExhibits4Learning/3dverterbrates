@@ -1,6 +1,6 @@
 'use client'
 
-import { fullUserSubmittal } from "@/api/interface"
+import { fullUserSubmittal } from "@/interface/interface"
 import { Divider } from "@nextui-org/react"
 import { userSubmittal } from "@prisma/client"
 import dynamic from "next/dynamic"

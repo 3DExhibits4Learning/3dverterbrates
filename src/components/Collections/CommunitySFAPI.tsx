@@ -14,7 +14,7 @@ const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'))
 import Image from 'next/image';
 import CommunityHerbarium from '@/functions/utils/Community3dModel';
 import { userSubmittal } from '@prisma/client';
-import { GbifImageResponse, GbifResponse } from '@/api/interface';
+import { GbifImageResponse, GbifResponse } from '@/interface/interface';
 
 const CommunitySFAPI = (props: { model: userSubmittal, gMatch: { hasInfo: boolean, data?: GbifResponse }, images: GbifImageResponse[], imageTitle: string }) => {
 

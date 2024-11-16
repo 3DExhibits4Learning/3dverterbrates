@@ -1,6 +1,6 @@
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { updateThumbUrl } from '@/api/queries'
+import { updateThumbUrl } from '@/functions/server/queries'
 
 export async function POST(request: Request) {
 

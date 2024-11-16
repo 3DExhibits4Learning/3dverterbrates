@@ -1,6 +1,6 @@
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join } from 'path'
-import { updateThumbUrl, getModelThumbnail } from '@/api/queries'
+import { updateThumbUrl, getModelThumbnail } from '@/functions/server/queries'
 
 export async function POST(request: Request) {
 

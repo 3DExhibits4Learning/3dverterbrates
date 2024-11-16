@@ -4,9 +4,9 @@ import GoogleProvider from "next-auth/providers/google"
 import EmailProvider from "next-auth/providers/email";
 import { Adapter } from "next-auth/adapters";
 import { SessionStrategy } from "next-auth";
-import iNaturalistProvider from "@/api/iNatualistProvider";
-import SketchfabProvider from "@/api/sketchfabProvider";
-import { prismaClient } from "@/api/queries";
+import iNaturalistProvider from "@/providers/iNatualistProvider";
+import SketchfabProvider from "@/providers/sketchfabProvider";
+import { prismaClient } from "@/functions/server/queries";
 
 const prisma = prismaClient()
 

@@ -4,8 +4,8 @@
  * In this context, a "common name" query is any search not matching a species of genus.
  */
 
-import { fetchCommonNameInfo } from "@/api/fetchFunctions";
-import { CommonNameInfo, SiteReadyModels } from "@/api/interface";
+import { fetchCommonNameInfo } from "@/functions/server/fetchFunctions";
+import { CommonNameInfo, SiteReadyModels } from "@/interface/interface";
 
 import CommonNameList from "@/components/CommonName/CommonNameList";
 import dynamic from "next/dynamic";

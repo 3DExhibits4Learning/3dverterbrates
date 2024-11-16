@@ -1,4 +1,4 @@
-import { getPublishedUserSubmittalsBySpecies } from "@/api/queries";
+import { getPublishedUserSubmittalsBySpecies } from "@/functions/server/queries";
 
 export async function GET(request: Request) {
 

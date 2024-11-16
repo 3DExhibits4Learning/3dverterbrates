@@ -3,10 +3,10 @@
 import { useState, Dispatch, SetStateAction, useEffect } from "react"
 import dynamic from "next/dynamic"
 const UpdateModelForm = dynamic(() => import("@/components/ModelSubmit/UpdateModelForm"))
-import { UpdateModelFormContainerProps } from "@/api/interface"
+import { UpdateModelFormContainerProps } from "@/interface/interface"
 import Select from "@/components/Shared/Form Fields/Select"
 import { model } from "@prisma/client"
-import { fullModel } from "@/api/interface"
+import { fullModel } from "@/interface/interface"
 
 export default function UpdateModelContainer(props: UpdateModelFormContainerProps) {
 

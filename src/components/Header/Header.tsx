@@ -21,7 +21,7 @@ import MobileModelOptions from "./MobileModelOptions"
 import { MobileSearch } from "./MobileSearch"
 import MobileMenuOptions from "./MobileMenuOptions"
 import windowMethods from "./WindowMethods"
-import { SearchHeaderProps } from "@/api/interface"
+import { SearchHeaderProps } from "@/interface/interface"
 
 const Header = (props: SearchHeaderProps) => {
 

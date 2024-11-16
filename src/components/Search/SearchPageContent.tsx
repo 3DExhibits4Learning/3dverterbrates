@@ -8,7 +8,7 @@
 import { useEffect, useState, useRef } from "react"
 import SearchPageModelList from "./SearchPageModelList"
 import SubHeader from "./SubHeader"
-import { fullUserSubmittal } from "@/api/interface"
+import { fullUserSubmittal } from "@/interface/interface"
 import { model } from "@prisma/client"
 
 const getUniqueModelers = (models: model[]): string[] => {

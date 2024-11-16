@@ -1,4 +1,4 @@
-import { getAllSiteReadyModels } from "@/api/queries"
+import { getAllSiteReadyModels } from "@/functions/server/queries"
 
 // Returns all SiteReadyModels
 export async function GET(request: Request) {

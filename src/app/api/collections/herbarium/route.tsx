@@ -1,5 +1,5 @@
-import { getSoftwares } from '@/api/queries'
-import { fetchGbifProfile, fetchGbifVernacularNames, fetchWikiSummary, fetchHSCImages } from "@/api/fetchFunctions";
+import { getSoftwares } from '@/functions/server/queries'
+import { fetchGbifProfile, fetchGbifVernacularNames, fetchWikiSummary, fetchHSCImages } from "@/functions/server/fetchFunctions";
 
 export async function GET(request: Request) {
     try {

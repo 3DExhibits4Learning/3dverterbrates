@@ -24,7 +24,7 @@ import Annotation from "./Annotation"
 import dynamic from "next/dynamic"
 const ModelViewer = dynamic(() => import('../Shared/ModelViewer'), { ssr: false })
 import ModelAnnotationSelect from "./AnnotationFields/ModelAnnotationSelect"
-import { AnnotationEntryProps } from "@/api/interface"
+import { AnnotationEntryProps } from "@/interface/interface"
 
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 

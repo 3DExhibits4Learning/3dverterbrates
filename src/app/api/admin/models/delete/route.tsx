@@ -5,7 +5,7 @@
  * @todo delete 3d model from sketchfab
  */
 
-import { deleteAllAnnotations, delete3DModel } from "@/api/queries";
+import { deleteAllAnnotations, delete3DModel } from "@/functions/server/queries";
 
 export async function DELETE(request: Request) {
 

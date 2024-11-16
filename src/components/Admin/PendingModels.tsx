@@ -1,6 +1,6 @@
 'use client'
 
-import { Models } from "@/api/interface"
+import { Models } from "@/interface/interface"
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import { Button } from "@nextui-org/react";
 import { useState } from "react";

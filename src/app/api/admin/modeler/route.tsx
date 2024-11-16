@@ -1,5 +1,5 @@
-import { prismaClient } from "@/api/queries"
-import { imageInsertion, modelInsertion, specimenInsertion } from "@/api/interface"
+import { prismaClient } from "@/functions/server/queries"
+import { imageInsertion, modelInsertion, specimenInsertion } from "@/interface/interface"
 const prisma = prismaClient()
 
 export async function POST(request: Request) {

@@ -4,10 +4,10 @@
  * Contains the 3D model (if it exists), images and occurrence map.
  */
 
-import { GbifImageResponse, GbifResponse } from "@/api/interface";
-import { getModel } from '@/api/queries'
-import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/api/fetchFunctions";
-import { fetchHSCImages } from "@/api/fetchFunctions";
+import { GbifImageResponse, GbifResponse } from "@/interface/interface";
+import { getModel } from '@/functions/server/queries'
+import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/functions/server/fetchFunctions";
+import { fetchHSCImages } from "@/functions/server/fetchFunctions";
 import Foot from '@/components/Shared/Foot'
 import dynamic from "next/dynamic";
 import { model } from "@prisma/client";

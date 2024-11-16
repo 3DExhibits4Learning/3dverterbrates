@@ -3,7 +3,7 @@
  * @fileoverview These are the route handlers for uploading and editing 3D models
  */
 
-import { prismaClient } from "@/api/queries";
+import { prismaClient } from "@/functions/server/queries";
 import { LatLngLiteral } from "leaflet";
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"

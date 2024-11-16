@@ -1,7 +1,7 @@
 'use client'
 
 import { Modal, ModalContent, ModalBody, ModalHeader, useDisclosure, Button, ModalFooter } from "@nextui-org/react"
-import { ModelsWithTagsAndSoftware } from "@/api/interface"
+import { ModelsWithTagsAndSoftware } from "@/interface/interface"
 import { useRef, useState } from "react";
 import ArtistName from "../ModelSubmit/ArtistNameField";
 import SpeciesName from "../ModelSubmit/SpeciesNameField";

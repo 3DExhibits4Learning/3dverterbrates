@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { getUserById } from "@/api/queries"
-import { getAuthorizedUsers } from "@/api/queries"
+import { getUserById } from "@/functions/server/queries"
+import { getAuthorizedUsers } from "@/functions/server/queries"
 import { redirect } from "next/navigation"
 
 export default async function Page() {

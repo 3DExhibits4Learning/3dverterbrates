@@ -16,7 +16,7 @@ import ModelAnnotation from './AnnotationModel';
 import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
 import { model, model_annotation, photo_annotation } from '@prisma/client';
 import Herbarium from '@/classes/HerbariumClass';
-import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/api/interface';
+import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/interface/interface';
 
 const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model: model, images: GbifImageResponse[], imageTitle: string }) => {
 

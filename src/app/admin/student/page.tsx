@@ -3,10 +3,10 @@
 import Header from "@/components/Header/Header"
 import Foot from "@/components/Shared/Foot"
 import AnnotationClient from "@/components/Admin/AnnotationClient"
-import { getAllAnnotationModels, getAssignments, getModelsToAnnotate } from "@/api/queries"
+import { getAllAnnotationModels, getAssignments, getModelsToAnnotate } from "@/functions/server/queries"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { getAuthorizedUsers } from "@/api/queries"
+import { getAuthorizedUsers } from "@/functions/server/queries"
 import serverAsyncErrorHandler from "@/functions/server/serverError/serverAsyncError"
 import { model, assignment } from "@prisma/client"
 

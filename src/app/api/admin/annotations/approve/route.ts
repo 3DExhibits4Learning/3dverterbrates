@@ -2,7 +2,7 @@
  * @file src/app/api/admin/annotations/approve/route.ts
  */
 
-import { approveAnnotations } from "@/api/queries";
+import { approveAnnotations } from "@/functions/server/queries";
 import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler";
 import routeHandlerTypicalCatch from "@/functions/server/serverError/routeHandlerTypicalCatch";
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse";

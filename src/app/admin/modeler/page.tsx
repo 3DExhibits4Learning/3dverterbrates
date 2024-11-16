@@ -1,7 +1,7 @@
 import Header from "@/components/Header/Header";
 import Foot from "@/components/Shared/Foot";
 import ModelerDash from "@/components/Admin/ModelerDash";
-import { getSpecimenWithoutPhotos, getSpecimenToModel } from "@/api/queries";
+import { getSpecimenWithoutPhotos, getSpecimenToModel } from "@/functions/server/queries";
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { management, modeler } from "@/functions/utils/devAuthed"

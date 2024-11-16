@@ -13,7 +13,7 @@ import CommunityModelWithoutGmatch from '@/components/Collections/CommunityWitho
 import { isMobileOrTablet } from '../../functions/utils/isMobile';
 const SketchfabApi = dynamic(() => import('@/components/Collections/SketchFabAPI'), { ssr: false })
 import { model, userSubmittal } from '@prisma/client';
-import { GbifResponse, GbifImageResponse } from '@/api/interface';
+import { GbifResponse, GbifImageResponse } from '@/interface/interface';
 
 export default function MainWrap(props: {
   redirectUrl: string | null, model: model[],

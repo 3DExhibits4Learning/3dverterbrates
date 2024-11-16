@@ -5,7 +5,7 @@
  */
 
 import { NextRequest } from "next/server"
-import { updateModelAnnotator, assignModelToStudent, unassignModelToStudent } from "@/api/queries"
+import { updateModelAnnotator, assignModelToStudent, unassignModelToStudent } from "@/functions/server/queries"
 import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
 import routeHandlerTypicalCatch from "@/functions/server/serverError/routeHandlerTypicalCatch"
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"

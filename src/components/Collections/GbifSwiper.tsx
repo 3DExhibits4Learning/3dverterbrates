@@ -12,7 +12,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
-import { GbifImageResponse } from '@/api/interface';
+import { GbifImageResponse } from '@/interface/interface';
 import { useRef } from 'react';
 import { isMobileOrTablet } from '@/functions/utils/isMobile';
 

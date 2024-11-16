@@ -1,6 +1,6 @@
 'use client'
 
-import { GbifImageResponse, GbifResponse } from "@/api/interface";
+import { GbifImageResponse, GbifResponse } from "@/interface/interface";
 import { userSubmittal } from "@prisma/client";
 
 export default class CommunityHerbarium {

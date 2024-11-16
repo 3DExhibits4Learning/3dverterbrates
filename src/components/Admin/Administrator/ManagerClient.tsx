@@ -14,8 +14,8 @@
 import { model } from "@prisma/client";
 import { useState, createContext } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { ManagerClientProps, studentsAssignmentsAndModels } from "@/api/interface";
-import { fullModel } from "@/api/interface";
+import { ManagerClientProps, studentsAssignmentsAndModels } from "@/interface/interface";
+import { fullModel } from "@/interface/interface";
 
 // Default imports
 import AnnotationClient from "../AnnotationClient";
