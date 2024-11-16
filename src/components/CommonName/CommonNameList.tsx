@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 import noImage from '../../../public/noImage.png';
 import { handleImgError } from "@/functions/utils/imageHandler";
-import { CommonNameInfo } from "@/api/types";
+import { CommonNameInfo } from "@/api/interface";
 
 type CommonNameSwiperProps = {
   commonNameInfo: CommonNameInfo[];

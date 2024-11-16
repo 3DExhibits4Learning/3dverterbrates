@@ -16,7 +16,7 @@ import TagInput from './Tags';
 import { LatLngLiteral } from 'leaflet';
 import FormMap from '../Map/Form';
 import DataTransferModal from '../Shared/Modals/DataTransferModal';
-import { UpdateModelFormProps } from '@/api/types';
+import { UpdateModelFormProps } from '@/api/interface';
 import TextInput from '../Shared/Form Fields/TextInput';
 import AutoCompleteWrapper from '../Shared/Form Fields/AutoCompleteWrapper';
 import DateInput from '../Shared/Form Fields/DateInput';

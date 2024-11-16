@@ -13,7 +13,7 @@
 import { Accordion, AccordionItem } from "@nextui-org/react"
 import { useEffect, useState, useRef, useContext } from "react"
 import { model } from "@prisma/client"
-import { fullAnnotation, studentsAssignmentsAndModels } from "@/api/types"
+import { fullAnnotation, studentsAssignmentsAndModels } from "@/api/interface"
 import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import { Button } from "@nextui-org/react"
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client"
@@ -24,13 +24,13 @@ import { approveAnnotations, unapproveAnnotations } from "@/functions/client/man
 import BotanistRefWrapper from "./BotanistModelViewerRef"
 import AreYouSure from "../Shared/Modals/AreYouSure"
 import AnnotationEntry from "./AnnotationEntry"
-import ModelAnnotations from "@/functions/utils/ModelAnnotationsClass"
+import ModelAnnotations from "@/classes/ModelAnnotationsClass"
 import assignAnnotation from "@/functions/client/managerClient/assignAnnotation"
 import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
 import StudentSelect from "./Administrator/Students/SelectStudents"
 import getIndex from "@/functions/client/annotationClient/getIndex"
 
-export default function AnnotationClient(props: { modelsToAnnotate: model[], annotationModels: model[], admin: boolean, students: studentsAssignmentsAndModels[] }) {
+export default function AnnotationClient(props: { modelsToAnnotate: model[], annotationModels: model[], admin: boolean, students?: studentsAssignmentsAndModels[] }) {
 
     // Variable declarations - data transfer contexts
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
@@ -93,7 +93,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
 
         // An annotator indicates unassignment; we need to find the email of the student for unassignment
         if (annotator) {
-            obtainedEmail = props.students.find(student => student.assignment.find(assignment => assignment.uid === uid))?.email
+            obtainedEmail = props.students?.find(student => student.assignment.find(assignment => assignment.uid === uid))?.email
         }
 
         // Define label and args based on whether this is assignment or unassignment
@@ -215,7 +215,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                         // Admin only - Student select and assign
                                         props.admin && !annotator && !newAnnotationEnabledState &&
                                         <>
-                                            <StudentSelect students={props.students} setNameAndEmailStates={setNameAndEmailStates} />
+                                            <StudentSelect students={props.students as studentsAssignmentsAndModels[]} setNameAndEmailStates={setNameAndEmailStates} />
                                             <div className="flex">
                                                 <Button onPress={() => assignAnnotationHandler()}
                                                     className="text-white mt-2 text-lg"
@@ -339,7 +339,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                             // 'Select a 3d model' banner
                             !uid && !activeAnnotation &&
                             <div className="flex items-center justify-center text-xl h-full w-full">
-                                <p className="mr-[10%] text-lg lg:text-3xl">Select a 3D model to get started!</p>
+                                <p className="mr-[10%] text-lg lg:text-3xl">{props.modelsToAnnotate.length ? props.admin ?'Select an annotation' : 'Select an annotation, or click New Annotation' : "No models assigned"}</p>
                             </div>
                         }
                         {

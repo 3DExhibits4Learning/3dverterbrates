@@ -12,7 +12,7 @@
 'use client'
 
 // Imports
-import { fullModel, studentsAssignmentsAndModels } from "@/api/types";
+import { fullModel, studentsAssignmentsAndModels } from "@/api/interface";
 import { useState, useEffect, useContext } from "react";
 import { Button } from "@nextui-org/react";
 import { DataTransferContext } from "../ManagerClient";

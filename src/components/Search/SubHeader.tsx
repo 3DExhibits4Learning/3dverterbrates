@@ -31,9 +31,6 @@ const SubHeader = (props: SubHeaderProps) => {
   return (
     <Navbar isBordered className="z-0 w-full bg-[#00856A] dark:bg-[#212121]">
       <NavbarContent>
-      <NavbarMenuItem>
-        <Button color='primary' className="hidden lg:inline-block w-[200px]" onClick={() => router.push('/modelSubmit')}>Contribute a 3D Model</Button>
-      </NavbarMenuItem>
         <div className="flex w-full gap-4 justify-center lg:justify-end">
           <Select
             size="sm"

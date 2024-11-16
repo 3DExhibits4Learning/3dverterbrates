@@ -2,7 +2,7 @@
 import { useRef, LegacyRef, useState } from "react"
 import { Button } from "@nextui-org/react"
 import DataTransferModal from "../Shared/Modals/DataTransferModal"
-import { imageInsertion } from "@/api/types"
+import { imageInsertion } from "@/api/interface"
 import AutoComplete from "../Shared/Form Fields/AutoCompleteRef"
 
 export default function NewImageSet() {

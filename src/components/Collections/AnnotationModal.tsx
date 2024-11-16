@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDi
 import { boolRinse, addCommas, arrayFromObjects} from './SketchfabDom';
 import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
 import Herbarium from "@/functions/utils/HerbariumClass";
-import { GbifResponse } from "@/api/types";
+import { GbifResponse } from "@/api/interface";
 import { photo_annotation } from "@prisma/client";
 
 type annotationModalProps = {

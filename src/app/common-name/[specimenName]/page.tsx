@@ -6,7 +6,7 @@
  */
 
 import { fetchCommonNameInfo } from "@/api/fetchFunctions";
-import { CommonNameInfo, SiteReadyModels } from "@/api/types";
+import { CommonNameInfo, SiteReadyModels } from "@/api/interface";
 
 import CommonNameList from "@/components/CommonName/CommonNameList";
 import Header from "@/components/Header/Header";

@@ -4,7 +4,7 @@
  * Contains the 3D model (if it exists), images and occurrence map.
  */
 
-import { GbifImageResponse, GbifResponse } from "@/api/types";
+import { GbifImageResponse, GbifResponse } from "@/api/interface";
 import { getModel } from '@/api/queries'
 import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/api/fetchFunctions";
 import { fetchHSCImages } from "@/api/fetchFunctions";

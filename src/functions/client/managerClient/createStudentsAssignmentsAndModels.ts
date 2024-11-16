@@ -1,5 +1,5 @@
-import { studentsAndAssignments, studentsAssignmentsAndModels } from "@/api/types";
-import { fullModel } from "@/api/types";
+import { studentsAndAssignments, studentsAssignmentsAndModels } from "@/api/interface";
+import { fullModel } from "@/api/interface";
 
 export default function createStudentsAssignmentsAndModels(students: studentsAndAssignments[], models: fullModel[]) {
 

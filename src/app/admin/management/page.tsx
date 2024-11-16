@@ -9,7 +9,7 @@
 // Typical imports
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { fullModel, studentsAndAssignments } from "@/api/types";
+import { fullModel, studentsAndAssignments } from "@/api/interface";
 import { getFullModels, getStudentsAndAssignments } from "@/api/queries";
 import { authorized } from "@prisma/client";
 import { getAuthorizedUsers } from "@/api/queries";

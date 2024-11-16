@@ -11,7 +11,7 @@
 import { Button } from "@nextui-org/react";
 import { useState } from "react";
 import Select from "@/components/Shared/Form Fields/Select";
-import { fullModel } from "@/api/types";
+import { fullModel } from "@/api/interface";
 import deleteModel from "@/functions/client/managerClient/deleteModel";
 import { useContext } from "react";
 import { DataTransferContext } from "../ManagerClient";
@@ -19,8 +19,8 @@ import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHan
 
 export default function DeleteModel(props: { models: fullModel[] | undefined }) {
 
-    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransfer
-    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransfer
+    const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
+    const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
 
     const [uid, setUid] = useState<string>('')
 
@@ -39,7 +39,7 @@ export default function DeleteModel(props: { models: fullModel[] | undefined }) 
                         <Button
                             className="text-white"
                             isDisabled={!uid}
-                            onClick={() => deleteModelHandler}
+                            onClick={() => deleteModelHandler(uid)}
                         >
                             Delete 3D Model
                         </Button>

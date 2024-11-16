@@ -6,10 +6,9 @@
 'use client'
 
 import { useEffect, useState, useRef } from "react"
-import PageWrapper from "../Shared/PageWrapper"
 import SearchPageModelList from "./SearchPageModelList"
 import SubHeader from "./SubHeader"
-import { fullUserSubmittal } from "@/api/types"
+import { fullUserSubmittal } from "@/api/interface"
 import { model } from "@prisma/client"
 
 const getUniqueModelers = (models: model[]): string[] => {
