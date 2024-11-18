@@ -16,7 +16,8 @@ import { model, userSubmittal } from '@prisma/client';
 import { GbifResponse, GbifImageResponse } from '@/interface/interface';
 
 export default function MainWrap(props: {
-  redirectUrl: string | null, model: model[],
+  redirectUrl: string | null, 
+  model: string,
   gMatch: { hasInfo: boolean, data?: GbifResponse },
   specimenName: string,
   noModelData: { title: string, images: GbifImageResponse[] }
@@ -24,6 +25,7 @@ export default function MainWrap(props: {
 
   const redirectUrl: string | null = props.redirectUrl
   const router = useRouter();
+  const model = JSON.parse(props.model).length ? JSON.parse(props.model) : []
 
   //const mediaQuery = window.matchMedia('(max-width: 1023.5px)')
   var modelHeight = isMobileOrTablet() ? "calc(100vh - 160px)" : "calc(100vh - 104.67px)"
@@ -56,7 +58,7 @@ export default function MainWrap(props: {
 
   useEffect(() => {
     
-    if(!props.model.length){
+    if(!model.length){
 
       var userModels: any
       
@@ -75,7 +77,7 @@ export default function MainWrap(props: {
   return <>
 
     {
-      !!props.model.length && props.gMatch.hasInfo && 
+      model.length && props.gMatch.hasInfo && 
       <>
         <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
           <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>
@@ -91,7 +93,7 @@ export default function MainWrap(props: {
         <div className="flex flex-col m-auto" style={{ width: "100vw", maxWidth: viewWidthInPx, margin: "0 auto !important" }}>
           <div style={{ height: modelHeight, maxHeight: viewportHeightInPx }}>
             <SketchfabApi
-              model={props.model[0]}
+              model={model[0]}
               gMatch={props.gMatch}
               images={props.noModelData.images}
               imageTitle={props.noModelData.title}
@@ -117,7 +119,7 @@ export default function MainWrap(props: {
     }
 
     {
-      !!!props.model.length && userModels && props.gMatch.hasInfo &&
+      !model.length && userModels && props.gMatch.hasInfo &&
       <>
         <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
           <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>
@@ -146,7 +148,7 @@ export default function MainWrap(props: {
     }
 
     {
-      !!!props.model.length && userModels && !props.gMatch.hasInfo &&
+      !model.length && userModels && !props.gMatch.hasInfo &&
       <>
         <CommunityModelWithoutGmatch communityModel={userModels[0]} />
         <Foot />
@@ -154,7 +156,7 @@ export default function MainWrap(props: {
     }
 
     {
-      !!!props.model.length && !userModels && props.gMatch.hasInfo && userModels !== undefined &&
+      !model.length && !userModels && props.gMatch.hasInfo && userModels !== undefined &&
       <>
         <div className="flex flex-col m-auto" style={{ width: "100vw", maxWidth: viewWidthInPx, margin: "0 auto !important" }}>
           {/* lg breakpoint in tailwind not working here, hence id and hard coded breakpoint in globals */}

@@ -7,7 +7,6 @@
 import { GbifImageResponse, GbifResponse } from "@/interface/interface";
 import { getModel } from '@/functions/server/queries'
 import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/functions/server/fetchFunctions";
-import { fetchHSCImages } from "@/functions/server/fetchFunctions";
 import Foot from '@/components/Shared/Foot'
 import dynamic from "next/dynamic";
 import { model } from "@prisma/client";
@@ -75,7 +74,7 @@ export default async function Page({ params }: { params: { specimenName: string 
 
       <CollectionsWrapper
         redirectUrl={redirectUrl}
-        model={_3dmodel}
+        model={JSON.stringify(_3dmodel)}
         gMatch={gMatch}
         specimenName={params.specimenName}
         noModelData={noModelData as { title: string, images: GbifImageResponse[] }}
