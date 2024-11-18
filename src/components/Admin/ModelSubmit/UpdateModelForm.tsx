@@ -14,12 +14,12 @@ import { Button } from "@nextui-org/react";
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
 import { LatLngLiteral } from 'leaflet';
-import FormMap from '../Map/Form';
-import DataTransferModal from '../Shared/Modals/DataTransferModal';
+import FormMap from '../../Map/Form';
+import DataTransferModal from '../../Shared/Modals/DataTransferModal';
 import { UpdateModelFormProps } from '@/interface/interface';
-import TextInput from '../Shared/Form Fields/TextInput';
-import AutoCompleteWrapper from '../Shared/Form Fields/AutoCompleteWrapper';
-import DateInput from '../Shared/Form Fields/DateInput';
+import TextInput from '../../Shared/Form Fields/TextInput';
+import AutoCompleteWrapper from '../../Shared/Form Fields/AutoCompleteWrapper';
+import DateInput from '../../Shared/Form Fields/DateInput';
 import ModelInput from './ModelInput';
 
 // Main component

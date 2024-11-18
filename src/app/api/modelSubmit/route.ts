@@ -42,9 +42,10 @@ export async function POST(request: Request) {
         const buildMethod = data.get('buildMethod') as string
         const software: string[] = JSON.parse(data.get('software') as string)
         const tags: string[] = JSON.parse(data.get('tags') as string)
-        const position: LatLngLiteral = JSON.parse(data.get('position') as string)
+        const position: {lat: string, lng: string} = JSON.parse(data.get('position') as string)
         const speciesAcquisitionDate = data.get('speciesAcquisitionDate') as string
         const modelFile = data.get('modelFile') as File
+        const baseOrAnnotation = data.get('baseOrAnnotation') as string
 
         // Form and fetch Variables 
         formData.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
@@ -66,7 +67,6 @@ export async function POST(request: Request) {
         })
             .then((res) => {
                 if (!res.ok) {
-                    console.log(res)
                     console.error(res.statusText)
                     throw Error('Bad SF request')
                 }
@@ -87,11 +87,12 @@ export async function POST(request: Request) {
                 spec_name: species,
                 build_process: buildMethod,
                 uid: modelUid,
-                lat: position.lat,
-                lng: position.lng,
+                lat: position.lat ? parseInt(position.lat) : null,
+                lng: position.lng ? parseInt(position.lng) : null,
                 spec_acquis_date: speciesAcquisitionDate ? speciesAcquisitionDate : null,
                 site_ready: true,
                 user: user,
+                base_model: baseOrAnnotation === 'base' ? true : false
             }
         }).catch((e) => {
             console.error(e.message)

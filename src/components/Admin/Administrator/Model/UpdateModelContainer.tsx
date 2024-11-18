@@ -2,7 +2,7 @@
 
 import { useState, Dispatch, SetStateAction, useEffect } from "react"
 import dynamic from "next/dynamic"
-const UpdateModelForm = dynamic(() => import("@/components/ModelSubmit/UpdateModelForm"))
+const UpdateModelForm = dynamic(() => import("@/components/Admin/ModelSubmit/UpdateModelForm"))
 import { UpdateModelFormContainerProps } from "@/interface/interface"
 import Select from "@/components/Shared/Form Fields/Select"
 import { model } from "@prisma/client"

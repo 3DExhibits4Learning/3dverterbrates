@@ -4,7 +4,7 @@ const ProcessSelect = (props: {defaultValue?: string, value: string, setValue: D
 
     return (
         <>
-            <p className='text-2xl mt-8 ml-12'>What process was used to create the 3D model?</p>
+            <p className='text-2xl mt-8 ml-12'>What process was used to create the 3D model?<span className="text-red-600"> *</span></p>
             <div className='grid grid-cols-2 w-[210px] ml-12 mt-4' style={{ gridTemplateColumns: 'auto auto' }}>
                 <div className='flex items-center'><label className='text-xl'>Photogrammetry</label></div>
                 <div className='flex items-center'>

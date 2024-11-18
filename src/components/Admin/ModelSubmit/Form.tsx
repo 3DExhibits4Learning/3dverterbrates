@@ -16,11 +16,11 @@ import ProcessSelect from './ProcessSelectField';
 import { Button } from "@nextui-org/react";
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
-import { LatLngLiteral } from 'leaflet';
-import FormMap from '../Map/Form';
-import DataTransferModal from '../Shared/Modals/DataTransferModal';
+import DataTransferModal from '../../Shared/Modals/DataTransferModal';
 import SpeciesAcquisitionDate from './AcquisitionDate';
 import ModelInput from './ModelInput';
+import LatLng from './LatLng';
+import BaseOrAnnotation from './BaseOrAnnotation';
 
 // Main component
 export default function ModelSubmitForm() {
@@ -28,8 +28,10 @@ export default function ModelSubmitForm() {
     // Variable initialization - field states
     const [species, setSpecies] = useState<string>('')
     const [speciesAcquisitionDate, setSpeciesAcquisitionDate] = useState<string>('')
-    const [position, setPosition] = useState<LatLngLiteral | null>(null)
+    const [lat, setLat] = useState<string>('')
+    const [lng, setLng] = useState<string>('')
     const [artist, setArtist] = useState<string>('')
+    const [baseOrAnnotation, setBaseOrAnnotation] = useState('')
     const [buildMethod, setBuildMethod] = useState<string>('')
     const [software, setSoftware] = useState<{ value: string }[]>([])
     const [tags, setTags] = useState<{ value: string }[]>([])
@@ -55,7 +57,7 @@ export default function ModelSubmitForm() {
             // Stringify arrays and object
             const formSoftware = JSON.stringify(software.map(obj => obj.value))
             const formTags = JSON.stringify(software.map(obj => obj.value))
-            const formPosition = JSON.stringify(position)
+            const formPosition = JSON.stringify({lat: lat, lng: lng})
 
             // Set form data
             const data = new FormData()
@@ -67,6 +69,7 @@ export default function ModelSubmitForm() {
             data.set('position', formPosition)
             data.set('speciesAcquisitionDate', speciesAcquisitionDate)
             data.set('modelFile', file as File)
+            data.set('baseOrAnnotation', baseOrAnnotation)
 
             // Upload 3d model to sketchfab and insert model data into database via associated route handler
             await fetch('/api/modelSubmit', {
@@ -98,10 +101,10 @@ export default function ModelSubmitForm() {
     // Enable/disable the upload button
     useEffect(() => {
 
-        if (species && artist && buildMethod && software.length && file && position) setUploadDisabled(false)
+        if (species && artist && buildMethod && software.length && file, baseOrAnnotation) setUploadDisabled(false)
         else setUploadDisabled(true)
 
-    }, [species, artist, buildMethod, software.length, file, position])
+    }, [species, artist, buildMethod, software.length, file, baseOrAnnotation])
 
     return (
         <>
@@ -127,7 +130,7 @@ export default function ModelSubmitForm() {
 
                 <SpeciesName value={species} setValue={setSpecies} />
                 <SpeciesAcquisitionDate value={speciesAcquisitionDate} setValue={setSpeciesAcquisitionDate} />
-                <FormMap position={position} setPosition={setPosition} title />
+                <LatLng lat={lat} lng={lng} setLat={setLat} setLng={setLng}/>
                 <TagInput value={tags} setValue={setTags} />
 
                 <Divider className='mt-8' />
@@ -137,8 +140,9 @@ export default function ModelSubmitForm() {
                 <Divider />
 
                 <ArtistName value={artist} setValue={setArtist} />
+                <BaseOrAnnotation value={baseOrAnnotation} setValue={setBaseOrAnnotation}/>
                 <ProcessSelect value={buildMethod} setValue={setBuildMethod} />
-                <TagInput value={software} setValue={setSoftware} marginTop='mt-12' title='Enter any software used in createion of the 3D model (must enter at least 1)' required/>
+                <TagInput value={software} setValue={setSoftware} marginTop='mt-12' title='Enter any software used in creation of the 3D model (must enter at least 1)' required/>
                 <ModelInput setFile={setFile} />
 
                 <Button

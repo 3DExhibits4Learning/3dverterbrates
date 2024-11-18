@@ -1,5 +1,5 @@
 import { Dispatch, useState, SetStateAction } from "react"
-import Autocomplete from "../Shared/Form Fields/AutoComplete"
+import Autocomplete from "../../Shared/Form Fields/AutoComplete"
 
 const SpeciesName = (props: { edit?: boolean, value: string, setValue: Dispatch<SetStateAction<string>>}) => {
 
@@ -15,7 +15,7 @@ const SpeciesName = (props: { edit?: boolean, value: string, setValue: Dispatch<
     
     return (
         <div className="w-full mb-8">
-            <label className='text-2xl ml-12 '>Species Name</label><br></br>
+            <label className='text-2xl ml-12 '>Species Name<span className="text-red-600"> *</span></label><br></br>
             <Autocomplete
                 options={speciesOptions}
                 changeFn={fetchAutoCompleteSpecies}

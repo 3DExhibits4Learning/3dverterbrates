@@ -7,7 +7,7 @@ const ArtistName = (props : { edit? : boolean, defaultValue?: string, value: str
     
     return (
         <div className={`${topMargin}`}>
-            <label className='text-2xl ml-12 '>3D Modeler Name </label><br></br>
+            <label className='text-2xl ml-12 '>3D Modeler Name<span className="text-red-600"> *</span></label><br></br>
             <input autoComplete='off' 
             value={props.value}
             onChange={(e) => props.setValue(e.target.value)}

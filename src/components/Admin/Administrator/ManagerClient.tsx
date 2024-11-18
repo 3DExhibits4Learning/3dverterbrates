@@ -35,7 +35,7 @@ import AdminItemContainer from "./ItemContainer";
 import Assignments from "./Assignments/Assignments";
 
 // Dynamic imports
-const ModelSubmitForm = dynamic(() => import("@/components/ModelSubmit/Form"))
+const ModelSubmitForm = dynamic(() => import("@/components/Admin/ModelSubmit/Form"))
 
 // Exported context
 export const DataTransferContext = createContext<any>('');
