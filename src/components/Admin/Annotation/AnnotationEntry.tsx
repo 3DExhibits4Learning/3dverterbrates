@@ -16,17 +16,17 @@ import { Button } from "@nextui-org/react"
 import { v4 as uuidv4 } from 'uuid'
 import { AnnotationEntryProps } from "@/interface/interface"
 
-import TextInput from "../Shared/Form Fields/TextInput"
-import RadioButtons from "./AnnotationFields/RadioButtons"
-import AnnotationReposition from "./AnnotationFields/AnnotationReposition"
-import FileInput from "./AnnotationFields/ImageInput"
-import License from "./AnnotationFields/License"
-import Annotation from "./Annotation"
+import TextInput from "@/components/Shared/Form Fields/TextInput"
+import RadioButtons from "@/components/Admin/AnnotationFields/RadioButtons"
+import AnnotationReposition from "@/components/Admin/AnnotationFields/AnnotationReposition"
+import FileInput from "@/components/Admin/AnnotationFields/ImageInput"
+import License from "@/components/Admin/AnnotationFields/License"
+import Annotation from "@/components/Admin/Annotation/Annotation"
 import dynamic from "next/dynamic"
-import ModelAnnotationSelect from "./AnnotationFields/ModelAnnotationSelect"
-import DataTransferModal from "../Shared/Modals/DataTransferModal"
+import ModelAnnotationSelect from "@/components/Admin/AnnotationFields/ModelAnnotationSelect"
+import DataTransferModal from "@/components/Shared/Modals/DataTransferModal"
 
-const ModelViewer = dynamic(() => import('../Shared/ModelViewer'), { ssr: false })
+const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'), { ssr: false })
 
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 

@@ -121,47 +121,6 @@ model tags {
   @@id([uid, tag])
 }
 
-model submittalAttempt {
-  attemptuid String   @id
-  email      String
-  dateTime   DateTime @default(now())
-  errorCode  String
-}
-
-model submittalSoftware {
-  id            String
-  software      String
-  userSubmittal userSubmittal @relation(fields: [id], references: [confirmation], map: "submittalSoftwareFk")
-
-  @@id([id, software])
-}
-
-model submittalTags {
-  id            String
-  tag           String
-  userSubmittal userSubmittal @relation(fields: [id], references: [confirmation], map: "submittalTagsFk")
-
-  @@id([id, tag])
-}
-
-model userSubmittal {
-  confirmation      String @id
-  email             String
-  artistName        String
-  speciesName       String
-  createdWithMobile Boolean
-  methodology       String
-  dateTime          DateTime @default(now())
-  modeluid          String   @unique
-  status            String
-  thumbnail         String
-  lat               Decimal
-  lng               Decimal
-  commonName        String @default("")
-  submittalSoftware submittalSoftware[]
-  submittalTags     submittalTags[]
-}
-
 model User {
   id             String     @id @default(cuid())
   name           String?

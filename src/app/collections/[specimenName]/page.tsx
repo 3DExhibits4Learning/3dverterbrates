@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: { specimenName: string 
   })
     .then(res => {
       images = res
-      noModelData = { title: 'Images from the Cal Poly Humboldt Vascular Plant Herbarium', images: images }
+      noModelData = { title: 'Images from the Global Biodiversity Information Facility', images: images }
     })
 
   // If there is a 3d model for the searched specimen or image data for the specimen searched, continue

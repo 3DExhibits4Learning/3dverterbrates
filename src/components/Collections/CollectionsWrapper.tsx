@@ -10,7 +10,6 @@ import Inaturalist from '@/components/Collections/iNaturalist'
 import dynamic from 'next/dynamic'
 import { isMobileOrTablet } from '../../functions/utils/isMobile';
 const SketchfabApi = dynamic(() => import('@/components/Collections/SketchFabAPI'), { ssr: false })
-import { userSubmittal } from '@prisma/client';
 import { GbifResponse, GbifImageResponse } from '@/interface/interface';
 
 export default function MainWrap(props: {
@@ -34,7 +33,6 @@ export default function MainWrap(props: {
   const [viewportHeightInPx, setViewportHeightInPx] = useState(window.outerHeight + 200)
   const [swiperHeight, setSwiperHeight] = useState(window.outerHeight - 96)
   const [imgHeight, setImageHeight] = useState(window.outerHeight - 208)
-  const [userModels, setUserModels] = useState<userSubmittal[]>()
 
   useEffect(() => {
     if (redirectUrl) {

@@ -230,36 +230,6 @@ export const updateModelAnnotator = async (uid: string, student: string | null) 
 }
 
 /**
- * @function getPendingModels
- * @description returns an array of pending model objects contributed by the user with specified email address.
- * 
- */
-export const getPendingModels = async (email: string) => {
-  const models = await prisma.userSubmittal.findMany({
-    where: { email: email, status: 'Pending' },
-    orderBy: {
-      dateTime: 'desc'
-    }
-  });
-  return models;
-};
-
-/**
- * @function getAllPendingModels
- * @description returns an array of all pending model objects 
- * 
- */
-export const getAllPendingModels = async () => {
-  const models = await prisma.userSubmittal.findMany({
-    where: { status: 'Pending' },
-    orderBy: {
-      dateTime: 'desc'
-    }
-  });
-  return models;
-};
-
-/**
  * @function getPublishedModels
  * @description returns an array of published model objects contributed by the user with specified email address.
  * 
@@ -709,89 +679,6 @@ export const markAsAnnotated = async (uid: string, annotated: boolean) => {
   return updated
 }
 
-/***** COMMUNITY QUERIES */
-
-/**
-* @function getSubmittalSoftware
-* @description return an array of softwares based on the id (confirmation) number of the model
-* 
-*/
-export const getSubmittalSoftware = async (id: string,) => {
-  const softwareObj = await prisma.submittalSoftware.findMany({
-    where: { id: id },
-  });
-  let softwareArray = []
-  for (let software in softwareObj)
-    softwareArray.push(softwareObj[software].software)
-  return softwareArray
-};
-
-/**
- * @function getSubmittalTags
- * @description return an array of tags based on the id (confirmation) number of the model
- * 
- */
-export const getSubmittalTags = async (id: string,) => {
-  const tagObj = await prisma.submittalTags.findMany({
-    where: { id: id },
-  });
-  let tagArray = []
-  for (let tag in tagObj)
-    tagArray.push(tagObj[tag].tag)
-  return tagArray
-};
-
-/**
- * @function getCommunityThumbnails
- * @description returns an array of thumbnail url's for 3D models uploaded by the community
- * 
- */
-export const getCommunityThumbnails = async () => {
-
-  let thumbmnails: string[] = []
-
-  const communityUploads = await prisma.userSubmittal.findMany({
-    where: {
-      status: 'published',
-    },
-  })
-
-  for (let i in communityUploads) {
-    thumbmnails.push(communityUploads[i].thumbnail)
-  }
-
-  return thumbmnails
-}
-
-/**
- * @function getPublishedUserSubmittals
- * @description returns a user account based on the userId and the provider
- * 
- */
-export const getPublishedUserSubmittals = async () => {
-
-  const submittals = await prisma.userSubmittal.findMany({
-    where: {
-      status: 'published'
-    },
-  })
-  return submittals
-}
-
-/**
- * @function getPublishedUserSubmittalsBySpecies
- * @description returns a user account based on the userId and the provider
- * 
- */
-export const getPublishedUserSubmittalsBySpecies = async (speciesName: string) => {
-
-  const submittals = await prisma.userSubmittal.findMany({
-    where: {
-      speciesName: speciesName
-    },
-  })
-  return submittals
-}
 
 /***** ADMIN QUERIES *****/
 

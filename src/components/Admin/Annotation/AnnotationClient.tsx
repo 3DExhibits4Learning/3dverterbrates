@@ -23,12 +23,12 @@ import { approveAnnotations, unapproveAnnotations } from "@/functions/client/man
 
 // Default imports
 import BotanistRefWrapper from "./AnnotationModelViewerRef"
-import AreYouSure from "../Shared/Modals/AreYouSure"
+import AreYouSure from "@/components/Shared/Modals/AreYouSure"
 import AnnotationEntry from "./AnnotationEntry"
 import ModelAnnotations from "@/classes/ModelAnnotationsClass"
 import assignAnnotation from "@/functions/client/managerClient/assignAnnotation"
 import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
-import StudentSelect from "./Administrator/Students/SelectStudents"
+import StudentSelect from "@/components/Admin/Administrator/Students/SelectStudents"
 import getIndex from "@/functions/client/annotationClient/getIndex"
 
 export default function AnnotationClient(props: { modelsToAnnotate: model[], annotationModels: model[], admin: boolean, students?: studentsAssignmentsAndModels[] }) {

@@ -29,7 +29,6 @@ const getUniqueAnnotators = (models: model[]): string[] => {
 const SearchPageContent = () => {
 
   const siteReadyModels = useRef<model[]>()
-  const [communityModels, setCommunityModels] = useState<fullUserSubmittal[]>()
 
   const [modeledByList, setModeledByList] = useState<string[]>()
   const [annotatedByList, setAnnotatedByList] = useState<string[]>()
@@ -48,7 +47,9 @@ const SearchPageContent = () => {
 
     let promises = []
 
-    const getModels = fetch('/api/collections/models').then(res => res.json()).then(json => {
+    const getModels = async() => await fetch('/api/collections/models')
+    .then(res => res.json())
+    .then(json => {
         siteReadyModels.current = json.response
         let a = getUniqueModelers(siteReadyModels.current as model[])
         let b = getUniqueAnnotators(siteReadyModels.current as model[])
@@ -57,26 +58,19 @@ const SearchPageContent = () => {
         setAnnotatedByList(b)
       })
 
-    const getCommunityModels = fetch('/api/collections/models/community').then(res => res.json()).then(json => setCommunityModels(json.response))
-
-    promises.push(getModels, getCommunityModels)
-    
-    const getAllModels = async() => {
-      await Promise.all(promises)
-    }
-    getAllModels()
+    getModels()
 
   }, [])
 
   return (
     <>
       {
-        modeledByList && annotatedByList && communityModels && 
+        modeledByList && annotatedByList && 
         <>
           <SubHeader modeledByList={modeledByList} annotatedByList={annotatedByList} handleModelerSelect={handleModelerSelect} handleAnnotatorSelect={handleAnnotatorSelect} />
           <br />
           {/* <PageWrapper> */}
-            <SearchPageModelList models={siteReadyModels.current as model[]} selectedModeler={selectedModeler} selectedAnnotator={selectedAnnotator} communityModels={communityModels} />
+            <SearchPageModelList models={siteReadyModels.current as model[]} selectedModeler={selectedModeler} selectedAnnotator={selectedAnnotator} />
             <br />
           {/* </PageWrapper> */}
         </>
