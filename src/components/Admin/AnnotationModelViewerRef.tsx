@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, lazy, Suspense } from "react"
-const BotanistModelViewer = lazy(() => import("./BotanistModelViewer"))
+const BotanistModelViewer = lazy(() => import("./AnnotationModelViewer"))
 
 const BotanistRefWrapper = forwardRef((props: any, ref: any) => {
     return (

@@ -476,7 +476,7 @@ export const createPhotoAnnotation = async (url: string, author: string, license
       url: url,
       author: author,
       license: license,
-      annotator: annotator ,
+      annotator: annotator,
       annotation_id: annotation_id,
       annotation: annotation,
       website: website ? website : '',
@@ -742,23 +742,6 @@ export const getSubmittalTags = async (id: string,) => {
 };
 
 /**
-* @function approveModel
-* @description approve a pending 3D model
-* 
-*/
-export const approveModel = async (confirmation: string,) => {
-  const updateObj = await prisma.userSubmittal.update({
-    where: {
-      confirmation: confirmation
-    },
-    data: {
-      status: 'Published'
-    }
-  })
-  return updateObj
-}
-
-/**
  * @function getCommunityThumbnails
  * @description returns an array of thumbnail url's for 3D models uploaded by the community
  * 
@@ -879,7 +862,7 @@ export const unassignModelToStudent = async (uid: string, email: string) => {
  * 
  */
 export const getStudentsAndAssignments = async () => {
-  return await prisma.authorized.findMany({ where: {role: 'student'}, include: {assignment: true} satisfies Prisma.authorizedInclude })
+  return await prisma.authorized.findMany({ where: { role: 'student' }, include: { assignment: true } satisfies Prisma.authorizedInclude })
 }
 
 /**
@@ -897,7 +880,7 @@ export const getAssignments = async () => {
  * 
  */
 export const getModelsWithAssignments = async () => {
-  return await prisma.model.findMany({include: {assignment: true}})
+  return await prisma.model.findMany({ include: { assignment: true } })
 }
 
 /**
@@ -907,14 +890,25 @@ export const getModelsWithAssignments = async () => {
  */
 
 export const approveAnnotations = async (uid: string) => {
-return await prisma.model.update({where: {uid: uid}, data: {annotationsApproved: true}})
+  return await prisma.model.update({ where: { uid: uid }, data: { annotationsApproved: true } })
 }
+
 /**
  * @function unapproveAnnotations
  * @description unapprove 3d model annotations
  * 
  */
 export const unapproveAnnotations = async (uid: string) => {
-  return await prisma.model.update({where: {uid: uid}, data: {annotationsApproved: false}})
-  }
+  return await prisma.model.update({ where: { uid: uid }, data: { annotationsApproved: false } })
+}
+
+/**
+ * @function approveModel
+ * @description unapprove 3d model annotations
+ * 
+ */
+export const approveModel = async (uid: string) => {
+  return await prisma.model.update({ where: { uid: uid }, data: { modelApproved: true } })
+}
+
 

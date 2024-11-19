@@ -12,7 +12,6 @@ import { fullUserSubmittal } from "@/interface/interface"
 import { model } from "@prisma/client"
 
 const getUniqueModelers = (models: model[]): string[] => {
-  console.log(models)
   const uniqueModelers = new Set<string>();
   models.forEach(model => uniqueModelers.add(model.modeled_by as string))
   return Array.from(uniqueModelers);

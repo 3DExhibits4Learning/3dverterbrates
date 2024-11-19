@@ -1,9 +1,10 @@
 /**
  * @file src/components/Admin/AnnotationClient.tsx
  * 
- * @fileoverview annotation client parent component; its most important children are BotanistModelViewer and AnnotationEntry
+ * @fileoverview annotation client parent component; its most important children are AnnotationModelViewer and AnnotationEntry
  * 
  * @todo Restructure state management with a reducer and state object
+ * @todo Provide context of that state object to AnnotationModelViewer and AnnotationEntry
  * 
  */
 
@@ -21,7 +22,7 @@ import { DataTransferContext } from "@/components/Admin/Administrator/ManagerCli
 import { approveAnnotations, unapproveAnnotations } from "@/functions/client/managerClient/approveAnnotations"
 
 // Default imports
-import BotanistRefWrapper from "./BotanistModelViewerRef"
+import BotanistRefWrapper from "./AnnotationModelViewerRef"
 import AreYouSure from "../Shared/Modals/AreYouSure"
 import AnnotationEntry from "./AnnotationEntry"
 import ModelAnnotations from "@/classes/ModelAnnotationsClass"

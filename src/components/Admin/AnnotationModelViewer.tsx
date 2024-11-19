@@ -1,4 +1,14 @@
-"use client";
+"use client"
+
+/**
+ * @file src/components/Admin/AnnotationModelViewer.tsx
+ * 
+ * @fileoverview model viewer that allows for embedding annotations
+ * 
+ * @todo extract and import stand alone functions
+ * @todo extract Effect logic in to stand alone functions, extract and import
+ */
+
 
 import Sketchfab from '@sketchfab/viewer-api';
 import { MutableRefObject, useEffect, useRef, Dispatch, SetStateAction, forwardRef, ForwardedRef, useState } from 'react';
@@ -32,7 +42,7 @@ const BotanistModelViewer = forwardRef((props: {
     const removeHigherAnnotations = () => {
         if (props.annotations && props.annotations.length + 1 !== props.activeAnnotationIndex) {
             for (let i = props.annotations.length; i >= (props.activeAnnotationIndex as number); i--) {
-                sketchfabApi.removeAnnotation(i, (err: any) => {})
+                sketchfabApi.removeAnnotation(i, (err: any) => { })
             }
         }
     }
@@ -49,7 +59,7 @@ const BotanistModelViewer = forwardRef((props: {
 
     // Annotation creation handler
     const createAnnotation = (info: any) => {
-        
+
         if (newAnnotationEnabled.current) {
 
             // Remove previous annotation if there is a new click
@@ -76,14 +86,14 @@ const BotanistModelViewer = forwardRef((props: {
 
     // Annotation reposition handler
     const repositionAnnotation = (info: any) => {
-        
+
         if (props.repositionEnabled) {
 
             // Remove higher annotations so that the current can be repositioned with all indexes remaining in tact
             removeHigherAnnotations()
 
             // Remove previous annotation if there is a new click
-            sketchfabApi.removeAnnotation(props.activeAnnotationIndex as number - 1, (err: any) => {})
+            sketchfabApi.removeAnnotation(props.activeAnnotationIndex as number - 1, (err: any) => { })
 
             // Get camera position and create annotation
             sketchfabApi.getCameraLookAt((err: any, camera: any) => {
@@ -189,19 +199,19 @@ const BotanistModelViewer = forwardRef((props: {
     // This effect repositions an annotation to its original location when the annotation reposition checkbox is unchecked
     useEffect(() => {
 
-        if(props.activeAnnotationIndex === 1){
+        if (props.activeAnnotationIndex === 1) {
             temporaryAnnotationIndex.current = undefined
             removeHigherAnnotations()
             sketchfabApi.removeAnnotation(props.activeAnnotationIndex as number - 1, (err: any) => { })
             const position = props.firstAnnotationPosition as string
-            sketchfabApi.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Placeholder', '', (err: any, index: any) => {replaceHigherAnnotations()})
+            sketchfabApi.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Placeholder', '', (err: any, index: any) => { replaceHigherAnnotations() })
         }
         else if (sketchfabApi && props.position3D !== (props.annotations as fullAnnotation[])[props.activeAnnotationIndex as number - 2]?.position && !props.repositionEnabled) {
             temporaryAnnotationIndex.current = undefined
             removeHigherAnnotations()
             sketchfabApi.removeAnnotation(props.activeAnnotationIndex as number - 1, (err: any) => { })
             const position = JSON.parse((props.annotations as fullAnnotation[])[props.activeAnnotationIndex as number - 2].position as string)
-            sketchfabApi.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Placeholder', '', (err: any, index: any) => {replaceHigherAnnotations()})
+            sketchfabApi.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Placeholder', '', (err: any, index: any) => { replaceHigherAnnotations() })
         }
     }, [props.repositionEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
 

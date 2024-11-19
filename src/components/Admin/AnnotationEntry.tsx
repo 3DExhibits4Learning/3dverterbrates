@@ -3,18 +3,19 @@
  * 
  * @fileoverview interface for annotation CRUD operations
  * 
- * @todo extract and export create, update, delete and setImgSrc functions
- * @todo create functions/wrappers to set group states in useEffect()
+ * @todo extract and import create, update, delete and setImgSrc functions
+ * @todo extract state logic with reducer and single state object for form fields
  * @todo convert data transfer states to context
  */
 
 'use client'
 
 import { useState, useEffect, SetStateAction, Dispatch } from "react"
-import { model_annotation, photo_annotation, video_annotation, model } from "@prisma/client"
+import { model_annotation, photo_annotation, video_annotation } from "@prisma/client"
 import { Button } from "@nextui-org/react"
-import DataTransferModal from "../Shared/Modals/DataTransferModal"
 import { v4 as uuidv4 } from 'uuid'
+import { AnnotationEntryProps } from "@/interface/interface"
+
 import TextInput from "../Shared/Form Fields/TextInput"
 import RadioButtons from "./AnnotationFields/RadioButtons"
 import AnnotationReposition from "./AnnotationFields/AnnotationReposition"
@@ -22,9 +23,10 @@ import FileInput from "./AnnotationFields/ImageInput"
 import License from "./AnnotationFields/License"
 import Annotation from "./Annotation"
 import dynamic from "next/dynamic"
-const ModelViewer = dynamic(() => import('../Shared/ModelViewer'), { ssr: false })
 import ModelAnnotationSelect from "./AnnotationFields/ModelAnnotationSelect"
-import { AnnotationEntryProps } from "@/interface/interface"
+import DataTransferModal from "../Shared/Modals/DataTransferModal"
+
+const ModelViewer = dynamic(() => import('../Shared/ModelViewer'), { ssr: false })
 
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 
@@ -56,6 +58,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     const [annotation, setAnnotation] = useState<string>((props.activeAnnotation as photo_annotation)?.annotation ?? '')
     const [length, setLength] = useState<string>((props.activeAnnotation as video_annotation)?.length ?? '')
     const [imageSource, setImageSource] = useState<string>()
+    const [videoSource, setVideoSource] = useState<string>('')
     const [modelAnnotationUid, setModelAnnotationUid] = useState<string>('select')
 
 
@@ -118,6 +121,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 case 'video':
                     // Video_annotation table data
                     data.set('length', length)
+                    data.set('url', videoSource)
 
                     break
 
@@ -214,6 +218,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 // Video_annotation table data
                 case 'video':
                     data.set('length', length)
+                    data.set('url', videoSource)
 
                     break
 
@@ -300,14 +305,14 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     useEffect(() => {
 
         // This code shouldn't run for the first annotation
-        if (props.index !== 1 && annotationType !== 'model') {
+        if (props.index !== 1 && annotationType === 'photo') {
 
             // Determine image visibility
-            if (annotationType === 'photo' && !file && !props.new) setImageVisible(true)
+            if (!file && !props.new) setImageVisible(true)
             else setImageVisible(false)
         }
 
-    }, [props.new, annotationType, mediaType, url, props.activeAnnotation, props.index, file, imageSource])
+    }, [props.new, annotationType, props.index, file, props.activeAnnotation])
 
     // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
     useEffect(() => {
@@ -316,7 +321,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         if (props.annotationType && props.activeAnnotation) {
 
             // Set states for photo annotation
-            if (props.annotationType == 'photo') {
+            if (props.annotationType === 'photo') {
 
                 const annotation = props.activeAnnotation as photo_annotation
 
@@ -330,6 +335,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 setAnnotationTitle(props.activeAnnotationTitle)
                 setImgSrc()
 
+                setAnnotationType(props.annotationType)
                 setMediaType('upload')
                 setPhotoChecked(true)
                 setVideoChecked(false)
@@ -337,23 +343,27 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }
 
             // Set for video annotation
-            else if (props.annotationType == 'video') {
+            else if (props.annotationType === 'video') {
 
                 setLength((props.activeAnnotation as video_annotation).length as string)
-                setImageSource((props.activeAnnotation as video_annotation).url)
+                setVideoSource((props.activeAnnotation as video_annotation).url)
 
+                setAnnotationType(props.annotationType)
                 setMediaType('url')
                 setVideoChecked(true)
                 setPhotoChecked(false)
                 setModelChecked(false)
+                setAnnotationType(props.annotationType)
             }
 
             // Set states for model annotation
-            else if (props.annotationType == 'model') {
+            else if (props.annotationType === 'model') {
 
                 setModelAnnotationUid((props.activeAnnotation as model_annotation).uid as string)
                 setAnnotation((props.activeAnnotation as model_annotation).annotation)
+                setAnnotationType(props.annotationType)
 
+                setAnnotationType(props.annotationType)
                 setMediaType('model')
                 setModelChecked(true)
                 setVideoChecked(false)
@@ -431,7 +441,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                     // Type assertion, required value arrays
                     const caseAnnotation = props.activeAnnotation as video_annotation
                     const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
-                    const currentValues = [annotationTitle, url, length]
+                    const currentValues = [annotationTitle, videoSource, length]
 
                     // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
                     if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
@@ -442,7 +452,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 default:
 
                     // Required fields
-                    const valueArray = [annotationTitle, url, length, props.position]
+                    const valueArray = [annotationTitle, videoSource, length, props.position]
 
                     // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
@@ -483,7 +493,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }
         }
 
-    }, [annotationTitle, props.position, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [annotationTitle, props.position, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid, videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (props.index == 1) {
         return (
@@ -581,14 +591,14 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                             <section className="flex my-12">
                                 <div className="flex ml-12 mt-12 flex-col w-1/2 max-w-[750px]">
                                     <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
-                                    <TextInput value={url as string} setValue={setUrl} title='URL' required />
+                                    <TextInput value={videoSource as string} setValue={setVideoSource} title='URL' required />
                                     <TextInput value={length as string} setValue={setLength} title='Length' required />
                                 </div>
                                 <div className="flex h-[50vh] w-[45%]">
                                     {
-                                        imageSource?.includes('https://www.youtube.com/embed/') &&
+                                        videoSource?.includes('https://www.youtube.com/embed/') &&
                                         <iframe
-                                            src={imageSource}
+                                            src={videoSource}
                                             className="h-full w-full ml-[1%] rounded-xl"
                                         >
                                         </iframe>
@@ -597,11 +607,10 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                             </section>
                         }
                         {
-                            annotationType == 'model' &&
+                            annotationType === 'model' &&
                             <section className="flex my-12 w-full">
                                 <div className="flex ml-12 mt-12 flex-col w-3/5 max-w-[750px] mr-12">
                                     <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
-                                    {/* <TextInput value={modelAnnotationUid as string} setValue={setModelAnnotationUid as Dispatch<SetStateAction<string>>} title='UID' required /> */}
                                     <ModelAnnotationSelect value={modelAnnotationUid} setValue={setModelAnnotationUid} modelAnnotations={props.annotationModels} />
                                     <Annotation annotation={annotation} setAnnotation={setAnnotation} />
                                 </div>
