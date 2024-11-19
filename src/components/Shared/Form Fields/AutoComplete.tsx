@@ -3,10 +3,10 @@
 
 'use client'
 
-import { ChangeEvent, LegacyRef, MutableRefObject, forwardRef, useRef, useState, useEffect, KeyboardEvent, SetStateAction, Dispatch } from "react"
+import { ChangeEvent, LegacyRef,  useRef, useState, useEffect, KeyboardEvent, SetStateAction, Dispatch } from "react"
 import { useRouter } from "next/navigation"
 
-export default function Autocomplete(props: { options: any[], changeFn: Function, width?: string, value: string, setValue:Dispatch<SetStateAction<string>>, className?: string, listWidth?: string, search?: boolean }) {
+export default function Autocomplete(props: { options: any[], changeFn: Function, width?: string, value: string, setValue: Dispatch<SetStateAction<string>>, className?: string, listWidth?: string, search?: boolean }) {
     // Variable Declarations
 
     const router = useRouter()
@@ -94,7 +94,7 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
 
                 if (highlightedIndex >= 0 && selectedValue.current) {
                     selectedValue.current.value = props.options[highlightedIndex].name
-                    valueRef.current =props.options[highlightedIndex].name
+                    valueRef.current = props.options[highlightedIndex].name
                     props.setValue(props.options[highlightedIndex].name)
                     setOptionsVisible(false)
 
@@ -123,7 +123,6 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
         }
     }, [props.options]) // eslint-disable-line react-hooks/exhaustive-deps
 
-
     return (
         <>
             <div className="flex">
@@ -139,10 +138,12 @@ export default function Autocomplete(props: { options: any[], changeFn: Function
                 {
                     props.options.length > 0 && optionsVisible &&
                     <ul ref={options as LegacyRef<HTMLUListElement>} className={`absolute ${props.listWidth} z-50 bg-white dark:bg-[#27272a] rounded-xl mt-[42px] text-[#004C46]`}>
-                        {props.options.map((option, index) => {
-                            if (index == highlightedIndex) return <li onClick={() => listSelect(option.name)} className={`hover:cursor-pointer px-4 bg-[#00856A] rounded-lg text-white`} key={option.name}>{option.name}</li>
-                            else return <li onClick={() => listSelect(option.name)} className={`hover:bg-[#00856A] hover:text-white dark:hover:bg-[#00856A] dark:text-white hover:cursor-pointer px-4 rounded-lg`} key={option.name}>{option.name}</li>
-                        })}
+                        {
+                            props.options.map((option, index) => {
+                                if (index == highlightedIndex) return <li onClick={() => listSelect(option.name)} className={`hover:cursor-pointer px-4 bg-[#00856A] rounded-lg text-white`} key={option.name}>{option.name}</li>
+                                else return <li onClick={() => listSelect(option.name)} className={`hover:bg-[#00856A] hover:text-white dark:hover:bg-[#00856A] dark:text-white hover:cursor-pointer px-4 rounded-lg`} key={option.name}>{option.name}</li>
+                            })
+                        }
                     </ul>
                 }
             </div>

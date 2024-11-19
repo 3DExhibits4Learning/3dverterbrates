@@ -19,7 +19,6 @@ import { fullModel } from "@/interface/interface";
 
 // Default imports
 import AnnotationClient from "../AnnotationClient";
-import AnnotationAssignment from "./Annotations/AnnotationAssignment";
 import initializeDataTransfer from "@/functions/client/dataTransfer/initializeDataTransfer";
 import terminateDataTransfer from "@/functions/client/dataTransfer/terminateDataTransfer";
 import RemoveStudent from "./Students/RemoveStudent";
@@ -33,6 +32,7 @@ import DataTransferModal from "../../Shared/Modals/DataTransferModal";
 import StudentTable from "./Students/GetStudents";
 import AdminItemContainer from "./ItemContainer";
 import Assignments from "./Assignments/Assignments";
+import FindModel from "./Model/Find";
 
 // Dynamic imports
 const ModelSubmitForm = dynamic(() => import("@/components/Admin/ModelSubmit/Form"))
@@ -99,6 +99,13 @@ export default function ManagerClient(props: ManagerClientProps) {
                     <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                         {/* "Models" nested accordion */}
                         <Accordion>
+                            {/* Model submit form */}
+                            <AccordionItem key='findModel' aria-label={'findModel'} title='Find' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                <FindModel models={models}/>
+                            </AccordionItem>
+                            <AccordionItem key='approveModel' aria-label={'approveModel'} title='Approve' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                                Approve
+                            </AccordionItem>
                             {/* Model submit form */}
                             <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
                                 <ModelSubmitForm />

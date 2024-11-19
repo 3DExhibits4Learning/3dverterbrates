@@ -13,14 +13,12 @@ import ProcessSelect from './ProcessSelectField';
 import { Button } from "@nextui-org/react";
 import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
-import { LatLngLiteral } from 'leaflet';
-import FormMap from '../../Map/Form';
 import DataTransferModal from '../../Shared/Modals/DataTransferModal';
 import { UpdateModelFormProps } from '@/interface/interface';
 import TextInput from '../../Shared/Form Fields/TextInput';
 import AutoCompleteWrapper from '../../Shared/Form Fields/AutoCompleteWrapper';
-import DateInput from '../../Shared/Form Fields/DateInput';
 import ModelInput from './ModelInput';
+import LatLng from './LatLng';
 
 // Main component
 export default function UpdateModelForm(props: UpdateModelFormProps) {
@@ -42,8 +40,8 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
     // Variable initialization - field states
     const [species, setSpecies] = useState<string>(model.spec_name)
     const [speciesAcquisitionDate, setSpeciesAcquisitionDate] = useState<string>(model.spec_acquis_date ? model.spec_acquis_date : '')
-    //@ts-ignore - number and decimal appear to be compatible in this context
-    const [position, setPosition] = useState<LatLngLiteral | null>({ lat: model.lat, lng: model.lng })
+    const [lat, setLat] = useState<string>(model.lat ? model.lat.toString() : '')
+    const [lng, setLng] = useState<string>(model.lng ? model.lng.toString() : '')
     const [artist, setArtist] = useState<string>(model.modeled_by)
     const [buildMethod, setBuildMethod] = useState<string>(model.build_process)
     const [software, setSoftware] = useState<{ value: string }[]>(model.software.map((softwareObject) => ({ value: softwareObject.software })))
@@ -94,7 +92,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
 
             const formSoftware = JSON.stringify(software.filter(obj => obj.value))
             const formTags = JSON.stringify(software.filter(obj => obj.value))
-            const formPosition = JSON.stringify(position)
+            const formPosition = JSON.stringify({ lat: lat, lng: lng })
 
             data.set('artist', artist)
             data.set('species', species)
@@ -119,7 +117,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                     setTransferring(false)
                 })
         }
-        
+
         // Typical catch
         catch (e: any) {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
@@ -131,8 +129,6 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
     useEffect(() => {
         setSpecies(props.model.spec_name)
         setSpeciesAcquisitionDate(model.spec_acquis_date ?? '')
-        //@ts-ignore - number and decimal appear to be compatible in this context
-        setPosition({ lat: model.lat, lng: model.lng })
         setReRenderKey(reRenderKey + 1)
         setReRenderKey1(reRenderKey1 + 1)
     }, [props.model])
@@ -143,15 +139,14 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
         // Appropriate then stringify initial values for comparison
         const initialSoftware = model.software.map((softwareObject) => ({ value: softwareObject.software }))
         const initialTags = model.tags.map((tagObject) => ({ value: tagObject.tag }))
-        const initialPosition = {lat: model.lat, lng: model.lng}
-        const initialFormValues = JSON.stringify([model.spec_name, model.spec_acquis_date, model.modeled_by, model.build_process, initialPosition, initialSoftware, initialTags])
-        const currentFormValues = JSON.stringify([species, speciesAcquisitionDate, artist, buildMethod, position, software, tags])
+        const initialFormValues = JSON.stringify([model.spec_name, model.spec_acquis_date, model.modeled_by, model.build_process, model.lat, model.lng, initialSoftware, initialTags])
+        const currentFormValues = JSON.stringify([species, speciesAcquisitionDate, artist, buildMethod, lat, lng, software, tags])
 
         // Set upload disabled button state
-        if (species && artist && buildMethod && software.length && position && currentFormValues !== initialFormValues) setUpdateDisabled(false)
+        if (species && artist && buildMethod && software.length && currentFormValues !== initialFormValues) setUpdateDisabled(false)
         else setUpdateDisabled(true)
 
-    }, [species, speciesAcquisitionDate, artist, buildMethod, position, software, tags])
+    }, [species, speciesAcquisitionDate, artist, buildMethod, software, tags])
 
     return (
         <>
@@ -168,8 +163,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                 <Divider className='mb-6' />
 
                 <AutoCompleteWrapper value={species} setValue={setSpecies} />
-                <DateInput value={speciesAcquisitionDate} setValue={setSpeciesAcquisitionDate} />
-                <FormMap position={position} setPosition={setPosition} title />
+                <LatLng lat={lat} lng={lng} setLat={setLat} setLng={setLng} />
                 <TagInput key={reRenderKey} value={tags} setValue={setTags} defaultValues={tagString} />
 
                 <Divider className='mt-8' />
@@ -189,7 +183,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                     onClick={edit3DModelHandler}
                     className='text-white text-xl mb-24 mt-8 ml-12'>Save changes
                 </Button>
-            
+
             </form>
         </>
     )
