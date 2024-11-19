@@ -12,7 +12,7 @@
 
 // Typical imports
 import { model } from "@prisma/client";
-import { useState, createContext } from "react";
+import { useState, createContext, useMemo } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import { ManagerClientProps, studentsAssignmentsAndModels } from "@/interface/interface";
 import { fullModel } from "@/interface/interface";
@@ -33,6 +33,7 @@ import StudentTable from "./Students/GetStudents";
 import AdminItemContainer from "./ItemContainer";
 import Assignments from "./Assignments/Assignments";
 import FindModel from "./Model/Find";
+import ApproveModel from "./Model/Approve";
 
 // Dynamic imports
 const ModelSubmitForm = dynamic(() => import("@/components/Admin/ModelSubmit/Form"))
@@ -49,6 +50,7 @@ export default function ManagerClient(props: ManagerClientProps) {
     const modelsWithThumbnails: fullModel[] = JSON.parse(props.modelsWithThumbnails)
     const unannotatedModels: fullModel[] = JSON.parse(props.unannotatedModels)
     const studentsAssignmentsAndModels: studentsAssignmentsAndModels[] = JSON.parse(props.studentsAssignmentsAndModels)
+    const unapprovedModels = useMemo(() => models.filter(model => !model.annotationsApproved), [props.models])
 
     // Data transfer state variables
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -104,7 +106,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                                 <FindModel models={models}/>
                             </AccordionItem>
                             <AccordionItem key='approveModel' aria-label={'approveModel'} title='Approve' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                Approve
+                                <ApproveModel unapprovedModels={unapprovedModels}/>
                             </AccordionItem>
                             {/* Model submit form */}
                             <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
