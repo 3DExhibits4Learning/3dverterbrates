@@ -5,25 +5,28 @@
  * @todo extract jsx sections as individual components
  * @todo extract stand alone functions
  */
+"use client"
 
-"use client";
+// Typical imports
+import { useEffect, useState, useRef, LegacyRef } from 'react'
+import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter'
+import { model, model_annotation, photo_annotation } from '@prisma/client'
+import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/interface/interface'
+import { setViewerWidth, annotationControl, boolRinse, addCommas, arrayFromObjects } from './SketchfabDom'
 
-import Sketchfab from '@sketchfab/viewer-api';
-import { useEffect, useState, useRef, LegacyRef } from 'react';
-import AnnotationModal from '@/components/Collections/AnnotationModal';
-import { setViewerWidth, annotationControl, boolRinse, addCommas, arrayFromObjects } from './SketchfabDom';
-import ModelAnnotation from './AnnotationModel';
-import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter';
-import { model, model_annotation, photo_annotation } from '@prisma/client';
-import Herbarium from '@/classes/HerbariumClass';
-import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/interface/interface';
+// Default imports
+import AnnotationModal from '@/components/Collections/AnnotationModal'
+import Sketchfab from '@sketchfab/viewer-api'
+import ModelAnnotation from './AnnotationModel'
+import Vertebrates from '@/classes/HerbariumClass'
 
 const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model: model, images: GbifImageResponse[], imageTitle: string }) => {
 
   // Variable Declarations
   const gMatch = props.gMatch.data as GbifResponse
 
-  const [s, setS] = useState<Herbarium>() // s = specimen due to constant repetition
+  // States
+  const [s, setS] = useState<Vertebrates>() // s = specimen due to constant repetition
   const [annotations, setAnnotations] = useState<fullAnnotation[]>()
   const [api, setApi] = useState<any>()
   const [index, setIndex] = useState<number | null>(null);
@@ -31,13 +34,16 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
   const [imgSrc, setImgSrc] = useState<string>()
   const [annotationTitle, setAnnotationTitle] = useState("")
 
-  const sRef = useRef<Herbarium>()
+  // Refs
+  const sRef = useRef<Vertebrates>()
   const modelViewer = useRef<HTMLIFrameElement>()
   const annotationDiv = useRef<HTMLDivElement>()
 
+  // Get switches - should probably update this to refs
   const annotationSwitch = document.getElementById("annotationSwitch")
   const annotationSwitchMobile = document.getElementById("annotationSwitchMobileHidden")
 
+  // Sketchfab viewer mobile success object
   const successObj = {
     success: (api: any) => {
       api.start()
@@ -56,21 +62,22 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
     ui_fadeout: 0
   }
 
-  let successObjDesktop = { ...successObj }
-  Object.assign(successObjDesktop, { annotation: 1 })
-  successObjDesktop.ui_fadeout = 1
+  // Sketchfab viewer desktop success object
+  const successObjDesktop = { ...successObj, annotation: 1, ui_fadeout: 1 }
 
-  // Annotation switch event listeners
+  // Annotation switch event listener
   const annotationSwitchListener = (event: Event) => {
     setViewerWidth(modelViewer.current, annotationDiv.current, (event.target as HTMLInputElement).checked)
     annotationControl(api, annotations, (event.target as HTMLInputElement).checked)
   }
+
+  // Annotation switch mobile event listener
   const annotationSwitchMobileListener = (event: Event) => {
     setViewerWidth(modelViewer, annotationDiv, (event.target as HTMLInputElement).checked)
     annotationControl(api, annotations, (event.target as HTMLInputElement).checked)
   }
 
-  // This effect initializes the sketchfab client and instantiates the specimen:Herbarium object; it also ensures the page begins from the top upon load
+  // This effect initializes the sketchfab client and instantiates the specimen:Vertebrates object; it also ensures the page begins from the top upon load
   useEffect(() => {
 
     const sketchFabLink = props.model.uid
@@ -78,33 +85,33 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
 
     // Choose initialization success object based on screen size
     if (window.matchMedia('(max-width: 1023.5px)').matches || window.matchMedia('(orientation: portrait)').matches) {
-      client.init(sketchFabLink, successObj);
+      client.init(sketchFabLink, successObj)
     }
-    else {
-      client.init(sketchFabLink, successObjDesktop);
-    }
+    else client.init(sketchFabLink, successObjDesktop)
 
-    // Instantiate/set herbarium and set annotations
-    const instantiateHerbarium = async () => {
-      sRef.current = await Herbarium.model(props.gMatch.data?.usageKey as number, props.model, props.images, props.imageTitle)
+    // Instantiate/set vertebrates and set annotations
+    const instantiateVertebrates = async () => {
+      sRef.current = await Vertebrates.model(props.gMatch.data?.usageKey as number, props.model, props.images, props.imageTitle)
       setS(sRef.current)
       setAnnotations(sRef.current.annotations.annotations)
     }
 
-    instantiateHerbarium()
+    instantiateVertebrates()
 
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
+    document.body.scrollTop = document.documentElement.scrollTop = 0
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // This effect implements any databased annotations and adds annotationSwitch event listeners and sets related mobile states
   useEffect(() => {
 
     if (s && annotations && api) {
-      
-      // Create the first annotation if it exists
+
+      // Create and go to the first annotation if it exists
       if (s.model.annotationPosition) {
         const position = JSON.parse(s.model.annotationPosition)
-        api.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Taxonomy and Description', '', (err: any, index: any) => { api.gotoAnnotation(0, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { }) })
+        api.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Taxonomy and Description', '', (err: any, index: any) => {
+          api.gotoAnnotation(0, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { })
+        })
 
         // Create any futher annotations that exist
         for (let i = 0; i < annotations.length; i++) {
@@ -116,22 +123,25 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
       }
 
       // Get annotationList/add event listeners
-      api.getAnnotationList(function (err: any, annotations: any) {
-        (annotationSwitch as HTMLInputElement).addEventListener("change", annotationSwitchListener);
-        (annotationSwitchMobile as HTMLInputElement).addEventListener("change", annotationSwitchMobileListener)
-      })
+      (annotationSwitch as HTMLInputElement).addEventListener("change", annotationSwitchListener);
+      (annotationSwitchMobile as HTMLInputElement).addEventListener("change", annotationSwitchMobileListener)
+
 
       // Set index when an annotation is selected
       api.addEventListener('annotationSelect', function (index: number) {
+        
         const mediaQueryWidth = window.matchMedia('(max-width: 1023.5px)')
         const mediaQueryOrientation = window.matchMedia('(orientation: portrait)')
+
         // this event is still triggered even when an annotation is not selected; an index of -1 is returned
         if (index != -1) {
           setIndex(index);
         }
+
         // Mobile annotation state management
         if (index != -1 && mediaQueryWidth.matches || index != -1 && mediaQueryOrientation.matches) {
           document.getElementById("annotationButton")?.click()
+          
           api.getAnnotation(index, function (err: any, information: any) {
             if (!err) {
               setAnnotationTitle(information.name)
@@ -272,7 +282,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
                   </div>
                   <div id="annotationDivText">
                     <br></br>
-                    <p dangerouslySetInnerHTML={{ __html: (annotations[index - 1].annotation as photo_annotation).annotation }} className='m-auto pr-[3%] pl-[2%] text-center fade' />
+                    <p dangerouslySetInnerHTML={{ __html: (annotations[index - 1].annotation as model_annotation).annotation }} className='m-auto pr-[3%] pl-[2%] text-center fade' />
                   </div>
                   <div id="annotationDivCitation">
                     <br></br>

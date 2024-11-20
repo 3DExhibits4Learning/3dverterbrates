@@ -18,7 +18,7 @@ import { ManagerClientProps, studentsAssignmentsAndModels } from "@/interface/in
 import { fullModel } from "@/interface/interface";
 
 // Default imports
-import AnnotationClient from "../AnnotationClient";
+import AnnotationClient from "@/components/Admin/Annotation/AnnotationClient";
 import initializeDataTransfer from "@/functions/client/dataTransfer/initializeDataTransfer";
 import terminateDataTransfer from "@/functions/client/dataTransfer/terminateDataTransfer";
 import RemoveStudent from "./Students/RemoveStudent";
@@ -30,7 +30,6 @@ import UpdateThumbnailContainer from "./Thumbnails/UpdateThumbnailContainer";
 import UpdateModelContainer from "./Model/UpdateModelContainer";
 import DataTransferModal from "../../Shared/Modals/DataTransferModal";
 import StudentTable from "./Students/GetStudents";
-import AdminItemContainer from "./ItemContainer";
 import Assignments from "./Assignments/Assignments";
 import FindModel from "./Model/Find";
 import ApproveModel from "./Model/Approve";

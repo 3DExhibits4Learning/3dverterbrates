@@ -6,7 +6,8 @@
 import { removeStudent, addStudent } from "@/functions/server/queries"
 import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
-import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
+import { informStudentOfAssignment } from "@/functions/server/email"
+import { routeHandlerErrorHandler, nonFatalError } from "@/functions/server/error"
 
 // Route path
 const route = 'src/app/api/admin/student/route.ts'
@@ -32,6 +33,9 @@ export async function POST(request: Request) {
         
         // Add student to authorized table in the database
         const insertStudent = await addStudent(email, name).catch((e) => routeHandlerErrorHandler(route, e.message, 'addStudent()', "Couldn't add student"))
+
+        // Email student, informing them of their addition to the project
+        await informStudentOfAssignment('ab632@humboldt.edu', 'localhost:3000').catch((e) => nonFatalError(route, e.message, 'emailNewlyAddedStudent()'))
 
         // Typical success response
         return Response.json({ data: 'Student added', response: insertStudent })

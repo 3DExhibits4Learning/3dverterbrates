@@ -6,7 +6,7 @@
 
 // Imports
 import { readFile } from "fs/promises"
-import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
+import { routeHandlerErrorHandler, routeHandlerTypicalCatch } from "@/functions/server/error"
 
 /**
  * @function GET
@@ -30,5 +30,5 @@ export async function GET(request: Request) {
     }
     
     // Typical catch
-    catch (e: any) {return Response.json({ data: e.message, response: e.message }, { status: 400, statusText: e.message })}
+    catch (e: any) {return routeHandlerTypicalCatch(e.message)}
 }

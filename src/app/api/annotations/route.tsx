@@ -33,10 +33,9 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
+import { routeHandlerErrorHandler, routeHandlerTypicalCatch } from "@/functions/server/error"
 
 // Default imports
-import routeHandlerErrorHandler from "@/functions/server/serverError/routeHandlerErrorHandler"
-import routeHandlerTypicalCatch from "@/functions/server/serverError/routeHandlerTypicalCatch"
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"
 
 // Global-scope route for console error reference

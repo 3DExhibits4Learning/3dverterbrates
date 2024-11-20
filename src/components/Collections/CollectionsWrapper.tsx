@@ -1,56 +1,58 @@
-"use client";
+/**
+ * @file src/components/Collections/CollectionsWrapper.tsx
+ * 
+ * @fileoverview Wrapper for the 3d model collections
+ * 
+ * @todo Modify to take JSX as children with references to the window resizing context for scale
+ */
+"use client"
 
-import { useEffect, useState } from 'react'
+// Typical Imports
+import { useState } from 'react'
+import { Switch } from "@nextui-org/react"
+import { isMobileOrTablet } from '../../functions/utils/isMobile'
+import { GbifResponse, GbifImageResponse } from '@/interface/interface'
+
+// Default Imports
+import Inaturalist from '@/components/Collections/iNaturalist'
+import dynamic from 'next/dynamic'
 import ComponentDivider from '@/components/Shared/ComponentDivider'
 import OccurrenceSwiper from "@/components/Collections/GbifSwiper"
 import Foot from '@/components/Shared/Foot'
-import { Switch } from "@nextui-org/react"
-import { useRouter } from "next/navigation"
-import Inaturalist from '@/components/Collections/iNaturalist'
-import dynamic from 'next/dynamic'
-import { isMobileOrTablet } from '../../functions/utils/isMobile';
-const SketchfabApi = dynamic(() => import('@/components/Collections/SketchFabAPI'), { ssr: false })
-import { GbifResponse, GbifImageResponse } from '@/interface/interface';
 
+// Dynamic Imports
+const SketchfabApi = dynamic(() => import('@/components/Collections/SketchFabAPI'), { ssr: false })
+
+// Main JSX 
 export default function MainWrap(props: {
-  redirectUrl: string | null,
   model: string,
   gMatch: { hasInfo: boolean, data?: GbifResponse },
   specimenName: string,
   noModelData: { title: string, images: GbifImageResponse[] }
 }) {
 
-  const redirectUrl: string | null = props.redirectUrl
-  const router = useRouter();
+  // Parse model (decimals can't be passed to client from server)
   const model = JSON.parse(props.model).length ? JSON.parse(props.model) : []
 
-  //const mediaQuery = window.matchMedia('(max-width: 1023.5px)')
+  // Model height based on user agent
   var modelHeight = isMobileOrTablet() ? "calc(100vh - 160px)" : "calc(100vh - 104.67px)"
 
-  const [isSelected, setIsSelected] = useState(true)
-  //const [scaleSelected, setScaleSelected] = useState(false)
+  // Variable heights based on window
   const [viewWidthInPx, setViewWidthInPx] = useState(window.outerWidth)
   const [viewportHeightInPx, setViewportHeightInPx] = useState(window.outerHeight + 200)
   const [swiperHeight, setSwiperHeight] = useState(window.outerHeight - 96)
   const [imgHeight, setImageHeight] = useState(window.outerHeight - 208)
 
-  useEffect(() => {
-    if (redirectUrl) {
-      router.push(redirectUrl);
-    }
-  }, [redirectUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Annotations selected state
+  const [isSelected, setIsSelected] = useState<boolean>(true)
 
-  if (typeof (window)) {
-    window.onresize = () => {
-      setViewportHeightInPx(window.outerHeight + 200)
-      setViewWidthInPx(window.outerWidth)
-      setSwiperHeight(window.outerHeight)
-      setImageHeight(window.outerHeight - 112)
-    }
+  // Reset heights on window resize (for zoom/scale)
+  window.onresize = () => {
+    setViewportHeightInPx(window.outerHeight + 200)
+    setViewWidthInPx(window.outerWidth)
+    setSwiperHeight(window.outerHeight)
+    setImageHeight(window.outerHeight - 112)
   }
-
-  //var screenSize: boolean = window.matchMedia(("(max-width: 768px)")).matches
-  //var txtSize: string = screenSize ? "1rem" : "1.4rem"
 
   return (
     <>
@@ -60,9 +62,6 @@ export default function MainWrap(props: {
           <div className="hidden lg:flex h-10 bg-[#00856A] dark:bg-[#212121] text-white items-center justify-between ">
             <p style={{ paddingLeft: "2.5%" }}>Also on this page: <a className="mx-4" href="#imageSection"><u>Images</u></a> <a href="#mapSection"><u>iNaturalist Observations</u></a></p>
             <div className='flex mr-4'>
-              {/* <Switch className='mr-12' defaultSelected id="scaleSwitch" isSelected={scaleSelected} color='secondary' onValueChange={setScaleSelected}>
-            <span className="text-white">Scale</span>
-          </Switch> */}
               <Switch style={{ paddingRight: "2.5%" }} defaultSelected id="annotationSwitch" isSelected={isSelected} color='secondary' onValueChange={setIsSelected}>
                 <span className="text-white">Annotations</span>
               </Switch>

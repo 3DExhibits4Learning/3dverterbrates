@@ -1,4 +1,3 @@
-
 import { getAnnotations, getPhotoAnnotation, getVideoAnnotation, markAsAnnotated, getModelAnnotation, updateModelAnnotator } from "@/functions/server/queries"
 
 export async function GET(request: Request) {

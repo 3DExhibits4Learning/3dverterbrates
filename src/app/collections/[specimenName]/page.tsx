@@ -1,18 +1,25 @@
 /**
  * @file /app/collections/[specimenName]/page.tsx
  * @fileoverview the collections page for when users are viewing a specific specimen (genus or species).
- * Contains the 3D model (if it exists), images and occurrence map.
+ * Contains the 3D model (if it exists), images and inaturalist observations, map and leaderboard.
  */
 
-import { GbifImageResponse, GbifResponse } from "@/interface/interface";
+// Typical Imports
+import { GbifImageResponse, GbifResponse } from "@/interface/interface"
 import { getModel } from '@/functions/server/queries'
-import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/functions/server/fetchFunctions";
-import Foot from '@/components/Shared/Foot'
-import dynamic from "next/dynamic";
-import { model } from "@prisma/client";
+import { fetchCommonNameInfo, fetchSpecimenGbifInfo, fetchGbifImages } from "@/functions/server/fetchFunctions"
+import { model } from "@prisma/client"
+import { redirect } from "next/navigation"
+
+// Default Imports
+import dynamic from "next/dynamic"
+import NoDataFound from "@/components/Collections/NoDataFound"
+
+// Dynamic Imports
 const Header = dynamic(() => import('@/components/Header/Header'), { ssr: false })
 const CollectionsWrapper = dynamic(() => import('@/components/Collections/CollectionsWrapper'), { ssr: false })
 
+// Main JSX
 export default async function Page({ params }: { params: { specimenName: string } }) {
 
   // Variable declarations
@@ -24,43 +31,37 @@ export default async function Page({ params }: { params: { specimenName: string 
   var images: any
   const decodedSpecimenName = decodeURI(params.specimenName)
 
-  // Populate promises then await the results
+  // Push GBIF fetch and getModel onto promise array
   promises.push(fetchSpecimenGbifInfo(params.specimenName), getModel(decodedSpecimenName))
 
+  // Await the promises
   await Promise.all(promises).then(results => {
 
-    gMatch = results[0] as { hasInfo: boolean; data?: GbifResponse }
+    // Populate variables with types
+    gMatch = results[0] as { hasInfo: boolean, data?: GbifResponse }
     _3dmodel = results[1] as model[]
 
+    // If there is a GBIF record of the specimen, fetch images
     if (gMatch.hasInfo) return fetchGbifImages(gMatch.data.usageKey, gMatch.data.rank)
   })
+    // Populate variables with images (or undefined if there are no images)
     .then(res => {
       images = res
       noModelData = { title: 'Images from the Global Biodiversity Information Facility', images: images }
     })
 
-  // If there is a 3d model for the searched specimen or image data for the specimen searched, continue
-  if (_3dmodel.length || images) { }
+  // If there is no model or GBIF record of the specimen, we test for a common name
+  if (!(_3dmodel.length || gMatch.hasInfo)) {
 
-  // If there are no models, search for common name information. If there is no common name information, display appropriate message. If there is, populate the redirect url.
-  else {
+    // Await common name data
     const commonNameInfo = await fetchCommonNameInfo(params.specimenName)
 
-    if (commonNameInfo.length <= 0) {
-      return (
-        <>
-          <Header headerTitle={params.specimenName} pageRoute="collections" />
-          <div className="h-[calc(100vh-177px)] w-full flex justify-center items-center text-center text-2xl px-5">
-            <p>No data found for search term &quot;{decodeURI(params.specimenName)}.&quot; Try a species, genus or vernacular name.</p>
-          </div>
-          <Foot />
-        </>
-      )
-    }
-    else {
-      redirectUrl = `/collections/common-name/${params.specimenName}`
-    }
+    // If there is no common name data, retrun <NoDataFound/>, else redirect to common name search
+    if (commonNameInfo.length <= 0) return <NoDataFound specimenName={params.specimenName} />
+    else redirect(`/collections/common-name/${params.specimenName}`)
   }
+
+
   return (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"></meta>
@@ -74,7 +75,6 @@ export default async function Page({ params }: { params: { specimenName: string 
       />
 
       <CollectionsWrapper
-        redirectUrl={redirectUrl}
         model={JSON.stringify(_3dmodel)}
         gMatch={gMatch}
         specimenName={params.specimenName}

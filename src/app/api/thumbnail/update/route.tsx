@@ -38,6 +38,7 @@ export async function POST(request: Request) {
         // Write file to path
         path = join(path, file.name)
 
+        //@ts-ignore - typescript thinks writeFile doesn't take a buffer
         await writeFile(path, buffer).catch((e) => {
             if (process.env.LOCAL_ENV === 'development') console.error(e.message)
             throw Error("Couldn't write file")
