@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: { specimenName: string 
   promises.push(fetchSpecimenGbifInfo(params.specimenName), getModel(decodedSpecimenName))
 
   await Promise.all(promises).then(results => {
-    
+
     gMatch = results[0] as { hasInfo: boolean; data?: GbifResponse }
     _3dmodel = results[1] as model[]
 
@@ -44,7 +44,7 @@ export default async function Page({ params }: { params: { specimenName: string 
 
   // If there are no models, search for common name information. If there is no common name information, display appropriate message. If there is, populate the redirect url.
   else {
-    const commonNameInfo = await fetchCommonNameInfo(params.specimenName);
+    const commonNameInfo = await fetchCommonNameInfo(params.specimenName)
 
     if (commonNameInfo.length <= 0) {
       return (
@@ -70,7 +70,8 @@ export default async function Page({ params }: { params: { specimenName: string 
         searchTerm={params.specimenName}
         headerTitle={params.specimenName}
         hasModel={!!_3dmodel.length}
-        pageRoute="collections" />
+        pageRoute="collections"
+      />
 
       <CollectionsWrapper
         redirectUrl={redirectUrl}
@@ -79,7 +80,6 @@ export default async function Page({ params }: { params: { specimenName: string 
         specimenName={params.specimenName}
         noModelData={noModelData as { title: string, images: GbifImageResponse[] }}
       />
-
     </>
   )
 }

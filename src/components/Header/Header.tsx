@@ -59,7 +59,7 @@ const Header = (props: SearchHeaderProps) => {
   // Fetch autocomplete options and refresh corresponding state
 
   const fetchAutoCompleteOptions = async () => {
-    const autocompleteOptions = await fetch(`https://api.inaturalist.org/v1/taxa/autocomplete?taxon_id=47126&rank=species,genus&q=${searchQuery.current}`)
+    const autocompleteOptions = await fetch(`https://api.inaturalist.org/v1/taxa/autocomplete?taxon_id=1&rank=species,genus&q=${searchQuery.current}`)
       .then(res => res.json()).then(json => json.results)
     setAutocompleteOptions(autocompleteOptions)
   }
@@ -151,7 +151,7 @@ const Header = (props: SearchHeaderProps) => {
         </NavbarMenu>
       </Navbar >
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
