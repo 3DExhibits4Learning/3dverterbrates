@@ -27,8 +27,8 @@ export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] |
                 props.modelsNeedingThumbnails && props.modelsNeedingThumbnails.length > 0 &&
 
                 props.modelsNeedingThumbnails.map((model, index) =>
-                    <section className="flex flex-col items-center">
-                        <div key={index} className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4">
+                    <section key={index} className="flex flex-col items-center">
+                        <div className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4">
                             <p>Species Name: {model.spec_name}</p>
                             <p className="mb-8">UID: {model.uid}</p>
                             <div className="w-[500px] h-[500px] mb-8">

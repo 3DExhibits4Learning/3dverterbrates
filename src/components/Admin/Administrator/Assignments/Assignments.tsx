@@ -28,7 +28,7 @@ export default function Assignments(props: { studentsAssignmentsAndModels: stude
                     {
                         sam.map((student, index) =>
                             <>
-                                <tr>
+                                <tr key={Math.random()}>
                                     <td className={index === sam.length - 1 && sam[index].assignment.length <= 1 ? "border-[#004C46] border-r py-2 pl-2" : "border-b border-[#004C46] border-r py-2 pl-2"} key={Math.random()}>{student.name}</td>
                                     <td className={index === sam.length - 1 && sam[index].assignment.length <= 1 ? "py-2 pl-2 border-r border-[#004C46]" : "border-b border-[#004C46] border-r py-2 pl-2"} key={Math.random()}>{student.assignment.length ? student.models[0].spec_name : 'N/A'}</td>
                                     <td className={index === sam.length - 1 && sam[index].assignment.length <= 1 ? "py-2 pl-2 border-r border-[#004C46]" : "border-b border-[#004C46] border-r py-2 pl-2"} key={Math.random()}>{student.assignment.length ? student.models[0].annotated ? 'Yes' : 'No' : ''}</td>
@@ -39,7 +39,7 @@ export default function Assignments(props: { studentsAssignmentsAndModels: stude
                                 {
                                     student.assignment.length > 1 &&
                                     student.assignment.slice(1).map((assignment, index) =>
-                                        <tr>
+                                        <tr key={Math.random()}>
                                             <td className={index === student.assignment.slice(1).length - 1 ? "border-[#004C46] border-r py-2 pl-2" : "border-b border-r border-[#004C46] py-2 pl-2"} key={Math.random()}>{student.name}</td>
                                             <td className={index === student.assignment.slice(1).length - 1 ? "border-[#004C46] border-r py-2 pl-2" : "border-b border-r border-[#004C46] py-2 pl-2"} key={Math.random()}>{student.models[index + 1].spec_name}</td>
                                             <td className={index === student.assignment.slice(1).length - 1 ? "border-[#004C46] border-r py-2 pl-2" : "border-b border-r border-[#004C46] py-2 pl-2"} key={Math.random()}>{student.models[index + 1].annotated ? 'Yes' : 'No'}</td>

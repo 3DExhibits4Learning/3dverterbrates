@@ -24,7 +24,7 @@ export default function StudentTable(props: { studentsAssignmentsAndModels: stud
                     </tr>
                     {
                         sam.map((student, index) =>
-                                <tr>
+                                <tr key={index}>
                                     <td className={index === sam.length - 1 ? "border-[#004C46] border-r py-2 pl-4" : "border-b border-[#004C46] border-r py-2 pl-4"} key={index}>{student.name}</td>
                                     <td className={index === sam.length - 1 ? "py-2 pl-4 border-[#004C46]" : "border-b border-[#004C46] py-2 pl-4"} key={index}>{student.email}</td>
                                 </tr>

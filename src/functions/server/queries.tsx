@@ -144,7 +144,8 @@ export async function getSoftwares(uid: string) {
  */
 export const getAllSiteReadyModels = async (development: boolean): Promise<model[]> => {
 
-  const whereClause = development ? { site_ready: true, base_model: true, thumbnail: { not: null } } : { site_ready: true, base_model: true, annotator: { not: null }, annotated: true, thumbnail: { not: null } }
+  const whereClause = development ? { site_ready: true, base_model: true, thumbnail: { not: null } } : 
+  { site_ready: true, base_model: true, annotator: { not: null }, annotated: true, thumbnail: { not: null }, annotationsApproved: true }
 
   const models = await prisma.model.findMany({
     where: whereClause,
@@ -228,21 +229,6 @@ export const updateModelAnnotator = async (uid: string, student: string | null) 
   })
   return models
 }
-
-/**
- * @function getPublishedModels
- * @description returns an array of published model objects contributed by the user with specified email address.
- * 
- */
-export const getPublishedModels = async (email: string) => {
-  const models = await prisma.userSubmittal.findMany({
-    where: { email: email, status: 'Published' },
-    orderBy: {
-      dateTime: 'desc'
-    }
-  });
-  return models;
-};
 
 /**
  * @function updateThumbUrl

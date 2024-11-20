@@ -2,12 +2,12 @@
 
 import Header from "@/components/Header/Header"
 import Foot from "@/components/Shared/Foot"
-import AnnotationClient from "@/components/Admin/AnnotationClient"
+import AnnotationClient from "@/components/Admin/Annotation/AnnotationClient"
 import { getAllAnnotationModels, getAssignments, getModelsToAnnotate } from "@/functions/server/queries"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getAuthorizedUsers } from "@/functions/server/queries"
-import serverAsyncErrorHandler from "@/functions/server/serverError/serverAsyncError"
+import { serverAsyncErrorHandler } from "@/functions/server/error"
 import { model, assignment } from "@prisma/client"
 
 export default async function Page() {

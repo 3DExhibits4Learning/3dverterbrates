@@ -62,26 +62,26 @@ export default function AnnotationAssignment(props: { students: studentsAssignme
 
     return (
         <>
-        <section className="flex justify-center w-full h-3/4 flex-col ml-12">
+            <section className="flex justify-center w-full h-3/4 flex-col ml-12">
 
-            <section className="flex flex-col w-1/2 mt-8">
-                <Select value={assignmentUid} setValue={setAssignmentUid} models={props.unannotatedModels} title='Select Model' />
+                <section className="flex flex-col w-1/2 mt-8">
+                    <Select value={assignmentUid} setValue={setAssignmentUid} models={props.unannotatedModels} title='Select Model' />
+                </section>
+
+                <StudentSelect setNameAndEmailStates={setNameAndEmailStates} students={props.students} />
+
             </section>
 
-            <StudentSelect setNameAndEmailStates={setNameAndEmailStates} students={props.students}/>
+            {
+                annotationAssigned &&
+                <p className="tmb-4 text-xl ml-12 mb-8">* This model is already assigned to this student, click below to unassign the model</p>
+            }
 
-        </section>
-
-                {
-        annotationAssigned &&
-            <p className="tmb-4 text-xl ml-12 mb-8">* This model is already assigned to this student, click below to unassign the model</p>
-    }
-
-    <section className="flex ml-12">
-        <Button className="text-white text-xl py-2 mb-8" onPress={assignAnnotationHandler} isDisabled={!(assignmentUid && student)}>
-            {annotationAssigned ? 'Unassign model' : 'Assign model'}
-        </Button>
-    </section>
-    </>
+            <section className="flex ml-12">
+                <Button className="text-white text-xl py-2 mb-8" onPress={assignAnnotationHandler} isDisabled={!(assignmentUid && student)}>
+                    {annotationAssigned ? 'Unassign model' : 'Assign model'}
+                </Button>
+            </section>
+        </>
     )
 }
