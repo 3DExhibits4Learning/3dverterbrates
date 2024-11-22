@@ -533,7 +533,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             <>
                 <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel='Saving Changes' closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
 
-                <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
+                <div className="w-[98%] min-w-[925px] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <section className="flex justify-around">
                         {
                             !props.new &&

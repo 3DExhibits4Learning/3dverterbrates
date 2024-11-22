@@ -15,6 +15,7 @@ import { useState, createContext, useMemo } from "react";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import { ManagerClientProps, studentsAssignmentsAndModels } from "@/interface/interface";
 import { fullModel } from "@/interface/interface";
+import { isMobileOrTablet } from "@/functions/utils/isMobile";
 
 // Default imports
 import AnnotationClient from "@/components/Admin/Annotation/AnnotationClient";
@@ -45,9 +46,8 @@ export default function ManagerClient(props: ManagerClientProps) {
     // Variable Declarations - prop conversions (decimals can't be passed directly from server to client)
     const models: fullModel[] = JSON.parse(props.models)
     const modelsNeedingThumbnails: fullModel[] = (JSON.parse(props.modelsNeedingThumbnails) as fullModel[]).filter(model => model.modelApproved)
-    //const modelsWithThumbnails: fullModel[] = JSON.parse(props.modelsWithThumbnails)
-    //const unannotatedModels: fullModel[] = JSON.parse(props.unannotatedModels)
     const studentsAssignmentsAndModels: studentsAssignmentsAndModels[] = JSON.parse(props.studentsAssignmentsAndModels)
+    const unusedModelAnnotations = JSON.parse(props.modelAnnotations)
     const unapprovedModels = useMemo(() => models.filter(model => !model.modelApproved), [props.models])
     const approvedModels = useMemo(() => models.filter(model => model.modelApproved), [props.models])
 
@@ -63,6 +63,14 @@ export default function ManagerClient(props: ManagerClientProps) {
 
     // Tailwind variables
     const accordionTitlesCss = 'text-[#004C46] text-2xl dark:text-[#F5F3E7]'
+
+    if (typeof window !== 'undefined' && isMobileOrTablet()) {
+        return <>
+            <main className='min-h-[calc(100vh-177px)] flex items-center justify-center '>
+                <p className='text-3xl text-center'>Please login from a desktop device, admin portal is not designed for mobile devices</p>
+            </main>
+        </>
+    }
 
     return (
         <>
@@ -105,10 +113,10 @@ export default function ManagerClient(props: ManagerClientProps) {
                         <Accordion>
                             {/* Model submit form */}
                             <AccordionItem key='findModel' aria-label={'findModel'} title='Find' classNames={{ title: accordionTitlesCss }}>
-                                <FindModel models={approvedModels}/>
+                                <FindModel models={approvedModels} />
                             </AccordionItem>
                             <AccordionItem key='approveModel' aria-label={'approveModel'} title='Approve' classNames={{ title: accordionTitlesCss }}>
-                                <ApproveModel unapprovedModels={unapprovedModels}/>
+                                <ApproveModel unapprovedModels={unapprovedModels} />
                             </AccordionItem>
                             {/* Model submit form */}
                             <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: accordionTitlesCss }}>
@@ -144,7 +152,7 @@ export default function ManagerClient(props: ManagerClientProps) {
                     <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <AnnotationClient
                             modelsToAnnotate={approvedModels.filter(model => model.base_model)}
-                            annotationModels={approvedModels.filter(model => !model.base_model)}
+                            annotationModels={unusedModelAnnotations}
                             admin={props.admin}
                             students={studentsAssignmentsAndModels}
                         />

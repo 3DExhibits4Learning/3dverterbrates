@@ -166,7 +166,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
             <AreYouSure uid={uid as string} open={modalOpen} setOpen={setModalOpen} />
 
             <div className="flex w-full h-full">
-                <section className="h-full w-1/5">
+                <section className="h-full w-1/5 min-w-[325px]">
 
                     {/* Accordion holds all imported models - this will be replaced with an autocomplete*/}
 
@@ -340,7 +340,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                             // 'Select a 3d model' banner
                             !uid && !activeAnnotation &&
                             <div className="flex items-center justify-center text-xl h-full w-full">
-                                <p className="mr-[10%] text-lg lg:text-3xl">{props.modelsToAnnotate.length ? props.admin ?'Select an annotation' : 'Select an annotation, or click New Annotation' : "No models assigned"}</p>
+                                <p className="mr-[10%] text-lg lg:text-3xl mb-12">{props.modelsToAnnotate.length ? props.admin ?'Select an annotation' : 'Select an annotation, or click New Annotation' : "No models assigned"}</p>
                             </div>
                         }
                         {

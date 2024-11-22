@@ -16,7 +16,6 @@ import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import { SearchIcon } from "./SearchIcon"
 import AutoComplete from "./Autocomplete"
 import Links from "./Links"
-import MobileSessionOptions from "./MobileSessionOptions"
 import MobileModelOptions from "./MobileModelOptions"
 import { MobileSearch } from "./MobileSearch"
 import MobileMenuOptions from "./MobileMenuOptions"
@@ -40,17 +39,11 @@ const Header = (props: SearchHeaderProps) => {
   const specimenName: string = (params['specimenName']) as string ?? headerTitle ?? ''
 
   const menuItems: string[] = [
-    "Home",
     "Collections",
-    "Plant.id",
-    "Feed",
-    "Accessibility"
-  ];
-
-  const userItems: string[] = [
-    "Dashboard",
-    "Submit a 3D Model",
-  ];
+    "About",
+    "Contribute",
+    "Contact"
+  ]
 
   // All window methods such as checking for dark mode 
 
@@ -121,17 +114,6 @@ const Header = (props: SearchHeaderProps) => {
 
 
         <NavbarMenu className="z-20">
-
-          {/* User section header */}
-
-          <NavbarMenuItem>
-            <h1 className="text-center">User</h1>
-            <Divider />
-          </NavbarMenuItem>
-
-          {/* Mobile session-based options */}
-
-          <MobileSessionOptions session={session} userItems={userItems} />
 
           {/* Navigation Section Header */}
 

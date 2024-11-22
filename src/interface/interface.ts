@@ -293,11 +293,10 @@ export interface fullModel extends model {
 
 export interface ManagerClientProps {
   models: string
-  modelsWithThumbnails: string
   modelsNeedingThumbnails: string
-  unannotatedModels: string
   studentsAssignmentsAndModels: string
   admin: boolean
+  modelAnnotations: string
 }
 
 export interface UpdateModelFormContainerProps {

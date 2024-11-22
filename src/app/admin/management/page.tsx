@@ -10,10 +10,11 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { fullModel, studentsAndAssignments } from "@/interface/interface";
-import { getFullModels, getStudentsAndAssignments } from "@/functions/server/queries";
+import { getFullModels, getStudentsAndAssignments, getModelAnnotations, getAuthorizedUsers } from "@/functions/server/queries";
 import { authorized } from "@prisma/client";
-import { getAuthorizedUsers } from "@/functions/server/queries";
 import { serverAsyncErrorHandler } from "@/functions/server/error";
+import { annotationWithModel } from "@/interface/interface";
+import { model } from "@prisma/client";
 
 // Default imports
 import ManagerClient from "@/components/Admin/Administrator/ManagerClient";
@@ -39,11 +40,15 @@ export default async function Page() {
         // Get all 3D models
         const models = await getFullModels().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get 3D Models from database")) as fullModel[]
 
+        // Get annotation models
+        const modelAnnotations = await getModelAnnotations().catch(e => serverAsyncErrorHandler(e.message, "Coulnd't get modelAnnotations")) as annotationWithModel[]
+        const isAnnotationModel = (model: model) => model.site_ready && !model.base_model && model.modelApproved && model.thumbnail
+        const isUsedAnnotationModel = (model: model) => modelAnnotations.some(annotationModel => annotationModel.model_annotation.uid === model.uid)
+
         // Stringified model filters (decimal objects (which are included in models table) can't be passed directly to client)
         const modelsString = JSON.stringify(models)
-        const modelsWithThumbnails = JSON.stringify(models.filter(model => model.thumbnail !== null))
         const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null))
-        const unannotatedModels = JSON.stringify(models.filter(model => !model.annotated))
+        const unusedModelAnnotations = JSON.stringify(models.filter(model => isAnnotationModel(model) && isUsedAnnotationModel(model)))
 
         // Get students and assignments
         const students = await getStudentsAndAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as studentsAndAssignments[]
@@ -58,11 +63,10 @@ export default async function Page() {
                 <main className="flex flex-col !min-h-[calc(100vh-177px)]">
                     <ManagerClient
                         models={modelsString}
-                        modelsWithThumbnails={modelsWithThumbnails}
                         modelsNeedingThumbnails={modelsNeedingThumbnails}
-                        unannotatedModels={unannotatedModels}
                         studentsAssignmentsAndModels={studentsAssignmentsAndModels}
                         admin={true}
+                        modelAnnotations={unusedModelAnnotations}
                     />
                 </main>
                 <Foot />
