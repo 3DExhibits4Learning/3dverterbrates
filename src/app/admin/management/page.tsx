@@ -3,7 +3,6 @@
  * 
  * @fileoverview server component serving the page for admin management
  * 
- * @todo update management auth
  */
 
 // Typical imports
@@ -48,7 +47,7 @@ export default async function Page() {
         // Stringified model filters (decimal objects (which are included in models table) can't be passed directly to client)
         const modelsString = JSON.stringify(models)
         const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null))
-        const unusedModelAnnotations = JSON.stringify(models.filter(model => isAnnotationModel(model) && isUsedAnnotationModel(model)))
+        const unusedModelAnnotations = JSON.stringify(models.filter(model => isAnnotationModel(model) && !isUsedAnnotationModel(model)))
 
         // Get students and assignments
         const students = await getStudentsAndAssignments().catch(e => serverAsyncErrorHandler(e.message, "Couldn't get authorized students from database")) as studentsAndAssignments[]

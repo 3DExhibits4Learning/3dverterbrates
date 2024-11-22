@@ -29,7 +29,7 @@ export default async function Page() {
     const modelAnnotations = await getModelAnnotations().catch(e => serverAsyncErrorHandler(e.message, "Coulnd't get modelAnnotations")) as annotationWithModel[]
     const isAnnotationModel = (model: model) => model.site_ready && !model.base_model && model.modelApproved && model.thumbnail
     const isUsedAnnotationModel = (model: model) => modelAnnotations.some(annotationModel => annotationModel.model_annotation.uid === model.uid)
-    const unusedModelAnnotations = JSON.stringify(annotationModels.filter(model => isAnnotationModel(model) && isUsedAnnotationModel(model)))
+    const unusedModelAnnotations = JSON.stringify(annotationModels.filter(model => isAnnotationModel(model) && !isUsedAnnotationModel(model)))
 
     // Filter assigned models
     const studentAssignmentUids = assignments.filter(assignment => assignment.email === email).map(assignment => assignment.uid)
