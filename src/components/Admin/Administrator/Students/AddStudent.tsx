@@ -15,12 +15,11 @@ export default function AddStudent() {
     const [email, setEmail] = useState<string>('')
     const [name, setName] = useState<string>('')
     const [buttonDisabled, setButtonDiabled] = useState<boolean>(true)
-    const re = /^\w{5}@humboldt.edu$/
 
     const addStudentHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, addStudent, [email, name], 'Adding student')
 
     useEffect(() => {
-        if (re.test(email) && name) setButtonDiabled(false)
+        if (email.includes("@humboldt.edu") && name) setButtonDiabled(false)
         else setButtonDiabled(true)
     }, [email])
 

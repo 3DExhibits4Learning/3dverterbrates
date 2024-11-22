@@ -14,12 +14,11 @@ export default function RemoveStudent() {
 
     const [email, setEmail] = useState<string>('')
     const [buttonDisabled, setButtonDiabled] = useState<boolean>(true)
-    const re = /^\w{5}@humboldt.edu$/
 
     const removeStudentHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, removeStudent, [email], 'Removing student')
 
     useEffect(() => {
-        if (re.test(email)) setButtonDiabled(false)
+        if (email.includes('@humboldt.edu')) setButtonDiabled(false)
         else setButtonDiabled(true)
     }, [email])
 

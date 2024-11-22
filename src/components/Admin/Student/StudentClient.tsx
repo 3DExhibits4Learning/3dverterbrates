@@ -1,14 +1,22 @@
 'use client'
 
 import AnnotationClient from "../Annotation/AnnotationClient"
-import { model } from "@prisma/client"
 import ModelSubmitForm from "../ModelSubmit/Form"
 import { Accordion, AccordionItem } from "@nextui-org/react"
+import { isMobileOrTablet } from "@/functions/utils/isMobile"
 
 export default function StudentClient(props: { modelsToAnnotate: string, annotationModels: string }) {
 
     // Tailwind variables
     const accordionTitlesCss = 'text-[#004C46] text-2xl dark:text-[#F5F3E7]'
+
+    if (typeof window !== 'undefined' && isMobileOrTablet()) {
+        return <>
+            <main className='min-h-[calc(100vh-177px)] flex items-center justify-center '>
+                <p className='text-3xl text-center'>Please login from a desktop device, admin portal is not designed for mobile devices</p>
+            </main>
+        </>
+    }
 
     return (
         <Accordion className="dark: text-[#F5F3E7]">

@@ -28,9 +28,6 @@ export default function AnnotationAssignment(props: { students: studentsAssignme
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
     const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
 
-    // email regular expression
-    const re = /^\w{5}@humboldt.edu$/
-
     // Form states
     const [student, setStudent] = useState<string>('')
     const [email, setEmail] = useState<string>('')
