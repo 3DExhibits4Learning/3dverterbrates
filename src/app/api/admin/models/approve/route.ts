@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         const approve = await approveModel(uid).catch(e => routeHandlerErrorHandler(route, e.message, 'approveModel()', "Couldn't approve model"))
 
-        routeHandlerTypicalResponse("Model approved", approve)
+        return routeHandlerTypicalResponse("Model approved", approve)
     }
 catch(e: any){routeHandlerTypicalCatch(e.message)}
 }

@@ -147,15 +147,17 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             data.set('annotation_id', annotationId)
 
             // Directory, path and url data
+            if(file){
             const photo = file as File
             data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}`)
             data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
             data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+            }
 
 
             // Route handler data
             data.set('mediaType', mediaType as string)
-            data.set('file', photo)
+            data.set('file', file as File)
 
             // Open transfer modal and set spinner
             setTransferModalOpen(true)
@@ -353,6 +355,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 setVideoChecked(true)
                 setPhotoChecked(false)
                 setModelChecked(false)
+                setAnnotationTitle(props.activeAnnotationTitle)
                 setAnnotationType(props.annotationType)
             }
 
@@ -364,6 +367,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 setAnnotationType(props.annotationType)
 
                 setAnnotationType(props.annotationType)
+                setAnnotationTitle(props.activeAnnotationTitle)
                 setMediaType('model')
                 setModelChecked(true)
                 setVideoChecked(false)
@@ -616,7 +620,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                                 </div>
                                 {
                                     modelAnnotationUid && modelAnnotationUid !== 'select' &&
-                                    <div className="w-1/3">
+                                    <div className="w-full mr-12">
                                         <ModelViewer uid={modelAnnotationUid} />
                                     </div>
                                 }

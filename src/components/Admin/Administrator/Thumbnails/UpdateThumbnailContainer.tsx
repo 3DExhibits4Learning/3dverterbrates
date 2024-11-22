@@ -23,7 +23,7 @@ export default function UpdateThumbnailContainer(props: { modelsWithThumbnails: 
 
     return (
         <div className="w-full flex justify-center">
-            <section className="flex flex-col w-1/2 pt-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46]">
+            <section className="flex flex-col w-1/2 pt-8 bg-[#D5CB9F] rounded-md px-4 border border-[#004C46] dark:bg-[#212121]">
                 {
                     props.modelsWithThumbnails && props.modelsWithThumbnails.length > 0 &&
                     <>

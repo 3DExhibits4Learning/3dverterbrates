@@ -10,11 +10,13 @@
 
 // Imports
 import { useState, useEffect } from 'react';
+import { Button } from "@nextui-org/react";
+import { Divider } from '@nextui-org/react';
+import dynamic from 'next/dynamic';
+
 import ArtistName from './ArtistNameField';
 import SpeciesName from './SpeciesNameField';
 import ProcessSelect from './ProcessSelectField';
-import { Button } from "@nextui-org/react";
-import { Divider } from '@nextui-org/react';
 import TagInput from './Tags';
 import DataTransferModal from '../../Shared/Modals/DataTransferModal';
 import SpeciesAcquisitionDate from './AcquisitionDate';
@@ -101,7 +103,7 @@ export default function ModelSubmitForm() {
     // Enable/disable the upload button
     useEffect(() => {
 
-        if (species && artist && buildMethod && software.length && file, baseOrAnnotation) setUploadDisabled(false)
+        if (species && artist && buildMethod && software.length && file && baseOrAnnotation) setUploadDisabled(false)
         else setUploadDisabled(true)
 
     }, [species, artist, buildMethod, software.length, file, baseOrAnnotation])

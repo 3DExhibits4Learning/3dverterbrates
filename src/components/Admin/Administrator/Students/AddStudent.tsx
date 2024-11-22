@@ -26,7 +26,7 @@ export default function AddStudent() {
 
     return (
         <section className="flex justify-center mb-16">
-            <div className="flex flex-col bg-[#D5CB9F] w-1/2 rounded-xl border border-[#004C46] py-8">
+            <div className="flex flex-col bg-[#D5CB9F] dark:bg-[#212121] w-1/2 rounded-xl border border-[#004C46] py-8">
                 <section className="flex-col ml-12">
                     <div className="my-8 flex flex-col w-full "><TextInput value={name} setValue={setName} title='Name' /></div>
                     <div className="my-8 flex flex-col w-full"><TextInput value={email} setValue={setEmail} title='Email' /></div>

@@ -13,6 +13,7 @@ import { toUpperFirstLetter } from '@/functions/utils/toUpperFirstLetter'
 import { model, model_annotation, photo_annotation } from '@prisma/client'
 import { fullAnnotation, GbifImageResponse, GbifResponse } from '@/interface/interface'
 import { setViewerWidth, annotationControl, boolRinse, addCommas, arrayFromObjects } from './SketchfabDom'
+import { useSearchParams } from 'next/navigation'
 
 // Default imports
 import AnnotationModal from '@/components/Collections/AnnotationModal'
@@ -24,6 +25,8 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
 
   // Variable Declarations
   const gMatch = props.gMatch.data as GbifResponse
+  const searchParams = useSearchParams()
+  const annotationUid = searchParams.get('annotation')
 
   // States
   const [s, setS] = useState<Vertebrates>() // s = specimen due to constant repetition
@@ -110,7 +113,7 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
       if (s.model.annotationPosition) {
         const position = JSON.parse(s.model.annotationPosition)
         api.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Taxonomy and Description', '', (err: any, index: any) => {
-          api.gotoAnnotation(0, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { })
+          if(!annotationUid)api.gotoAnnotation(0, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { })
         })
 
         // Create any futher annotations that exist
@@ -120,6 +123,12 @@ const SFAPI = (props: { gMatch: { hasInfo: boolean; data?: GbifResponse }, model
             api.createAnnotationFromScenePosition(position[0], position[1], position[2], `${annotations[i].title}`, '', (err: any, index: any) => { })
           }
         }
+      }
+
+      if(annotationUid){
+        const annotation = annotations.find(annotation => annotation.annotation_type === 'model' && (annotation.annotation as model_annotation).uid === annotationUid)
+        if(annotation) api.gotoAnnotation(annotation.annotation_no - 1, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { })
+        else api.gotoAnnotation(0, { preventCameraAnimation: true, preventCameraMove: false }, function (err: any, index: any) { })
       }
 
       // Get annotationList/add event listeners

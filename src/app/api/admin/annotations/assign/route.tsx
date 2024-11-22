@@ -8,6 +8,7 @@ import { NextRequest } from "next/server"
 import { updateModelAnnotator, assignModelToStudent, unassignModelToStudent } from "@/functions/server/queries"
 import { routeHandlerErrorHandler, routeHandlerTypicalCatch } from "@/functions/server/error"
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"
+import { informStudentOfAssignment } from "@/functions/server/email"
 
 const route = 'src/app/api/admin/annotations/assign/route.tsx'
 
@@ -34,8 +35,12 @@ export async function POST(request: NextRequest) {
             .catch((e) => routeHandlerErrorHandler(route, e.message, 'updateModelAnnotator()', "Couldn't update model annotator"))
 
         // If student, assign the model to them
-        if (student) assignment = await assignModelToStudent(modelUid, email)
-            .catch((e) => routeHandlerErrorHandler(route, e.message, 'assignModelToStudent()', "Couldn't assign model to student"))
+        if (student) {
+            assignment = await assignModelToStudent(modelUid, email)
+                .catch((e) => routeHandlerErrorHandler(route, e.message, 'assignModelToStudent()', "Couldn't assign model to student"))
+
+            await informStudentOfAssignment(process.env.NODE_ENV === 'production' ? email : "ab632@humboldt.edu", "beta.3dvertebrates.org")
+        }
 
         // Else, unassign the model to them
         else assignment = await unassignModelToStudent(modelUid, email)

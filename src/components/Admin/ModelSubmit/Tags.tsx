@@ -1,13 +1,11 @@
 'use client'
 
-import { SetStateAction, useCallback, Dispatch } from 'react'
-//@ts-ignore
+import { SetStateAction, useCallback, Dispatch} from 'react'
 import Tags from '@yaireo/tagify/dist/react.tagify' // React-wrapper file
 import '@yaireo/tagify/dist/tagify.css' // Tagify CSS
 
 const TagInput = (props: { defaultValues?: string, title?: string, marginTop?: string, marginBottom?: string, value: { value: string; }[], setValue: Dispatch<SetStateAction<{ value: string }[]>>, required?: boolean}) => {
 
-    const tags = props.value
     const title = props.title ?? 'Enter tags to describe your specimen, such as phenotype (parts, locality, etc.)'
 
     const onChange = useCallback((e: any) => {
@@ -26,7 +24,6 @@ const TagInput = (props: { defaultValues?: string, title?: string, marginTop?: s
                 }
             </h1>
             <Tags
-                id='tags'
                 className={`w-4/5 h-[150px] bg-white ml-12 dark:bg-[#181818] dark:text-white ${props.marginBottom}`}
                 placeholder='Add some tags'
                 settings={{

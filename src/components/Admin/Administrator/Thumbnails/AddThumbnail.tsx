@@ -12,7 +12,7 @@ import { useContext } from "react";
 import { DataTransferContext } from "../ManagerClient";
 
 
-export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] | undefined}) {
+export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] | undefined }) {
 
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
     const terminateDataTransfer = useContext(DataTransferContext).terminateDataTransferHandler
@@ -26,29 +26,32 @@ export default function AddThumbnail(props: { modelsNeedingThumbnails: model[] |
             {
                 props.modelsNeedingThumbnails && props.modelsNeedingThumbnails.length > 0 &&
 
-                props.modelsNeedingThumbnails.map((model, index) =>
-                    <section key={index} className="flex flex-col items-center">
-                        <div className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4">
-                            <p>Species Name: {model.spec_name}</p>
-                            <p className="mb-8">UID: {model.uid}</p>
-                            <div className="w-[500px] h-[500px] mb-8">
-                                <ModelViewer uid={model.uid} />
-                            </div>
-                            <p className="text-center mb-8 text-xl">Upload Thumbnail:</p>
-                            <div className="flex justify-between">
-                                <PhotoInput setFile={setFile as Dispatch<SetStateAction<File>>} />
-                                <Button
-                                    isDisabled={!file}
-                                    className="bg-[#004C46] text-white text-[16px] font-medium rounded-md px-4 h-[34px]"
-                                    radius='none'
-                                    onClick={() => { addThumbnailHandler(model.uid, file as File) }}
-                                >
-                                    Submit
-                                </Button>
-                            </div>
-                        </div>
-                    </section>
-                )
+                <section className="flex">
+                    {
+                        props.modelsNeedingThumbnails.map((model, index) =>
+                            <section key={index} className="flex flex-col items-center">
+                                <div className="border border-[#004C46] rounded-xl w-fit px-4 font-medium mb-8 pb-4 bg-[#D5CB9F] pt-4 mx-4 dark:bg-[#212121]">
+                                    <p>Species Name: {model.spec_name}</p>
+                                    <p className="mb-8">UID: {model.uid}</p>
+                                    <div className="w-[500px] h-[500px] mb-8">
+                                        <ModelViewer uid={model.uid} noAutoStart/>
+                                    </div>
+                                    <p className="text-center mb-8 text-xl">Upload Thumbnail:</p>
+                                    <div className="flex justify-between">
+                                        <PhotoInput setFile={setFile as Dispatch<SetStateAction<File>>} />
+                                        <Button
+                                            isDisabled={!file}
+                                            className="bg-[#004C46] text-white text-[16px] font-medium rounded-md px-4 h-[34px]"
+                                            radius='none'
+                                            onClick={() => { addThumbnailHandler(model.uid, file as File) }}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+                </section>
             }
 
             {

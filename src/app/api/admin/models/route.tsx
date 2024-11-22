@@ -1,5 +1,7 @@
 import { getFullModels } from "@/functions/server/queries"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     try {
             const models = await getFullModels().catch((e) => {

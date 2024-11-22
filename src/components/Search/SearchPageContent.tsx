@@ -18,7 +18,7 @@ const getUniqueModelers = (models: model[]): string[] => {
 
 const getUniqueAnnotators = (models: model[]): string[] => {
   const uniqueAnnotators = new Set<string>()
-  models.forEach(model => {if(model.annotator)uniqueAnnotators.add(model.annotator as string)})
+  models.forEach(model => { if (model.annotator) uniqueAnnotators.add(model.annotator as string) })
   return Array.from(uniqueAnnotators)
 }
 
@@ -39,11 +39,13 @@ const SearchPageContent = () => {
       .then(res => res.json())
       .then(json => {
         siteReadyModels.current = json.response
-        let a = getUniqueModelers(siteReadyModels.current as model[])
-        let b = getUniqueAnnotators(siteReadyModels.current as model[])
-        a.unshift('All'); b.unshift('All')
-        setModeledByList(a)
-        setAnnotatedByList(b)
+        if (siteReadyModels.current) {
+          let a = getUniqueModelers(siteReadyModels.current as model[])
+          let b = getUniqueAnnotators(siteReadyModels.current as model[])
+          a.unshift('All'); b.unshift('All')
+          setModeledByList(a)
+          setAnnotatedByList(b)
+        }
       })
 
     getModels()
@@ -64,14 +66,12 @@ const SearchPageContent = () => {
             setSelectedAnnotator={(setSelectedAnnotator)}
           />
           <br />
-          {/* <PageWrapper> */}
           <SearchPageModelList models={siteReadyModels.current as model[]} selectedModeler={selectedModeler} selectedAnnotator={selectedAnnotator} />
           <br />
-          {/* </PageWrapper> */}
         </>
       }
     </>
   )
 }
 
-export default SearchPageContent;
+export default SearchPageContent

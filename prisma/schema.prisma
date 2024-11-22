@@ -72,9 +72,9 @@ model model {
 }
 
 model model_annotation {
-  modeler       String      @db.VarChar(75) @default("Hunter Phillips")
+  modeler       String      @db.VarChar(75) @default("Humboldt Vertebrate Museum")
   license       String      @db.VarChar(75) @default("CC BY-NC-SA")
-  annotator     String      @db.VarChar(25) @default("Kat Lim")
+  annotator     String      @db.VarChar(75) @default("Humboldt Vertebrate Museum")
   annotation    String      @db.VarChar(4000)
   annotation_id String      @id @db.VarChar(36)
   uid           String      @unique @db.VarChar(36)

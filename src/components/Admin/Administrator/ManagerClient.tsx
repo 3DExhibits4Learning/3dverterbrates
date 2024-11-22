@@ -7,7 +7,6 @@
  * 
  * @todo check if and what error is generated upon duplicate assignment of a model due to db constraint violation
  */
-
 'use client'
 
 // Typical imports
@@ -43,13 +42,14 @@ export const DataTransferContext = createContext<any>('');
 // Main JSX component
 export default function ManagerClient(props: ManagerClientProps) {
 
-    // Variable Declarations - prop conversions
+    // Variable Declarations - prop conversions (decimals can't be passed directly from server to client)
     const models: fullModel[] = JSON.parse(props.models)
-    const modelsNeedingThumbnails: fullModel[] = JSON.parse(props.modelsNeedingThumbnails)
-    const modelsWithThumbnails: fullModel[] = JSON.parse(props.modelsWithThumbnails)
-    const unannotatedModels: fullModel[] = JSON.parse(props.unannotatedModels)
+    const modelsNeedingThumbnails: fullModel[] = (JSON.parse(props.modelsNeedingThumbnails) as fullModel[]).filter(model => model.modelApproved)
+    //const modelsWithThumbnails: fullModel[] = JSON.parse(props.modelsWithThumbnails)
+    //const unannotatedModels: fullModel[] = JSON.parse(props.unannotatedModels)
     const studentsAssignmentsAndModels: studentsAssignmentsAndModels[] = JSON.parse(props.studentsAssignmentsAndModels)
-    const unapprovedModels = useMemo(() => models.filter(model => !model.annotationsApproved), [props.models])
+    const unapprovedModels = useMemo(() => models.filter(model => !model.modelApproved), [props.models])
+    const approvedModels = useMemo(() => models.filter(model => model.modelApproved), [props.models])
 
     // Data transfer state variables
     const [openModal, setOpenModal] = useState<boolean>(false)
@@ -57,9 +57,12 @@ export default function ManagerClient(props: ManagerClientProps) {
     const [result, setResult] = useState<string>('')
     const [loadingLabel, setLoadingLabel] = useState<string>('')
 
-    // Data transfer functions for context
+    // Data transfer handlers for context
     const initializeDataTransferHandler = (loadingLabel: string) => initializeDataTransfer(setOpenModal, setTransferring, setLoadingLabel, loadingLabel)
     const terminateDataTransferHandler = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
+
+    // Tailwind variables
+    const accordionTitlesCss = 'text-[#004C46] text-2xl dark:text-[#F5F3E7]'
 
     return (
         <>
@@ -70,69 +73,69 @@ export default function ManagerClient(props: ManagerClientProps) {
             <DataTransferContext.Provider value={{ initializeDataTransferHandler, terminateDataTransferHandler }}>
 
                 {/* Main admin Accordion */}
-                <Accordion>
+                <Accordion className="dark: text-[#F5F3E7]">
 
                     {/* AccordionItem holds nested "Students" accordion */}
-                    <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                    <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: accordionTitlesCss }}>
                         {/* "Students" nested accordion */}
                         <Accordion>
                             {/* Active students table */}
-                            <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='activeStudents' aria-label='activeStudents' title='Active' classNames={{ title: accordionTitlesCss }}>
                                 <StudentTable studentsAssignmentsAndModels={studentsAssignmentsAndModels} />
                             </AccordionItem>
                             {/* Add student form */}
-                            <AccordionItem key='addStudent' aria-label='addStudent' title='Add' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='addStudent' aria-label='addStudent' title='Add' classNames={{ title: accordionTitlesCss }}>
                                 <AddStudent />
                             </AccordionItem>
                             {/* Remove student form*/}
-                            <AccordionItem key='removeStudent' aria-label='removeStudent' title='Remove' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='removeStudent' aria-label='removeStudent' title='Remove' classNames={{ title: accordionTitlesCss }}>
                                 <RemoveStudent />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
 
                     {/* AccordionItem holds nested "Assignments" accordion */}
-                    <AccordionItem key={'assignments'} aria-label={'assignments'} title='Assignments' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                    <AccordionItem key={'assignments'} aria-label={'assignments'} title='Assignments' classNames={{ title: accordionTitlesCss }}>
                         <Assignments studentsAssignmentsAndModels={studentsAssignmentsAndModels} />
                     </AccordionItem>
 
                     {/* AccordionItem holds nested "Models" accordion */}
-                    <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                    <AccordionItem key={'adminModels'} aria-label={'adminModels'} title='Models' classNames={{ title: accordionTitlesCss }}>
                         {/* "Models" nested accordion */}
                         <Accordion>
                             {/* Model submit form */}
-                            <AccordionItem key='findModel' aria-label={'findModel'} title='Find' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <FindModel models={models}/>
+                            <AccordionItem key='findModel' aria-label={'findModel'} title='Find' classNames={{ title: accordionTitlesCss }}>
+                                <FindModel models={approvedModels}/>
                             </AccordionItem>
-                            <AccordionItem key='approveModel' aria-label={'approveModel'} title='Approve' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='approveModel' aria-label={'approveModel'} title='Approve' classNames={{ title: accordionTitlesCss }}>
                                 <ApproveModel unapprovedModels={unapprovedModels}/>
                             </AccordionItem>
                             {/* Model submit form */}
-                            <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='uploadModel' aria-label={'uploadModel'} title='Upload' classNames={{ title: accordionTitlesCss }}>
                                 <ModelSubmitForm />
                             </AccordionItem>
                             {/* Model update form*/}
-                            <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <UpdateModelContainer models={models} />
+                            <AccordionItem key='updateModel' aria-label={'updateModel'} title='Update' classNames={{ title: accordionTitlesCss }}>
+                                <UpdateModelContainer models={approvedModels} />
                             </AccordionItem>
                             {/* Model delete form*/}
-                            <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <DeleteModel models={models} />
+                            <AccordionItem key='deleteModel' aria-label={'deleteModel'} title='Delete' classNames={{ title: accordionTitlesCss }}>
+                                <DeleteModel models={approvedModels} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
 
                     {/* AccordionItem holds nested "Thumbnails" accordion */}
-                    <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                    <AccordionItem key={'adminThumbnails'} aria-label={'New Specimen'} title='Thumbnails' classNames={{ title: accordionTitlesCss }}>
                         {/* "Thumbnails" nested accordion */}
                         <Accordion>
                             {/* Add thumbnail form */}
-                            <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: 'text-[#004C46] text-2xl' }}>
+                            <AccordionItem key='modelsWithoutThumbnails' aria-label={'modelsWithoutThumbnails'} title='Models' classNames={{ title: accordionTitlesCss }}>
                                 <AddThumbnail modelsNeedingThumbnails={modelsNeedingThumbnails as model[] | undefined} />
                             </AccordionItem>
                             {/* Update thumbnail form */}
-                            <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: 'text-[#004C46] text-2xl' }}>
-                                <UpdateThumbnailContainer modelsWithThumbnails={modelsWithThumbnails} />
+                            <AccordionItem key='updateThumbnail' aria-label={'updateThumbnail'} title='Update' classNames={{ title: accordionTitlesCss }}>
+                                <UpdateThumbnailContainer modelsWithThumbnails={approvedModels} />
                             </AccordionItem>
                         </Accordion>
                     </AccordionItem>
@@ -140,8 +143,8 @@ export default function ManagerClient(props: ManagerClientProps) {
                     {/* AccordionItem holds nested "Annotations" accordion */}
                     <AccordionItem key={'adminAnnotations'} aria-label={'New Image Set'} title={"Annotations"} classNames={{ title: 'text-[ #004C46] text-2xl' }}>
                         <AnnotationClient
-                            modelsToAnnotate={models.filter(model => model.base_model)}
-                            annotationModels={models.filter(model => !model.base_model)}
+                            modelsToAnnotate={approvedModels.filter(model => model.base_model)}
+                            annotationModels={approvedModels.filter(model => !model.base_model)}
                             admin={props.admin}
                             students={studentsAssignmentsAndModels}
                         />

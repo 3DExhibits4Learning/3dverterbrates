@@ -25,7 +25,7 @@ export default function RemoveStudent() {
 
     return (
         <section className="flex justify-center mb-16">
-            <div className="flex bg-[#D5CB9F] flex-col w-1/2 rounded-xl border border-[#004C46] py-8">
+            <div className="flex bg-[#D5CB9F] flex-col w-1/2 rounded-xl border border-[#004C46] py-8 dark:bg-[#212121]">
                 <section className="ml-12 flex-col">
                     <TextInput value={email} setValue={setEmail} title='Email' />
                     <div><Button className="mt-4 text-xl text-white" isDisabled={buttonDisabled} onPress={removeStudentHandler}>Remove Student</Button></div>

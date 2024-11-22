@@ -8,7 +8,7 @@ export default function UpdateThumbnail(props: { setFile: Dispatch<SetStateActio
     return (
         <>
             <section className="flex flex-col">
-                <div className="rounded-xl w-full px-4 font-medium mb-4 pb-4 bg-[#D5CB9F] pt-4">
+                <div className="rounded-xl w-full px-4 font-medium mb-4 pb-4 bg-[#D5CB9F] pt-4 dark:bg-[#212121]">
                     <div className="flex flex-col">
                         <PhotoInput setFile={props.setFile as Dispatch<SetStateAction<File>>} />
                         <div className="mt-8">

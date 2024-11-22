@@ -5,7 +5,7 @@
 
 import { Dispatch } from "react";
 import { SetStateAction } from "react";
-import { annotations, photo_annotation, video_annotation, userSubmittal, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
+import { annotations, photo_annotation, video_annotation, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
 export interface SearchHeaderProps {
   headerTitle: string,
@@ -14,7 +14,6 @@ export interface SearchHeaderProps {
   page?: string;
   hasModel?: boolean
 };
-
 
 export interface iNatApiResponse {
   total_results: number;
@@ -286,11 +285,6 @@ export interface fullAnnotation extends annotations {
   annotation: photo_annotation | video_annotation | model_annotation
 }
 
-export interface fullUserSubmittal extends userSubmittal {
-  tags: string[],
-  software: string[]
-}
-
 export interface fullModel extends model {
   software: software[]
   tags: tags[]
@@ -347,6 +341,10 @@ export interface AnnotationEntryProps {
   setAnnotationSavedOrDeleted: Dispatch<SetStateAction<boolean>>
   annotationSavedOrDeleted: boolean
   annotationModels: model[]
+}
+
+export interface annotationWithModel extends annotations{
+  model_annotation: model_annotation
 }
 
 

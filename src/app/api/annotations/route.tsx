@@ -35,6 +35,8 @@ import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
 import { routeHandlerErrorHandler, routeHandlerTypicalCatch } from "@/functions/server/error"
 
+export const dynamic = 'force-dynamic'
+
 // Default imports
 import routeHandlerTypicalResponse from "@/functions/server/typicalSuccessResponse"
 
@@ -158,7 +160,10 @@ export async function POST(request: Request) {
                     const newModelAnnotation = await createModelAnnotation(
                         data.get('modelAnnotationUid') as string,
                         data.get('annotation') as string,
-                        data.get('annotation_id') as string)
+                        data.get('annotation_id') as string,
+                        session.user.name ?? 'Student',
+                        session.user.name ?? 'Student'
+                    )
                         .catch((e) => routeHandlerErrorHandler(route, e.message, 'POST createModelAnnotation()', "Couldn't create model annotation"))
 
                     // Typical response
@@ -379,7 +384,10 @@ export async function PATCH(request: Request) {
                         const newModelAnnotation = await createModelAnnotation(
                             data.get('modelAnnotationUid') as string,
                             data.get('annotation') as string,
-                            data.get('annotation_id') as string)
+                            data.get('annotation_id') as string,
+                            session.user.name ?? 'Student',
+                            session.user.name ?? 'Student'
+                        )
                             .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH newModelAnnotation()', "Couldn't create new model annotation"))
 
                         // Typical response

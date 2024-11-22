@@ -28,7 +28,7 @@ export default function DeleteModel(props: { models: fullModel[] | undefined }) 
 
     return (
         <section className="w-full flex justify-center">
-            <div className="w-1/2 flex flex-col border-2 border-[#00856A] rounded-xl bg-[#D5CB9F]">
+            <div className="w-1/2 flex flex-col border-2 border-[#00856A] rounded-xl bg-[#D5CB9F] dark:bg-[#212121]">
                 <section className="ml-12">
                     <p className="my-12 text-xl">This will <b>permanantly delete</b> the 3D model <b>and</b> any annotations associated with it.</p>
                     {

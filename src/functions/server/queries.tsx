@@ -158,6 +158,22 @@ export const getAllSiteReadyModels = async (development: boolean): Promise<model
 }
 
 /**
+ * @function getAllModels
+ * @description returns all 3D models from the database
+ * 
+ * @returns {Promise<model[]>}
+ */
+export const getAllModels = async ()=> {return await prisma.model.findMany({orderBy: {spec_name: 'asc'}})}
+
+/**
+ * @function getModelAnnotations
+ * @description returns all annotations records of 'model' annotation_type; includes model_annotation record
+ * 
+ * @returns {Promise<model[]>}
+ */
+export const getModelAnnotations = async ()=> {return await prisma.annotations.findMany({where: {annotation_type: 'model'}, include: {model_annotation: true}})}
+
+/**
  * @function getModelsWithoutThumbnails
  * @description returns a list of all models without thumbnails.
  * 
@@ -507,13 +523,15 @@ export const updateVideoAnnotation = async (url: string, length: string, id: str
  * @description creates a database record for a 3d model Model annotation
  * 
  */
-export const createModelAnnotation = async (uid: string, annotation: string, id: string) => {
+export const createModelAnnotation = async (uid: string, annotation: string, id: string, annotator: string, modeler: string) => {
 
   const newAnnotation = await prisma.model_annotation.create({
     data: {
       uid: uid,
       annotation: annotation,
-      annotation_id: id
+      annotation_id: id,
+      annotator: annotator,
+      modeler: modeler
     }
   })
   return newAnnotation

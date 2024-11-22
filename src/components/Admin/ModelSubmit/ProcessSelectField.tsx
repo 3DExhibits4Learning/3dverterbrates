@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction } from "react"
+import { Dispatch, SetStateAction, useEffect } from "react"
 
 const ProcessSelect = (props: {defaultValue?: string, value: string, setValue: Dispatch<SetStateAction<string>>}) => {
+
+    useEffect(() => {if(props.defaultValue && document.getElementById(props.defaultValue)) (document.getElementById(props.defaultValue) as HTMLInputElement).checked = true}, [])
 
     return (
         <>

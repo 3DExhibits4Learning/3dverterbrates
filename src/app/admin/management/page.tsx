@@ -42,7 +42,7 @@ export default async function Page() {
         // Stringified model filters (decimal objects (which are included in models table) can't be passed directly to client)
         const modelsString = JSON.stringify(models)
         const modelsWithThumbnails = JSON.stringify(models.filter(model => model.thumbnail !== null))
-        const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null && model.base_model === true))
+        const modelsNeedingThumbnails = JSON.stringify(models.filter(model => model.thumbnail === null))
         const unannotatedModels = JSON.stringify(models.filter(model => !model.annotated))
 
         // Get students and assignments

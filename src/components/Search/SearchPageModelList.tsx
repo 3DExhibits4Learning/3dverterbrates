@@ -43,7 +43,7 @@ const SearchPageModelList = (props: SearchPageModelListProps) => {
               <div key={index} className='noselect'>
                 <article className='rounded-md overflow-hidden mx-1'>
                   <section className='rounded shadow-md mx-auto'>
-                    <a href={"/collections/" + (model as model).spec_name} tabIndex={-1}>
+                    <a href= {model.base_model ? "/collections/" + (model as model).spec_name : "/collections/" + (model as model).spec_name + `?annotation=${model.uid}`} tabIndex={-1}>
                       <img
                         alt={'Image of ' + (model as model).spec_name}
                         role='button'

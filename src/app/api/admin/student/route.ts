@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         const insertStudent = await addStudent(email, name).catch((e) => routeHandlerErrorHandler(route, e.message, 'addStudent()', "Couldn't add student"))
 
         // Email student, informing them of their addition to the project
-        await informStudentOfAssignment('ab632@humboldt.edu', 'localhost:3000').catch((e) => nonFatalError(route, e.message, 'emailNewlyAddedStudent()'))
+        await informStudentOfAssignment(process.env.NODE_ENV === 'production' ? email : "ab632@humboldt.edu", 'beta.3dvertebrates.org').catch((e) => nonFatalError(route, e.message, 'emailNewlyAddedStudent()'))
 
         // Typical success response
         return Response.json({ data: 'Student added', response: insertStudent })
