@@ -232,7 +232,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                         props.admin && annotator && !newAnnotationEnabledState &&
                                         <>
                                             <div className="w-full mb-2">
-                                                <table className="w-full overflow-hidden rounded-b-lg bg-[#D5CB9F] text-center">
+                                                <table className="w-full overflow-hidden rounded-b-lg bg-[#D5CB9F] dark:bg-[#212121] text-center">
                                                     <tr>
                                                         <td className="py-1 border-b border-[#004C46] border-r">Assigned to</td>
                                                         <td className="py-1 border-b border-[#004C46]">{annotator}</td>
@@ -340,7 +340,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                             // 'Select a 3d model' banner
                             !uid && !activeAnnotation &&
                             <div className="flex items-center justify-center text-xl h-full w-full">
-                                <p className="mr-[10%] text-lg lg:text-3xl mb-12">{props.modelsToAnnotate.length ? props.admin ?'Select an annotation' : 'Select an annotation, or click New Annotation' : "No models assigned"}</p>
+                                <p className="mr-[10%] text-lg lg:text-3xl mb-12">{props.modelsToAnnotate.length ? props.admin ?'Select a 3D model' : 'Select an annotation, or click New Annotation' : "No models assigned"}</p>
                             </div>
                         }
                         {
