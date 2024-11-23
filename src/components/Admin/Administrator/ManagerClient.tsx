@@ -81,7 +81,7 @@ export default function ManagerClient(props: ManagerClientProps) {
             <DataTransferContext.Provider value={{ initializeDataTransferHandler, terminateDataTransferHandler }}>
 
                 {/* Main admin Accordion */}
-                <Accordion className="dark: text-[#F5F3E7]">
+                <Accordion className="text-[#004C46] dark:text-[#F5F3E7]">
 
                     {/* AccordionItem holds nested "Students" accordion */}
                     <AccordionItem key='adminStudents' aria-label='adminStudents' title='Students' classNames={{ title: accordionTitlesCss }}>
