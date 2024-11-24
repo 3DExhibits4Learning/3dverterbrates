@@ -7,6 +7,37 @@ import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { annotations, photo_annotation, video_annotation, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
+export interface annotationsAndPositions {
+  annotations: fullAnnotation[] | undefined,
+  numberOfAnnotations: number | undefined,
+  cancelledAnnotation: boolean | undefined,
+  position3D: string | undefined,
+  activeAnnotationIndex: number | 'new' | undefined,
+  activeAnnotation: photo_annotation | video_annotation | model_annotation | undefined,
+  activeAnnotationType: 'photo' | 'video' | 'model' | undefined,
+  activeAnnotationTitle: string | undefined,
+  activeAnnotationPosition: string | undefined,
+  firstAnnotationPosition: string | undefined,
+  newAnnotationEnabled: boolean,
+  annotationSavedOrDeleted: boolean,
+  repositionEnabled: boolean
+}
+
+export interface annotationClientSpecimen {
+  specimenName: string | undefined,
+  uid: string | undefined,
+  annotator: string | undefined,
+  annotated: boolean | undefined,
+  annotationsApproved: boolean | undefined
+}
+
+export interface annotationClientData {
+  annotationsAndPositions: annotationsAndPositions,
+  annotationsAndPositionsDispatch: Dispatch<annotationsAndPositions>,
+  specimenData: annotationClientSpecimen,
+  specimenDataDispatch: Dispatch<annotationClientSpecimen>
+}
+
 export interface SearchHeaderProps {
   headerTitle: string,
   pageRoute: string;
@@ -324,25 +355,12 @@ export interface modelsAndAssignments extends model {
 }
 
 export interface AnnotationEntryProps {
-  activeAnnotation?: photo_annotation | video_annotation | model_annotation | undefined,
-  specimenName?: string,
-  annotationType?: string,
   index: number,
   new: boolean,
-  setActiveAnnotationIndex: Dispatch<SetStateAction<number | 'new' | undefined>>,
-  position: string | undefined,
-  uid: string | undefined
-  activeAnnotationPosition?: string
-  setRepositionEnabled: Dispatch<SetStateAction<boolean>>
-  repositionEnabled: boolean
-  setPosition3D?: Dispatch<SetStateAction<string | undefined>>
-  activeAnnotationTitle?: string
-  setAnnotationSavedOrDeleted: Dispatch<SetStateAction<boolean>>
-  annotationSavedOrDeleted: boolean
   annotationModels: model[]
 }
 
-export interface annotationWithModel extends annotations{
+export interface annotationWithModel extends annotations {
   model_annotation: model_annotation
 }
 

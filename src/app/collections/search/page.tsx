@@ -19,7 +19,7 @@ const SearchPage = async () => {
       </section>
       <Foot />
     </>
-  );
-};
+  )
+}
 
-export default SearchPage;
+export default SearchPage

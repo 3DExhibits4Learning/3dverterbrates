@@ -73,7 +73,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
 
     // Set imgSrc from NFS storage
-    const setImgSrc = async () => {
+    const setImgSrc = () => {
         const annotation = props.activeAnnotation as photo_annotation
         const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${annotation.url.slice(5)}` : `public${annotation.url}`
         setImageSource(`/api/nfs?path=${path}`)
@@ -82,6 +82,11 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // This is the createAnnotaion function, calling the appropriate route handler when the 'save changes' button is depressed
     const createAnnotation = async () => {
 
+        // Open transfer modal and set spinner
+        setTransferModalOpen(true)
+        setTransferring(true)
+        setLoadingLabel('Creating annotation...')
+
         const data = new FormData()
 
         // Simple handler for the first annotation (always taxonomy and description)
@@ -89,11 +94,6 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             data.set('uid', props.uid as string)
             data.set('position', props.position as string)
             data.set('index', props.index.toString())
-
-            // Open transfer modal and set spinner
-            setTransferModalOpen(true)
-            setTransferring(true)
-            setLoadingLabel('Creating annotation...')
 
             // Fetch route handler - set modal result
             await fetch('/api/annotations', {
@@ -147,21 +147,17 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             data.set('annotation_id', annotationId)
 
             // Directory, path and url data
-            if(file){
-            const photo = file as File
-            data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}`)
-            data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
-            data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+            if (file) {
+                const photo = file as File
+                data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}`)
+                data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+                data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
             }
 
 
             // Route handler data
             data.set('mediaType', mediaType as string)
             data.set('file', file as File)
-
-            // Open transfer modal and set spinner
-            setTransferModalOpen(true)
-            setTransferring(true)
 
             // Fetch route handler - set modal result
             await fetch('/api/annotations', {
