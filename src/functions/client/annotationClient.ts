@@ -2,6 +2,8 @@
  * @file src/functions/client/annotationClient.ts
  * 
  * @fileoverview Annotation Client functions
+ * 
+ * @todo update param descriptions
  */
 
 'use client'
@@ -15,11 +17,15 @@ import { dispatch } from "@/interface/interface"
 import ModelAnnotations from "@/classes/ModelAnnotationsClass"
 import { model } from "@prisma/client"
 
-// Interfaces
-interface newModelSelectedOrDbUpdate{
-    type: string,
+// New model selected/db update dispatch action interface
+interface newModelSelectedOrDbUpdate extends dispatch{
     modelAnnotations: ModelAnnotations,
     firstAnnotationPosition: number[]
+}
+
+// Specimen data update interface
+interface newModelClicked extends dispatch{
+    model: model
 }
 
 /**
@@ -34,8 +40,8 @@ export const getIndex = (apData: annotationsAndPositions) => {
     // If else block to determine the correct index
     if (!apData.numberOfAnnotations && !apData.firstAnnotationPosition || apData.activeAnnotationIndex == 1) index = 1
     else if (!apData.numberOfAnnotations) index = 2
-    else if (apData.numberOfAnnotations && apData.activeAnnotationIndex != 'new') index = apData.activeAnnotationIndex
-    else if (apData.activeAnnotationIndex == 'new') index = apData.numberOfAnnotations + 2
+    else if (apData.numberOfAnnotations && apData.activeAnnotationIndex !== 'new') index = apData.activeAnnotationIndex
+    else if (apData.activeAnnotationIndex === 'new') index = apData.numberOfAnnotations + 2
 
     // Return
     return index
@@ -94,7 +100,14 @@ export const modelOrAnnotationChangeHandler = async (specimenData: annotationCli
     apDispatch({ type: 'newModelSelectedOrDbUpdate', modelAnnotations: modelAnnotations, firstAnnotationPosition: annotationPosition })
 }
 
-export const modelClickHandler = (modelClicked: boolean, model: model, apDispatch: Dispatch<dispatch>, sdDispatch: Dispatch<any>, ) => {
+/**
+ * 
+ * @param modelClicked indicates if a model was selected or closed on the accordion
+ * @param model 3D model database record
+ * @param apDispatch annotationsAndPositionsDispatch
+ * @param sdDispatch specimenDataDispatch
+ */
+export const modelClickHandler = (modelClicked: boolean, model: model, apDispatch: Dispatch<dispatch>, sdDispatch: Dispatch<newModelClicked | dispatch>, ) => {
     if (modelClicked) {
         // First annotation position MUST be loaded before BotanistRefWrapper, so it is set to undefined while model data is set
         apDispatch({ type: 'newModelClicked' })

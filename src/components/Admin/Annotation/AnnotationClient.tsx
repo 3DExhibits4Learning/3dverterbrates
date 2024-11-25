@@ -13,7 +13,7 @@
 import { Accordion, AccordionItem } from "@nextui-org/react"
 import { useEffect, useState, useRef, useContext, createContext, useReducer } from "react"
 import { model } from "@prisma/client"
-import { studentsAssignmentsAndModels, annotationsAndPositions, annotationClientSpecimen, annotationClientData } from "@/interface/interface"
+import { studentsAssignmentsAndModels, annotationClientData } from "@/interface/interface"
 import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import { Button } from "@nextui-org/react"
 import { DataTransferContext } from "@/components/Admin/Administrator/ManagerClient"
@@ -21,6 +21,7 @@ import { approveAnnotations, unapproveAnnotations } from "@/functions/client/man
 import { annotationsAndPositionsReducer } from "@/functions/client/reducers/annotationsAndPositions"
 import { annotationClientSpecimenReducer } from "@/functions/client/reducers/annotationClientSpecimen"
 import { getIndex, getAssignmentArgs, getAssignmentLabel, activeAnnotationChangeHandler, modelOrAnnotationChangeHandler, modelClickHandler } from "@/functions/client/annotationClient"
+import { initialAnnotationsAndPositions, initialSpecimenData } from "@/interface/initializers"
 
 // Default imports
 import BotanistRefWrapper from "./AnnotationModelViewerRef"
@@ -29,32 +30,6 @@ import AnnotationEntry from "./AnnotationEntry"
 import assignAnnotation from "@/functions/client/managerClient/assignAnnotation"
 import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
 import StudentSelect from "@/components/Admin/Administrator/Students/SelectStudents"
-
-// Annotation and position state data object for context
-const initialAnnotationsAndPositions: annotationsAndPositions = {
-    annotations: undefined,
-    numberOfAnnotations: undefined,
-    cancelledAnnotation: undefined,
-    position3D: undefined,
-    activeAnnotationIndex: undefined,
-    activeAnnotation: undefined,
-    activeAnnotationType: undefined,
-    activeAnnotationTitle: undefined,
-    activeAnnotationPosition: undefined,
-    firstAnnotationPosition: undefined,
-    newAnnotationEnabled: false,
-    annotationSavedOrDeleted: false,
-    repositionEnabled: false,
-}
-
-// Specimen data object for context
-const initialSpecimenData: annotationClientSpecimen = {
-    specimenName: undefined,
-    uid: undefined,
-    annotator: undefined,
-    annotated: undefined,
-    annotationsApproved: undefined
-}
 
 // Exported context
 export const AnnotationClientData = createContext<annotationClientData | ''>('')
@@ -97,7 +72,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
     // Set the activeAnnotation when its dependency is changed from the BotanistModelViewer, either via clicking an annotation or creating a new one
     useEffect(() => activeAnnotationChangeHandler(annotationsAndPositions, annotationsAndPositionsDispatch), [annotationsAndPositions.activeAnnotationIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Set relevant model data; this is called onPress of the Accordion or when an annotation record has been changed in the database
+    // Set relevant model data onPress of the Accordion or when an annotation record has been changed in the database
     useEffect(() => { newAnnotationEnabled.current = false; modelOrAnnotationChangeHandler(specimenData, annotationsAndPositionsDispatch) }, [specimenData.uid, annotationsAndPositions.annotationSavedOrDeleted])
 
     return (
