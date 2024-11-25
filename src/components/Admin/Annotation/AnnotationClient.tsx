@@ -3,8 +3,7 @@
  * 
  * @fileoverview annotation client parent component; its most important children are AnnotationModelViewer and AnnotationEntry
  * 
- * @todo Restructure state management with a reducer and state object
- * @todo Provide context of that state object to AnnotationModelViewer and AnnotationEntry
+ * @todo Extract and import single JSX components
  * 
  */
 
@@ -31,37 +30,37 @@ import assignAnnotation from "@/functions/client/managerClient/assignAnnotation"
 import dataTransferHandler from "@/functions/client/dataTransfer/dataTransferHandler"
 import StudentSelect from "@/components/Admin/Administrator/Students/SelectStudents"
 
+// Annotation and position state data object for context
+const initialAnnotationsAndPositions: annotationsAndPositions = {
+    annotations: undefined,
+    numberOfAnnotations: undefined,
+    cancelledAnnotation: undefined,
+    position3D: undefined,
+    activeAnnotationIndex: undefined,
+    activeAnnotation: undefined,
+    activeAnnotationType: undefined,
+    activeAnnotationTitle: undefined,
+    activeAnnotationPosition: undefined,
+    firstAnnotationPosition: undefined,
+    newAnnotationEnabled: false,
+    annotationSavedOrDeleted: false,
+    repositionEnabled: false,
+}
+
+// Specimen data object for context
+const initialSpecimenData: annotationClientSpecimen = {
+    specimenName: undefined,
+    uid: undefined,
+    annotator: undefined,
+    annotated: undefined,
+    annotationsApproved: undefined
+}
+
 // Exported context
-export const AnnotationClientData = createContext<any>('');
+export const AnnotationClientData = createContext<annotationClientData | ''>('')
 
 // Main JSX
 export default function AnnotationClient(props: { modelsToAnnotate: model[], annotationModels: model[], admin: boolean, students?: studentsAssignmentsAndModels[] }) {
-
-    // Annotation and position state data object for context
-    const initialAnnotationsAndPositions: annotationsAndPositions = {
-        annotations: undefined,
-        numberOfAnnotations: undefined,
-        cancelledAnnotation: undefined,
-        position3D: undefined,
-        activeAnnotationIndex: undefined,
-        activeAnnotation: undefined,
-        activeAnnotationType: undefined,
-        activeAnnotationTitle: undefined,
-        activeAnnotationPosition: undefined,
-        firstAnnotationPosition: undefined,
-        newAnnotationEnabled: false,
-        annotationSavedOrDeleted: false,
-        repositionEnabled: false,
-    }
-
-    // Specimen data object for context
-    const initialSpecimenData: annotationClientSpecimen = {
-        specimenName: undefined,
-        uid: undefined,
-        annotator: undefined,
-        annotated: undefined,
-        annotationsApproved: undefined
-    }
 
     // Data transfer contexts
     const initializeDataTransfer = useContext(DataTransferContext).initializeDataTransferHandler
@@ -93,13 +92,13 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
     const unapproveAnnotationsHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, unapproveAnnotations, [specimenData.uid], 'Unapproving annotations')
 
     // Annotation assign (or unassign) handler
-    const assignAnnotationHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, assignAnnotation, getAssignmentArgs(props.students, email), getAssignmentLabel())
+    const assignAnnotationHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, assignAnnotation, getAssignmentArgs(specimenData, props.students, email), getAssignmentLabel(specimenData))
 
-    // This effect sets the activeAnnotation when its dependency is changed from the BotanistModelViewer, either via clicking an annotation or creating a new one
-    useEffect(() => activeAnnotationChangeHandler(), [annotationsAndPositions.activeAnnotationIndex]) // eslint-disable-line react-hooks/exhaustive-deps
+    // Set the activeAnnotation when its dependency is changed from the BotanistModelViewer, either via clicking an annotation or creating a new one
+    useEffect(() => activeAnnotationChangeHandler(annotationsAndPositions, annotationsAndPositionsDispatch), [annotationsAndPositions.activeAnnotationIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Set relevant model data; this is called onPress of the Accordion or when an annotation record has been changed in the database
-    useEffect(() => { newAnnotationEnabled.current = false; modelOrAnnotationChangeHandler() }, [specimenData.uid, annotationsAndPositions.annotationSavedOrDeleted])
+    useEffect(() => { newAnnotationEnabled.current = false; modelOrAnnotationChangeHandler(specimenData, annotationsAndPositionsDispatch) }, [specimenData.uid, annotationsAndPositions.annotationSavedOrDeleted])
 
     return (
         <AnnotationClientData.Provider value={annotationClientContext} >
@@ -111,19 +110,19 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                     {/* Accordion holds all imported models - this will be replaced with an autocomplete*/}
 
                     <Accordion className="h-full" onSelectionChange={(keys: any) => modelClicked.current = keys.size ? true : false}>
-                        {props.modelsToAnnotate.map((model, i) => {
-                            return (
+                        {
+                            props.modelsToAnnotate.map((model, i) =>
                                 <AccordionItem
                                     key={i}
                                     aria-label={'Specimen to model'}
                                     title={toUpperFirstLetter(model.spec_name)}
                                     classNames={{ title: 'text-[ #004C46] text-2xl' }}
-                                    onPress={() => modelClickHandler(modelClicked.current as boolean, model)}
+                                    onPress={() => modelClickHandler(modelClicked.current as boolean, model, annotationsAndPositionsDispatch, specimenDataDispatch)}
                                 >
                                     {
                                         // Conditional render that waits until the first annotation (thus all annotations) is loaded
                                         // RefWrapper required to pass ref to dynamically imported component
-                                        annotationsAndPositions.firstAnnotationPosition != undefined &&
+                                        annotationsAndPositions.firstAnnotationPosition !== undefined &&
                                         <div className="h-[400px]">
                                             <BotanistRefWrapper ref={newAnnotationEnabled} />
                                         </div>
@@ -240,7 +239,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                     }
                                 </AccordionItem>
                             )
-                        })}
+                        }
                     </Accordion>
                 </section>
 
@@ -266,12 +265,12 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                         {
                             // This indicates a databased annotation
                             typeof (annotationsAndPositions.activeAnnotationIndex) == 'number' &&
-                            <AnnotationEntry index={getIndex() as number} new={false} annotationModels={props.annotationModels} />
+                            <AnnotationEntry index={getIndex(annotationsAndPositions) as number} new={false} annotationModels={props.annotationModels} />
                         }
                         {
                             // This indicates a new annotation
                             typeof (annotationsAndPositions.activeAnnotationIndex) == 'string' &&
-                            <AnnotationEntry index={getIndex() as number} new annotationModels={props.annotationModels} />
+                            <AnnotationEntry index={getIndex(annotationsAndPositions) as number} new annotationModels={props.annotationModels} />
                         }
                     </section>
                 </div>
@@ -279,29 +278,3 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
         </AnnotationClientData.Provider>
     )
 }
-
-// // Annotation states
-// const [newAnnotationEnabledState, setNewAnnotationEnabledState] = useState<boolean>(false)
-// const [cancelledAnnotation, setCancelledAnnotation] = useState<boolean>()
-// const [annotationSavedOrDeleted, setAnnotationSavedOrDeleted] = useState<boolean>(false)
-// const [annotations, setAnnotations] = useState<fullAnnotation[]>()
-// const [numberOfAnnotations, setNumberOfAnnotations] = useState<number>()
-
-// // Active annotation states
-// const [activeAnnotationIndex, setActiveAnnotationIndex] = useState<number | 'new' | undefined>()
-// const [activeAnnotation, setActiveAnnotation] = useState<photo_annotation | video_annotation | model_annotation | undefined>()
-// const [activeAnnotationType, setActiveAnnotationType] = useState<'photo' | 'video' | 'model'>()
-// const [activeAnnotationTitle, setActiveAnnotationTitle] = useState<string>()
-
-// // Position states
-// const [activeAnnotationPosition, setActiveAnnotationPosition] = useState<string>()
-// const [repositionEnabled, setRepositionEnabled] = useState<boolean>(false)
-// const [position3D, setPosition3D] = useState<string>()
-// const [firstAnnotationPosition, setFirstAnnotationPostion] = useState<string>()
-
-// // Specimen (model) states
-// const [specimenName, setSpecimenName] = useState<string>()
-// const [uid, setUid] = useState<string>()
-// const [annotator, setAnnotator] = useState<string | null>()
-// const [annotated, setAnnotated] = useState<boolean>()
-// const [annotationsApproved, setAnnotationsApproved] = useState<boolean>()

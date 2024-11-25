@@ -7,25 +7,26 @@
 'use client'
 
 // Typical imports
-import { useContext } from "react"
-import { AnnotationClientData } from "@/components/Admin/Annotation/AnnotationClient"
+import { Dispatch } from "react"
 import { annotationClientSpecimen, annotationsAndPositions, studentsAssignmentsAndModels } from "@/interface/interface"
+import { dispatch } from "@/interface/interface"
 
 // Default imports
 import ModelAnnotations from "@/classes/ModelAnnotationsClass"
 import { model } from "@prisma/client"
 
-// Annotation client context
-const specimenData: annotationClientSpecimen = useContext(AnnotationClientData).specimenData
-const apData: annotationsAndPositions = useContext(AnnotationClientData).annotationsAndPositions
-const annotationsAndPositionsDispatch = useContext(AnnotationClientData).annotationsAndPositionsDispatch
-const specimenDataDispatch = useContext(AnnotationClientData).specimenDataDispatch
+// Interfaces
+interface newModelSelectedOrDbUpdate{
+    type: string,
+    modelAnnotations: ModelAnnotations,
+    firstAnnotationPosition: number[]
+}
 
 /**
  * 
  * @returns the index of the active annotation for the selected model in the annotation client
  */
-export const getIndex = () => {
+export const getIndex = (apData: annotationsAndPositions) => {
 
     // Index
     var index
@@ -45,7 +46,8 @@ export const getIndex = () => {
  * @param students array of students, assignments and models (see type)
  * @returns email of student who is assigned the model with uid from specimenData object
  */
-export const findStudentEmail = (students: studentsAssignmentsAndModels[]) => students.find(student => student.assignment.find(assignment => assignment.uid === specimenData.uid))?.email
+export const findStudentEmail = (students: studentsAssignmentsAndModels[], specimenData: annotationClientSpecimen) => 
+    students.find(student => student.assignment.find(assignment => assignment.uid === specimenData.uid))?.email
 
 /**
  * 
@@ -53,30 +55,30 @@ export const findStudentEmail = (students: studentsAssignmentsAndModels[]) => st
  * @param email email of student who to be assigned the currently selected model for annotation
  * @returns arguments for assignAnnotation()
  */
-export const getAssignmentArgs = (students?: studentsAssignmentsAndModels[], email?: string | null) => specimenData.annotator ?
-    [specimenData.uid, null, findStudentEmail(students as studentsAssignmentsAndModels[])] :
+export const getAssignmentArgs = (specimenData: annotationClientSpecimen, students?: studentsAssignmentsAndModels[], email?: string | null) => specimenData.annotator ?
+    [specimenData.uid, null, findStudentEmail(students as studentsAssignmentsAndModels[], specimenData)] :
     [specimenData.uid, name, email]
 
 /**
  * 
  * @returns data transfer label for assignAnnotation()
  */
-export const getAssignmentLabel = () => specimenData.annotator ? 'Unassigning model to student for annotation' : 'Assigning model to student for annotation'
+export const getAssignmentLabel = (specimenData: annotationClientSpecimen) => specimenData.annotator ? 'Unassigning model to student for annotation' : 'Assigning model to student for annotation'
 
 /**
  * 
  * @description dispatch based on active annotation index
  */
-export const activeAnnotationChangeHandler = () => {
-    if (apData.activeAnnotationIndex == 1) annotationsAndPositionsDispatch({ type: 'activeAnnotationIndex=1' })
-    else if (typeof (apData.activeAnnotationIndex) === 'number' && apData.annotations) annotationsAndPositionsDispatch({ type: 'activeAnnotationIndex>1' })
+export const activeAnnotationChangeHandler = (apData: annotationsAndPositions, apDispatch: Dispatch<dispatch>) => {
+    if (apData.activeAnnotationIndex == 1) apDispatch({ type: 'activeAnnotationIndex=1' })
+    else if (typeof (apData.activeAnnotationIndex) === 'number' && apData.annotations) apDispatch({ type: 'activeAnnotationIndex>1' })
 }
 
 /**
  * 
  * @returns first annotation position of the active specimen if it exists, or an empty string if not
  */
-export const getFirstAnnotationPosition = async () => await fetch(`/api/annotations?uid=${specimenData.uid}`, { cache: 'no-store' })
+export const getFirstAnnotationPosition = async (specimenData: annotationClientSpecimen) => await fetch(`/api/annotations?uid=${specimenData.uid}`, { cache: 'no-store' })
     .then(res => res.json()).then(json => {
         if (json.response) return JSON.parse(json.response)
         else return ''
@@ -86,17 +88,17 @@ export const getFirstAnnotationPosition = async () => await fetch(`/api/annotati
  * 
  * @description get relevant data and dispatch when a either a model is selected or an annotation record is created/updated
  */
-export const modelOrAnnotationChangeHandler = async () => {
+export const modelOrAnnotationChangeHandler = async (specimenData: annotationClientSpecimen, apDispatch: Dispatch<newModelSelectedOrDbUpdate>) => {
     const modelAnnotations = await ModelAnnotations.retrieve(specimenData.uid as string)
-    const annotationPosition = await getFirstAnnotationPosition()
-    annotationsAndPositionsDispatch({ type: 'newModelSelectedOrDbUpdate', modelAnnotations: modelAnnotations, firstAnnotationPostion: annotationPosition })
+    const annotationPosition = await getFirstAnnotationPosition(specimenData)
+    apDispatch({ type: 'newModelSelectedOrDbUpdate', modelAnnotations: modelAnnotations, firstAnnotationPosition: annotationPosition })
 }
 
-export const modelClickHandler = (modelClicked: boolean, model: model) => {
+export const modelClickHandler = (modelClicked: boolean, model: model, apDispatch: Dispatch<dispatch>, sdDispatch: Dispatch<any>, ) => {
     if (modelClicked) {
         // First annotation position MUST be loaded before BotanistRefWrapper, so it is set to undefined while model data is set
-        annotationsAndPositionsDispatch({ type: 'newModelClicked' })
-        specimenDataDispatch({ type: 'newModelClicked', model: model })
+        apDispatch({ type: 'newModelClicked' })
+        sdDispatch({ type: 'newModelClicked', model: model })
     }
-    else specimenDataDispatch({ type: 'modelUndefined' })
+    else sdDispatch({ type: 'modelUndefined' })
 }

@@ -9,14 +9,14 @@
  * @todo extract Effect logic in to stand alone functions, extract and import
  */
 
-import { MutableRefObject, useEffect, useRef, Dispatch, SetStateAction, forwardRef, ForwardedRef, useState, useContext } from 'react';
+import { MutableRefObject, useEffect, useRef, forwardRef, ForwardedRef, useState, useContext } from 'react';
 import { AnnotationClientData } from './AnnotationClient';
-import { fullAnnotation } from '@/interface/interface';
+import { annotationClientData, fullAnnotation } from '@/interface/interface';
 
 import Sketchfab from '@sketchfab/viewer-api';
 
 
-const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
+const BotanistModelViewer = forwardRef((props: {minHeight?: string}, ref: ForwardedRef<boolean>) => {
 
     // Variable declarations
     const newAnnotationEnabled = ref as MutableRefObject<boolean>
@@ -25,9 +25,10 @@ const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
 
     const [sketchfabApi, setSketchfabApi] = useState<any>()
 
-    const clientData = useContext(AnnotationClientData)
+    const clientData = useContext(AnnotationClientData) as annotationClientData
     const apData = clientData.annotationsAndPositions
     const apDataDispatch = clientData.annotationsAndPositionsDispatch
+    const specimen = clientData.specimenData
 
     const minHeight = props.minHeight ? props.minHeight : '150px'
 
@@ -69,7 +70,7 @@ const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
                     const positionArray = Array.from(info.position3D)
                     apDataDispatch({type:'newPosition', position: JSON.stringify([positionArray, camera.position, camera.target])})
 
-                    if (apData.activeAnnotationIndex !== 'new') props.setActiveAnnotationIndex('new')
+                    if (apData.activeAnnotationIndex !== 'new') apDataDispatch({type:'newAnnotationIndex', index: 'new'})
 
                 }
                 else apDataDispatch({type:'newPosition', position: undefined})
@@ -111,7 +112,7 @@ const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
     // Annotation select handler
     const annotationSelectHandler = (index: any) => {
         if (newAnnotationEnabled.current) return
-        else if (index != -1) props.setActiveAnnotationIndex(index + 1)
+        else if (index != -1) apDataDispatch({type:'newAnnotationIndex', index: index + 1})
     }
 
     // Sketchfab API initialization success object
@@ -154,40 +155,40 @@ const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
     // This effect initializes the viewer
     useEffect(() => {
         const iframe = modelViewer.current as HTMLIFrameElement
-        iframe.src = props.uid
+        iframe.src = specimen.uid as string
         const client = new Sketchfab(iframe)
-        client.init(props.uid, successObj)
-    }, [props.uid, props.annotations]) // eslint-disable-line react-hooks/exhaustive-deps
+        client.init(specimen.uid, successObj)
+    }, [specimen.uid, apData.annotations]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect removes the temporary annotation when its cancelled
     useEffect(() => {
         if (sketchfabApi && temporaryAnnotationIndex.current != undefined) {
             sketchfabApi.removeAnnotation(temporaryAnnotationIndex.current, (err: any) => { })
-            props.setPosition3D(undefined)
+            apDataDispatch({type:'newPosition', position: undefined})
         }
-    }, [props.cancelledAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apData.cancelledAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect adds the createAnnotation listener onClick when the associated state is enabled (or vice versa)
     useEffect(() => {
-        if (sketchfabApi && props.newAnnotationEnabledState === true) {
+        if (sketchfabApi && apData.newAnnotationEnabled === true) {
             temporaryAnnotationIndex.current = undefined
             sketchfabApi.addEventListener('click', createAnnotation, { pick: 'fast' })
         }
         else if (sketchfabApi) sketchfabApi.removeEventListener('click', createAnnotation, { pick: 'fast' })
 
         return () => { if (sketchfabApi) sketchfabApi.removeEventListener('click', createAnnotation, { pick: 'fast' }) }
-    }, [props.newAnnotationEnabledState]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apData.newAnnotationEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect allows repositioning of the activeAnnotation onClick (or removes it when there is no active annotation, or a new annotation)
     useEffect(() => {
-        if (sketchfabApi && props.activeAnnotationIndex !== undefined && props.activeAnnotationIndex !== 'new' && props.repositionEnabled) {
+        if (sketchfabApi && apData.activeAnnotationIndex !== undefined && apData.activeAnnotationIndex !== 'new' && apData.repositionEnabled) {
             sketchfabApi.addEventListener('click', repositionAnnotation, { pick: 'fast' })
         }
 
         else if (sketchfabApi) sketchfabApi.removeEventListener('click', repositionAnnotation, { pick: 'fast' })
 
         return () => { if (sketchfabApi) sketchfabApi.removeEventListener('click', repositionAnnotation, { pick: 'fast' }) }
-    }, [props.activeAnnotationIndex, props.repositionEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apData.activeAnnotationIndex, apData.repositionEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect repositions an annotation to its original location when the annotation reposition checkbox is unchecked
     useEffect(() => {
@@ -206,7 +207,7 @@ const BotanistModelViewer = forwardRef((ref: ForwardedRef<boolean>) => {
             const position = JSON.parse((apData.annotations as fullAnnotation[])[apData.activeAnnotationIndex as number - 2].position as string)
             sketchfabApi.createAnnotationFromScenePosition(position[0], position[1], position[2], 'Placeholder', '', (err: any, index: any) => { replaceHigherAnnotations() })
         }
-    }, [props.repositionEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apData.repositionEnabled]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect initializes the annotation select event handler and handles corresponding state changes within the handler
     useEffect(() => {

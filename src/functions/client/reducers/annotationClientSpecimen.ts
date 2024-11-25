@@ -1,7 +1,7 @@
 import { annotationClientSpecimen } from "@/interface/interface"
 import { model } from "@prisma/client"
 
-export function annotationClientSpecimenReducer(specimenData: annotationClientSpecimen, action: any) {
+export function annotationClientSpecimenReducer(specimenData: annotationClientSpecimen, action: any): annotationClientSpecimen {
 
     switch (action.type) {
 
@@ -9,7 +9,7 @@ export function annotationClientSpecimenReducer(specimenData: annotationClientSp
 
             const model = action.model as model
 
-            const returnState0: annotationClientSpecimen = {
+            return {
                 ...specimenData,
                 specimenName: model.spec_name,
                 uid: model.uid,
@@ -18,17 +18,15 @@ export function annotationClientSpecimenReducer(specimenData: annotationClientSp
                 annotationsApproved: model.annotationsApproved
             }
 
-            return returnState0
 
         case 'modelUndefined':
 
 
-            const returnState1: annotationClientSpecimen = {
+            return {
                 ...specimenData,
                 uid: undefined
             }
 
-            return returnState1
 
         default:
             throw Error('Unknown action: ' + action.type)

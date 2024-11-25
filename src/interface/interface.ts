@@ -7,6 +7,10 @@ import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { annotations, photo_annotation, video_annotation, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
+export interface dispatch{
+  type: string
+}
+
 export interface annotationsAndPositions {
   annotations: fullAnnotation[] | undefined,
   numberOfAnnotations: number | undefined,
@@ -33,9 +37,9 @@ export interface annotationClientSpecimen {
 
 export interface annotationClientData {
   annotationsAndPositions: annotationsAndPositions,
-  annotationsAndPositionsDispatch: Dispatch<annotationsAndPositions>,
+  annotationsAndPositionsDispatch: Dispatch<any>,
   specimenData: annotationClientSpecimen,
-  specimenDataDispatch: Dispatch<annotationClientSpecimen>
+  specimenDataDispatch: Dispatch<any>
 }
 
 export interface SearchHeaderProps {

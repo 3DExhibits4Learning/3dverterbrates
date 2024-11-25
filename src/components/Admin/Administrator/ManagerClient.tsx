@@ -43,7 +43,7 @@ export const DataTransferContext = createContext<any>('');
 // Main JSX component
 export default function ManagerClient(props: ManagerClientProps) {
 
-    // Variable Declarations - prop conversions (decimals can't be passed directly from server to client)
+    // Variable Declarations 
     const models: fullModel[] = JSON.parse(props.models)
     const modelsNeedingThumbnails: fullModel[] = (JSON.parse(props.modelsNeedingThumbnails) as fullModel[]).filter(model => model.modelApproved)
     const studentsAssignmentsAndModels: studentsAssignmentsAndModels[] = JSON.parse(props.studentsAssignmentsAndModels)
@@ -64,6 +64,7 @@ export default function ManagerClient(props: ManagerClientProps) {
     // Tailwind variables
     const accordionTitlesCss = 'text-[#004C46] text-2xl dark:text-[#F5F3E7]'
 
+    // For now... annotaion entry simply needs to be removed on mobile
     if (typeof window !== 'undefined' && isMobileOrTablet()) {
         return <>
             <main className='min-h-[calc(100vh-177px)] flex items-center justify-center '>

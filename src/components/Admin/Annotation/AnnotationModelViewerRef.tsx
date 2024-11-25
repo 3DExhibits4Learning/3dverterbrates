@@ -3,10 +3,10 @@
 import { forwardRef, lazy, Suspense } from "react"
 const BotanistModelViewer = lazy(() => import("./AnnotationModelViewer"))
 
-const BotanistRefWrapper = forwardRef((ref: any) => {
+const BotanistRefWrapper = forwardRef((props:{minHeight?: string}, ref: any) => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <BotanistModelViewer ref={ref} />
+            <BotanistModelViewer {...props} ref={ref} />
         </Suspense>
     )
 })

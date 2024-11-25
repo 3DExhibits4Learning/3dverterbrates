@@ -1,27 +1,25 @@
 import ModelAnnotations from "@/classes/ModelAnnotationsClass"
 import { annotationsAndPositions, fullAnnotation } from "@/interface/interface"
 
-export function annotationsAndPositionsReducer(annotationsAndPositions: annotationsAndPositions, action: any) {
+export function annotationsAndPositionsReducer(annotationsAndPositions: annotationsAndPositions, action: any): annotationsAndPositions {
 
     switch (action.type) {
 
         case 'activeAnnotationIndex=1':
 
-            const returnState0: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 activeAnnotation: undefined,
                 activeAnnotationType: undefined,
                 activeAnnotationPosition: undefined
             }
 
-            return returnState0
-
         case 'activeAnnotationIndex>1':
 
             const annotations = annotationsAndPositions.annotations as fullAnnotation[]
             const i = annotationsAndPositions.activeAnnotationIndex as number
 
-            const returnState1: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 activeAnnotationType: annotations[i - 2].annotation_type as 'photo' | 'video' | 'model' | undefined,
                 activeAnnotationPosition: annotations[i - 2].position as string,
@@ -31,13 +29,11 @@ export function annotationsAndPositionsReducer(annotationsAndPositions: annotati
                 activeAnnotation: annotations[i - 2].annotation
             }
 
-            return returnState1
-
         case 'newModelSelectedOrDbUpdate':
 
             const mAnnotations = (action.modelAnnotations as ModelAnnotations).annotations
 
-            const returnState2: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 annotations: mAnnotations,
                 numberOfAnnotations: mAnnotations.length,
@@ -49,47 +45,68 @@ export function annotationsAndPositionsReducer(annotationsAndPositions: annotati
                 repositionEnabled: false
             }
 
-            return returnState2
-
         case 'newModelClicked':
 
-            const returnState3: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 firstAnnotationPosition: undefined
             }
 
-            return returnState3
-
         case 'newAnnotation':
 
-            const returnState4: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 newAnnotationEnabled: true,
                 activeAnnotationIndex: 'new',
                 repositionEnabled: false
             }
 
-            return returnState4
-
         case 'annotationCancelled':
 
-            const returnState5: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 newAnnotationEnabled: false,
                 activeAnnotationIndex: undefined,
                 cancelledAnnotation: !annotationsAndPositions.cancelledAnnotation
             }
 
-            return returnState5
 
         case 'newPosition':
 
-            const returnState6: annotationsAndPositions = {
+            return {
                 ...annotationsAndPositions,
                 position3D: action.position
             }
 
-            return returnState6
+        case 'newAnnotationIndex':
+
+            return {
+                ...annotationsAndPositions,
+                activeAnnotationIndex: action.index
+            }
+
+
+        case 'switchRepositionEnabled':
+
+            return {
+                ...annotationsAndPositions,
+                repositionEnabled: !annotationsAndPositions.repositionEnabled
+            }
+
+        case 'switchRepositionAndUndefinePosition':
+
+            return {
+                ...annotationsAndPositions,
+                repositionEnabled: !annotationsAndPositions.repositionEnabled,
+                position3D: undefined
+            }
+
+        case 'annotationSavedOrDeleted':
+
+            return {
+                ...annotationsAndPositions,
+                annotationSavedOrDeleted: !annotationsAndPositions.annotationSavedOrDeleted
+            }
 
         default:
             throw Error('Unknown action: ' + action.type)

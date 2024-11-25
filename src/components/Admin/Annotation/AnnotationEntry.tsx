@@ -10,11 +10,12 @@
 
 'use client'
 
-import { useState, useEffect, SetStateAction, Dispatch } from "react"
+import { useState, useEffect, SetStateAction, Dispatch, useContext } from "react"
 import { model_annotation, photo_annotation, video_annotation } from "@prisma/client"
 import { Button } from "@nextui-org/react"
 import { v4 as uuidv4 } from 'uuid'
-import { AnnotationEntryProps } from "@/interface/interface"
+import { AnnotationEntryProps, annotationClientData } from "@/interface/interface"
+import { AnnotationClientData } from "./AnnotationClient"
 
 import TextInput from "@/components/Shared/Form Fields/TextInput"
 import RadioButtons from "@/components/Admin/AnnotationFields/RadioButtons"
@@ -30,12 +31,16 @@ const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'), { s
 
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 
-    /***** Variable declarations *****/
+    const clientData = useContext(AnnotationClientData) as annotationClientData
+    const apData = clientData.annotationsAndPositions
+    const apDataDispatch = clientData.annotationsAndPositionsDispatch
+    const specimen = clientData.specimenData
+
 
     // Lightweight functions used to enable annotation creation/save edits
     const allTruthy = (value: any) => value ? true : false
     const allSame = (originalValues: any[], currentValues: any[]) => JSON.stringify(originalValues) === JSON.stringify(currentValues) ? true : false
-    const isNewPosition = props.position !== undefined ? true : false
+    const isNewPosition = apData.position3D !== undefined ? true : false
 
     // Radio Buttons
     const [photoChecked, setPhotoChecked] = useState<boolean>()
@@ -49,14 +54,14 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
     // Form fields
     const [annotationTitle, setAnnotationTitle] = useState<string>()
-    const [url, setUrl] = useState<string>((props.activeAnnotation as photo_annotation)?.url ?? '')
+    const [url, setUrl] = useState<string>((apData.activeAnnotation as photo_annotation)?.url ?? '')
     const [file, setFile] = useState<File>()
-    const [author, setAuthor] = useState<string>((props.activeAnnotation as photo_annotation)?.author ?? '')
-    const [license, setLicense] = useState<string>((props.activeAnnotation as photo_annotation)?.license ?? '')
-    const [photoTitle, setPhotoTitle] = useState<string>((props.activeAnnotation as photo_annotation)?.title ?? '')
-    const [website, setWebsite] = useState<string>((props.activeAnnotation as photo_annotation)?.website ?? '')
-    const [annotation, setAnnotation] = useState<string>((props.activeAnnotation as photo_annotation)?.annotation ?? '')
-    const [length, setLength] = useState<string>((props.activeAnnotation as video_annotation)?.length ?? '')
+    const [author, setAuthor] = useState<string>((apData.activeAnnotation as photo_annotation)?.author ?? '')
+    const [license, setLicense] = useState<string>((apData.activeAnnotation as photo_annotation)?.license ?? '')
+    const [photoTitle, setPhotoTitle] = useState<string>((apData.activeAnnotation as photo_annotation)?.title ?? '')
+    const [website, setWebsite] = useState<string>((apData.activeAnnotation as photo_annotation)?.website ?? '')
+    const [annotation, setAnnotation] = useState<string>((apData.activeAnnotation as photo_annotation)?.annotation ?? '')
+    const [length, setLength] = useState<string>((apData.activeAnnotation as video_annotation)?.length ?? '')
     const [imageSource, setImageSource] = useState<string>()
     const [videoSource, setVideoSource] = useState<string>('')
     const [modelAnnotationUid, setModelAnnotationUid] = useState<string>('select')
@@ -72,9 +77,12 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     const [createDisabled, setCreateDisabled] = useState<boolean>(true)
     const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
 
+    // Temporary close fn
+    const close = (arg: boolean) => apDataDispatch({type: 'annotationSavedOrDeleted'})
+
     // Set imgSrc from NFS storage
     const setImgSrc = () => {
-        const annotation = props.activeAnnotation as photo_annotation
+        const annotation = apData.activeAnnotation as photo_annotation
         const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${annotation.url.slice(5)}` : `public${annotation.url}`
         setImageSource(`/api/nfs?path=${path}`)
     }
@@ -91,8 +99,8 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
         // Simple handler for the first annotation (always taxonomy and description)
         if (props.index == 1) {
-            data.set('uid', props.uid as string)
-            data.set('position', props.position as string)
+            data.set('uid', specimen.uid as string)
+            data.set('position', apData.position3D as string)
             data.set('index', props.index.toString())
 
             // Fetch route handler - set modal result
@@ -109,10 +117,10 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         else {
 
             // Annotations table data
-            data.set('uid', props.uid as string)
+            data.set('uid', specimen.uid as string)
             data.set('annotation_no', props.index.toString())
             data.set('annotation_type', annotationType)
-            data.set('position', props.position as string)
+            data.set('position', apData.position3D as string)
             data.set('title', annotationTitle as string)
 
             // Set relevant data based on annotationType
@@ -149,9 +157,9 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             // Directory, path and url data
             if (file) {
                 const photo = file as File
-                data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}`)
-                data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
-                data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotationId}/${photo.name}`)
+                data.set('dir', `public/data/Herbarium/Annotations/${specimen.uid}/${annotationId}`)
+                data.set('path', `public/data/Herbarium/Annotations/${specimen.uid}/${annotationId}/${photo.name}`)
+                data.set('url', `/data/Herbarium/Annotations/${specimen.uid}/${annotationId}/${photo.name}`)
             }
 
 
@@ -176,8 +184,8 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
         // Simple handler for the first annotation (always taxonomy and description)
         if (props.index == 1) {
-            data.set('uid', props.uid as string)
-            data.set('position', props.position as string)
+            data.set('uid', specimen.uid as string)
+            data.set('position', apData.position3D as string)
             data.set('index', props.index.toString())
 
             // Open transfer modal and set spinner
@@ -199,15 +207,15 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         else {
 
             // Media transition data
-            if (props.annotationType !== annotationType) {
+            if (apData.activeAnnotationType !== annotationType) {
                 data.set('mediaTransition', 'true')
-                data.set('previousMedia', props.annotationType as string)
+                data.set('previousMedia', apData.activeAnnotationType as string)
             }
 
             // Annotations table data (for update)
-            data.set('uid', props.uid as string)
+            data.set('uid', specimen.uid as string)
             data.set('annotation_type', annotationType)
-            data.set('position', props.position as string ?? props.activeAnnotationPosition)
+            data.set('position', apData.position3D as string ?? apData.activeAnnotationPosition)
             data.set('title', annotationTitle as string)
 
             // Set relevant data based on annotationType
@@ -238,22 +246,22 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
             // Shared data (url was formerly the foreign key)
             // Note that the url is the url necessary from the collections page; also note the old path must be inlcuded for deletion; also note that a new id is not generated for update
-            data.set('annotation_id', (props.activeAnnotation as photo_annotation | video_annotation).annotation_id)
-            data.set('specimenName', props.specimenName as string)
+            data.set('annotation_id', (apData.activeAnnotation as photo_annotation | video_annotation).annotation_id)
+            data.set('specimenName', specimen.specimenName as string)
 
             // Set relevant form data if there is a new photo file
             if (file) {
                 const photo = file as File
-                const annotation = props.activeAnnotation as photo_annotation
-                data.set('dir', `public/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}`)
-                data.set('path', `public/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}/${photo.name}`)
-                data.set('url', `/data/Herbarium/Annotations/${props.uid}/${annotation.annotation_id}/${photo.name}`)
+                const annotation = apData.activeAnnotation as photo_annotation
+                data.set('dir', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}`)
+                data.set('path', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
+                data.set('url', `/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
                 data.set('file', photo)
-                if (props.annotationType === 'photo') data.set('oldUrl', (props.activeAnnotation as photo_annotation).url)
+                if (apData.activeAnnotationType === 'photo') data.set('oldUrl', (apData.activeAnnotation as photo_annotation).url)
             }
 
             // Else if the databased annotation is a photo, the url should be the same
-            else if (props.annotationType === 'photo') data.set('url', (props.activeAnnotation as photo_annotation).url)
+            else if (apData.activeAnnotationType === 'photo') data.set('url', (apData.activeAnnotation as photo_annotation).url)
 
             // Route handler data
             data.set('mediaType', mediaType as string)
@@ -279,9 +287,9 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
 
         // request body
         const requestObj = {
-            annotation_id: props.activeAnnotation?.annotation_id,
-            modelUid: props.uid,
-            oldUrl: props.annotationType === 'photo' ? (props.activeAnnotation as photo_annotation).url : ''
+            annotation_id: apData.activeAnnotation?.annotation_id,
+            modelUid: specimen.uid,
+            oldUrl: apData.activeAnnotationType === 'photo' ? (apData.activeAnnotation as photo_annotation).url : ''
         }
 
         // Open transfer modal and set spinner
@@ -310,30 +318,30 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             else setImageVisible(false)
         }
 
-    }, [props.new, annotationType, props.index, file, props.activeAnnotation])
+    }, [props.new, annotationType, props.index, file, apData.activeAnnotation])
 
     // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
     useEffect(() => {
 
         // Populate fields if there is an annotation pulled from the db
-        if (props.annotationType && props.activeAnnotation) {
+        if (apData.activeAnnotationType && apData.activeAnnotation) {
 
             // Set states for photo annotation
-            if (props.annotationType === 'photo') {
+            if (apData.activeAnnotationType === 'photo') {
 
-                const annotation = props.activeAnnotation as photo_annotation
+                const annotation = apData.activeAnnotation as photo_annotation
 
-                setAnnotationType(props.annotationType)
+                setAnnotationType(apData.activeAnnotationType)
                 setUrl(annotation.url)
                 setAuthor(annotation.author)
                 setLicense(annotation.license)
                 setPhotoTitle(annotation.title as string)
                 setWebsite(annotation.website as string)
                 setAnnotation(annotation.annotation)
-                setAnnotationTitle(props.activeAnnotationTitle)
+                setAnnotationTitle(apData.activeAnnotationTitle)
                 setImgSrc()
 
-                setAnnotationType(props.annotationType)
+                setAnnotationType(apData.activeAnnotationType)
                 setMediaType('upload')
                 setPhotoChecked(true)
                 setVideoChecked(false)
@@ -341,36 +349,36 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }
 
             // Set for video annotation
-            else if (props.annotationType === 'video') {
+            else if (apData.activeAnnotationType === 'video') {
 
-                setLength((props.activeAnnotation as video_annotation).length as string)
-                setVideoSource((props.activeAnnotation as video_annotation).url)
+                setLength((apData.activeAnnotation as video_annotation).length as string)
+                setVideoSource((apData.activeAnnotation as video_annotation).url)
 
-                setAnnotationType(props.annotationType)
+                setAnnotationType(apData.activeAnnotationType)
                 setMediaType('url')
                 setVideoChecked(true)
                 setPhotoChecked(false)
                 setModelChecked(false)
-                setAnnotationTitle(props.activeAnnotationTitle)
-                setAnnotationType(props.annotationType)
+                setAnnotationTitle(apData.activeAnnotationTitle)
+                setAnnotationType(apData.activeAnnotationType)
             }
 
             // Set states for model annotation
-            else if (props.annotationType === 'model') {
+            else if (apData.activeAnnotationType === 'model') {
 
-                setModelAnnotationUid((props.activeAnnotation as model_annotation).uid as string)
-                setAnnotation((props.activeAnnotation as model_annotation).annotation)
-                setAnnotationType(props.annotationType)
+                setModelAnnotationUid((apData.activeAnnotation as model_annotation).uid as string)
+                setAnnotation((apData.activeAnnotation as model_annotation).annotation)
+                setAnnotationType(apData.activeAnnotationType)
 
-                setAnnotationType(props.annotationType)
-                setAnnotationTitle(props.activeAnnotationTitle)
+                setAnnotationType(apData.activeAnnotationType)
+                setAnnotationTitle(apData.activeAnnotationTitle)
                 setMediaType('model')
                 setModelChecked(true)
                 setVideoChecked(false)
                 setPhotoChecked(false)
             }
         }
-    }, [props.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect enables the 'save changes' button for databased annoations if all required fields are populated and at least one differs from the data from the database
     // For new annotations, it enables the 'create annotation' button if all required fields are populated
@@ -380,7 +388,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         if (props.index == 1) {
 
             // Enable button if an annotation position has been selected
-            if (props.position) {
+            if (apData.position3D) {
                 setCreateDisabled(false)
                 setSaveDisabled(false)
             }
@@ -401,10 +409,10 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 case false:
 
                     // Type assertion for brevity
-                    const caseAnnotation = props.activeAnnotation as photo_annotation
+                    const caseAnnotation = apData.activeAnnotation as photo_annotation
 
                     // Required value arrays for comparison
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
+                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
                     const currentValues = [annotationTitle, author, license, annotation]
 
                     // Optional value arrays for comparison
@@ -421,7 +429,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 default:
 
                     // Required fields
-                    const valueArray = [annotationTitle, file, author, license, annotation, props.position]
+                    const valueArray = [annotationTitle, file, author, license, annotation, apData.position3D]
 
                     // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
@@ -439,8 +447,8 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 case false:
 
                     // Type assertion, required value arrays
-                    const caseAnnotation = props.activeAnnotation as video_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
+                    const caseAnnotation = apData.activeAnnotation as video_annotation
+                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
                     const currentValues = [annotationTitle, videoSource, length]
 
                     // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
@@ -452,7 +460,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 default:
 
                     // Required fields
-                    const valueArray = [annotationTitle, videoSource, length, props.position]
+                    const valueArray = [annotationTitle, videoSource, length, apData.position3D]
 
                     // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
@@ -470,8 +478,8 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 case false:
 
                     // Type assertion, required value arrays
-                    const caseAnnotation = props.activeAnnotation as model_annotation
-                    const originalValues = [props.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
+                    const caseAnnotation = apData.activeAnnotation as model_annotation
+                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
                     const currentValues = [annotationTitle, modelAnnotationUid, annotation]
 
                     // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
@@ -483,7 +491,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 default:
 
                     // Required fields
-                    const valueArray = [annotationTitle, modelAnnotationUid, annotation, props.position]
+                    const valueArray = [annotationTitle, modelAnnotationUid, annotation, apData.position3D]
 
                     // Enable button if all required fields are populated
                     if (valueArray.every(allTruthy)) setCreateDisabled(false)
@@ -493,12 +501,19 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             }
         }
 
-    }, [annotationTitle, props.position, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid, videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [annotationTitle, apData.position3D, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid, videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (props.index == 1) {
         return (
             <>
-                <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel={loadingLabel as string} closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
+                <DataTransferModal 
+                open={transferModalOpen} 
+                transferring={transferring} 
+                result={result} 
+                loadingLabel={loadingLabel as string} 
+                closeFn={close} 
+                closeVar={apData.annotationSavedOrDeleted} 
+                />
 
                 <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <p className="text-2xl mb-4 mt-2 ml-12">Annotation {props.index} <span className="ml-8">(This annotation is always taxonomy and description)</span></p>
@@ -506,7 +521,7 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                         {
                             !props.new &&
                             <>
-                                <AnnotationReposition repositionEnabled={props.repositionEnabled} setRepositionEnabled={props.setRepositionEnabled} setPosition3D={props.setPosition3D as Dispatch<SetStateAction<string | undefined>>} />
+                                <AnnotationReposition />
                                 <div>
                                     <Button onClick={() => updateAnnotation()} className="text-white text-lg mr-12" isDisabled={saveDisabled}>Save Changes</Button>
                                 </div>
@@ -524,16 +539,21 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         )
     }
 
-    else {
         return (
             <>
-                <DataTransferModal open={transferModalOpen} transferring={transferring} result={result} loadingLabel='Saving Changes' closeFn={props.setAnnotationSavedOrDeleted} closeVar={props.annotationSavedOrDeleted} />
+                <DataTransferModal 
+                open={transferModalOpen} 
+                transferring={transferring} 
+                result={result} 
+                loadingLabel='Saving Changes' 
+                closeFn={close} 
+                closeVar={apData.annotationSavedOrDeleted} />
 
                 <div className="w-[98%] min-w-[925px] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
                     <section className="flex justify-around">
                         {
                             !props.new &&
-                            <AnnotationReposition repositionEnabled={props.repositionEnabled} setRepositionEnabled={props.setRepositionEnabled} setPosition3D={props.setPosition3D as Dispatch<SetStateAction<string | undefined>>} />
+                            <AnnotationReposition />
                         }
                         <p className="text-2xl mb-4 mt-2">Annotation {props.index}</p>
                         <section className="flex">
@@ -643,5 +663,4 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
             </>
         )
     }
-}
 export default AnnotationEntry
