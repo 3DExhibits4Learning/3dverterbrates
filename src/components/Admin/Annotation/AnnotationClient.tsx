@@ -186,9 +186,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                         annotationsAndPositions.annotations?.length >= 6 &&
                                         <>
                                             <br></br>
-                                            <Button onPress={() => {
-                                                setModalOpen(true)
-                                            }}
+                                            <Button onPress={() => setModalOpen(true)}
                                                 className="text-white mt-2 text-lg"
                                                 isDisabled={annotationsAndPositions.repositionEnabled}
                                             >
