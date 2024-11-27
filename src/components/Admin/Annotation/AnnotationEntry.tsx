@@ -10,13 +10,18 @@
 
 'use client'
 
-import { useState, useEffect, SetStateAction, Dispatch, useContext } from "react"
-import { model_annotation, photo_annotation, video_annotation } from "@prisma/client"
-import { Button } from "@nextui-org/react"
-import { v4 as uuidv4 } from 'uuid'
-import { AnnotationEntryProps, annotationClientData } from "@/interface/interface"
-import { AnnotationClientData } from "./AnnotationClient"
+// Import all annotation entry functions (aeFn = Annotation Entry Function)
+import * as aeFn from '@/functions/client/annotationEntry'
 
+// Typical imports
+import { useState, useEffect, useContext, createContext, useReducer } from "react"
+import { photo_annotation } from "@prisma/client"
+import { Button } from "@nextui-org/react"
+import { AnnotationEntryProps, annotationClientData, annotationEntryContext } from "@/interface/interface"
+import { AnnotationClientData } from "./AnnotationClient"
+import { getInitialAnnotationEntryData } from "@/interface/initializers"
+
+// Default imports
 import TextInput from "@/components/Shared/Form Fields/TextInput"
 import RadioButtons from "@/components/Admin/AnnotationFields/RadioButtons"
 import AnnotationReposition from "@/components/Admin/AnnotationFields/AnnotationReposition"
@@ -26,357 +31,115 @@ import Annotation from "@/components/Admin/Annotation/Annotation"
 import dynamic from "next/dynamic"
 import ModelAnnotationSelect from "@/components/Admin/AnnotationFields/ModelAnnotationSelect"
 import DataTransferModal from "@/components/Shared/Modals/DataTransferModal"
+import annotationEntryReducer from "@/functions/client/reducers/AnnotationEntryData"
+import initializeDataTransfer from '@/functions/client/dataTransfer/initializeDataTransfer'
+import terminateDataTransfer from '@/functions/client/dataTransfer/terminateDataTransfer'
+import dataTransferHandler from '@/functions/client/dataTransfer/dataTransferHandler'
 
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'), { ssr: false })
 
+export const AnnotationEntryData = createContext<annotationEntryContext | ''>('')
+
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 
+    // Annotation client context
     const clientData = useContext(AnnotationClientData) as annotationClientData
+
+    // Data from context
     const apData = clientData.annotationsAndPositions
-    const apDataDispatch = clientData.annotationsAndPositionsDispatch
     const specimen = clientData.specimenData
 
+    // Dispatch from context
+    const apDataDispatch = clientData.annotationsAndPositionsDispatch
 
-    // Lightweight functions used to enable annotation creation/save edits
-    const allTruthy = (value: any) => value ? true : false
-    const allSame = (originalValues: any[], currentValues: any[]) => JSON.stringify(originalValues) === JSON.stringify(currentValues) ? true : false
-    const isNewPosition = apData.position3D !== undefined ? true : false
+    // Annotation entry data initialization
+    const initialEntryData = getInitialAnnotationEntryData(apData)
 
-    // Radio Buttons
-    const [photoChecked, setPhotoChecked] = useState<boolean>()
-    const [videoChecked, setVideoChecked] = useState<boolean>()
-    const [modelChecked, setModelChecked] = useState<boolean>()
+    // Reducer
+    const [annotationEntryData, annotationEntryDataDispatch] = useReducer(annotationEntryReducer, initialEntryData)
 
-    // Radio button resultant states
-    const [annotationType, setAnnotationType] = useState<string>('')
-    const [mediaType, setMediaType] = useState<string>()
-    const [imageVisible, setImageVisible] = useState<boolean>()
-
-    // Form fields
-    const [annotationTitle, setAnnotationTitle] = useState<string>()
-    const [url, setUrl] = useState<string>((apData.activeAnnotation as photo_annotation)?.url ?? '')
-    const [file, setFile] = useState<File>()
-    const [author, setAuthor] = useState<string>((apData.activeAnnotation as photo_annotation)?.author ?? '')
-    const [license, setLicense] = useState<string>((apData.activeAnnotation as photo_annotation)?.license ?? '')
-    const [photoTitle, setPhotoTitle] = useState<string>((apData.activeAnnotation as photo_annotation)?.title ?? '')
-    const [website, setWebsite] = useState<string>((apData.activeAnnotation as photo_annotation)?.website ?? '')
-    const [annotation, setAnnotation] = useState<string>((apData.activeAnnotation as photo_annotation)?.annotation ?? '')
-    const [length, setLength] = useState<string>((apData.activeAnnotation as video_annotation)?.length ?? '')
-    const [imageSource, setImageSource] = useState<string>()
-    const [videoSource, setVideoSource] = useState<string>('')
-    const [modelAnnotationUid, setModelAnnotationUid] = useState<string>('select')
-
+    // Context objext
+    const annotationEntryContext: annotationEntryContext = { annotationEntryData, annotationEntryDataDispatch }
 
     // Data transfer modal states
     const [transferModalOpen, setTransferModalOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
     const [result, setResult] = useState<string>('')
-    const [loadingLabel, setLoadingLabel] = useState<string>()
+    const [loadingLabel, setLoadingLabel] = useState<string>('')
+
+    // New position boolean
+    const isNewPosition = apData.position3D !== undefined ? true : false
 
     // Save/Create button enabled state
     const [createDisabled, setCreateDisabled] = useState<boolean>(true)
     const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
 
+    // Data transfer handlers for context
+    const initializeDataTransferHandler = (loadingLabel: string) => initializeDataTransfer(setTransferModalOpen, setTransferring, setLoadingLabel, loadingLabel)
+    const terminateDataTransferHandler = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
+
     // Temporary close fn
-    const close = (arg: boolean) => apDataDispatch({type: 'annotationSavedOrDeleted'})
+    const close = (arg: boolean) => apDataDispatch({ type: 'annotationSavedOrDeleted' })
 
     // Set imgSrc from NFS storage
-    const setImgSrc = () => {
-        const annotation = apData.activeAnnotation as photo_annotation
-        const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${annotation.url.slice(5)}` : `public${annotation.url}`
-        setImageSource(`/api/nfs?path=${path}`)
-    }
+    const setImgSrc = () => annotationEntryDataDispatch({ type: 'setImageSource', path: aeFn.getImagePath(apData.activeAnnotation as photo_annotation) })
 
-    // This is the createAnnotaion function, calling the appropriate route handler when the 'save changes' button is depressed
+    // Create annoation handler
     const createAnnotation = async () => {
-
-        // Open transfer modal and set spinner
-        setTransferModalOpen(true)
-        setTransferring(true)
-        setLoadingLabel('Creating annotation...')
-
-        const data = new FormData()
-
         // Simple handler for the first annotation (always taxonomy and description)
-        if (props.index == 1) {
-            data.set('uid', specimen.uid as string)
-            data.set('position', apData.position3D as string)
-            data.set('index', props.index.toString())
-
-            // Fetch route handler - set modal result
-            await fetch('/api/annotations', {
-                method: 'POST',
-                body: data
-            }).then(res => res.json()).then(json => {
-                setResult(json.data)
-                setTransferring(false)
-            })
+        if (props.index === 1) {
+            const data = aeFn.firstAnnotationFormData(specimen.uid as string, apData.position3D as string, props.index.toString())
+            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data], "Creating annotation")
         }
-
-        // Handler for annotations with non-hosted photos
+        // Handler for all other annotations
         else {
-
-            // Annotations table data
-            data.set('uid', specimen.uid as string)
-            data.set('annotation_no', props.index.toString())
-            data.set('annotation_type', annotationType)
-            data.set('position', apData.position3D as string)
-            data.set('title', annotationTitle as string)
-
-            // Set relevant data based on annotationType
-            switch (annotationType) {
-
-                case 'video':
-                    // Video_annotation table data
-                    data.set('length', length)
-                    data.set('url', videoSource)
-
-                    break
-
-                case 'model':
-                    // Model_annotation table data
-                    data.set('modelAnnotationUid', modelAnnotationUid as string)
-                    data.set('annotation', annotation)
-
-                    break
-
-                default:
-
-                    // Photo_annotation table data
-                    data.set('author', author)
-                    data.set('license', license)
-                    data.set('annotation', annotation)
-                    if (photoTitle) data.set('photoTitle', photoTitle)
-                    if (website) data.set('website', website)
-            }
-
-            // Shared data (url was formerly the foreign key)
-            const annotationId = uuidv4()
-            data.set('annotation_id', annotationId)
-
-            // Directory, path and url data
-            if (file) {
-                const photo = file as File
-                data.set('dir', `public/data/Herbarium/Annotations/${specimen.uid}/${annotationId}`)
-                data.set('path', `public/data/Herbarium/Annotations/${specimen.uid}/${annotationId}/${photo.name}`)
-                data.set('url', `/data/Herbarium/Annotations/${specimen.uid}/${annotationId}/${photo.name}`)
-            }
-
-
-            // Route handler data
-            data.set('mediaType', mediaType as string)
-            data.set('file', file as File)
-
-            // Fetch route handler - set modal result
-            await fetch('/api/annotations', {
-                method: 'POST',
-                body: data
-            }).then(res => res.json()).then(json => {
-                setResult(json.data)
-                setTransferring(false)
-            })
+            const data = aeFn.annotationFormData(annotationEntryData, specimen.uid as string, props.index.toString(), apData.position3D as string)
+            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data], "Creating annotation")
         }
     }
 
-    // Update annotation function
+    // Update annotation handler
     const updateAnnotation = async () => {
-        const data = new FormData()
-
-        // Simple handler for the first annotation (always taxonomy and description)
         if (props.index == 1) {
-            data.set('uid', specimen.uid as string)
-            data.set('position', apData.position3D as string)
-            data.set('index', props.index.toString())
-
-            // Open transfer modal and set spinner
-            setTransferModalOpen(true)
-            setTransferring(true)
-            setLoadingLabel('Updating annotation...')
-
-            // Fetch route handler - set modal result
-            await fetch('/api/annotations', {
-                method: 'PATCH',
-                body: data
-            }).then(res => res.json()).then(json => {
-                setResult(json.data)
-                setTransferring(false)
-            })
+            const data = aeFn.annotationFormData(annotationEntryData, specimen.uid as string, props.index.toString(), apData.position3D as string)
+            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'PATCH'], "Updating annotation")
         }
-
-        // Handler for annotations with non-hosted photos
         else {
-
-            // Media transition data
-            if (apData.activeAnnotationType !== annotationType) {
-                data.set('mediaTransition', 'true')
-                data.set('previousMedia', apData.activeAnnotationType as string)
-            }
-
-            // Annotations table data (for update)
-            data.set('uid', specimen.uid as string)
-            data.set('annotation_type', annotationType)
-            data.set('position', apData.position3D as string ?? apData.activeAnnotationPosition)
-            data.set('title', annotationTitle as string)
-
-            // Set relevant data based on annotationType
-            switch (annotationType) {
-
-                // Video_annotation table data
-                case 'video':
-                    data.set('length', length)
-                    data.set('url', videoSource)
-
-                    break
-
-                // Model_annotation table data
-                case 'model':
-                    data.set('modelAnnotationUid', modelAnnotationUid as string)
-                    data.set('annotation', annotation)
-
-                    break
-
-                // Photo_annotation table data
-                default:
-                    data.set('author', author)
-                    data.set('license', license)
-                    data.set('annotation', annotation)
-                    if (photoTitle) data.set('photoTitle', photoTitle)
-                    if (website) data.set('website', website)
-            }
-
-            // Shared data (url was formerly the foreign key)
-            // Note that the url is the url necessary from the collections page; also note the old path must be inlcuded for deletion; also note that a new id is not generated for update
-            data.set('annotation_id', (apData.activeAnnotation as photo_annotation | video_annotation).annotation_id)
-            data.set('specimenName', specimen.specimenName as string)
-
-            // Set relevant form data if there is a new photo file
-            if (file) {
-                const photo = file as File
-                const annotation = apData.activeAnnotation as photo_annotation
-                data.set('dir', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}`)
-                data.set('path', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
-                data.set('url', `/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
-                data.set('file', photo)
-                if (apData.activeAnnotationType === 'photo') data.set('oldUrl', (apData.activeAnnotation as photo_annotation).url)
-            }
-
-            // Else if the databased annotation is a photo, the url should be the same
-            else if (apData.activeAnnotationType === 'photo') data.set('url', (apData.activeAnnotation as photo_annotation).url)
-
-            // Route handler data
-            data.set('mediaType', mediaType as string)
-
-            // Open transfer modal and set spinner
-            setTransferModalOpen(true)
-            setTransferring(true)
-
-            // Fetch route handler - set modal result
-            await fetch('/api/annotations', {
-                method: 'PATCH',
-                body: data
-            }).then(res => res.json()).then(json => {
-                setResult(json.data)
-                setTransferring(false)
-                if (process.env.NODE_ENV === 'development') console.log(json.response)
-            })
+            const data = aeFn.annotationUpdateData(annotationEntryData, apData, specimen)
+            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'PATCH'], "Updating annotation")
         }
     }
 
-    // Delete annotation function
+    // Delete annotation handler
     const deleteAnnotation = async () => {
-
-        // request body
-        const requestObj = {
-            annotation_id: apData.activeAnnotation?.annotation_id,
-            modelUid: specimen.uid,
-            oldUrl: apData.activeAnnotationType === 'photo' ? (apData.activeAnnotation as photo_annotation).url : ''
-        }
-
-        // Open transfer modal and set spinner
-        setTransferModalOpen(true)
-        setTransferring(true)
-        setLoadingLabel('Deleting annotation...')
-
-        // Fetch delete, set modal states
-        await fetch('/api/annotations', {
-            method: 'DELETE',
-            body: JSON.stringify(requestObj)
-        }).then(res => res.json()).then(json => {
-            setResult(json.data)
-            setTransferring(false)
-        })
+        const data = aeFn.deleteAnnotationData(apData, specimen.uid as string)
+        dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'DELETE'], "Deleting annotation")
     }
 
     // This effect updates annotation image visibility and source
     useEffect(() => {
 
         // This code shouldn't run for the first annotation
-        if (props.index !== 1 && annotationType === 'photo') {
+        if (props.index !== 1 && annotationEntryData.annotationType === 'photo') {
 
             // Determine image visibility
-            if (!file && !props.new) setImageVisible(true)
-            else setImageVisible(false)
+            if (!annotationEntryData.file && !props.new) annotationEntryDataDispatch({ type: 'setImageVisibility', isVisible: true })
+            else annotationEntryDataDispatch({ type: 'setImageVisibility', isVisible: false })
         }
 
-    }, [props.new, annotationType, props.index, file, apData.activeAnnotation])
+    }, [props.new, annotationEntryData.annotationType, props.index, annotationEntryData.file, apData.activeAnnotation])
 
     // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
     useEffect(() => {
 
         // Populate fields if there is an annotation pulled from the db
         if (apData.activeAnnotationType && apData.activeAnnotation) {
-
             // Set states for photo annotation
-            if (apData.activeAnnotationType === 'photo') {
-
-                const annotation = apData.activeAnnotation as photo_annotation
-
-                setAnnotationType(apData.activeAnnotationType)
-                setUrl(annotation.url)
-                setAuthor(annotation.author)
-                setLicense(annotation.license)
-                setPhotoTitle(annotation.title as string)
-                setWebsite(annotation.website as string)
-                setAnnotation(annotation.annotation)
-                setAnnotationTitle(apData.activeAnnotationTitle)
-                setImgSrc()
-
-                setAnnotationType(apData.activeAnnotationType)
-                setMediaType('upload')
-                setPhotoChecked(true)
-                setVideoChecked(false)
-                setModelChecked(false)
-            }
-
+            if (apData.activeAnnotationType === 'photo') { annotationEntryDataDispatch({ type: 'loadPhotoAnnotation', apData: apData }); setImgSrc() }
             // Set for video annotation
-            else if (apData.activeAnnotationType === 'video') {
-
-                setLength((apData.activeAnnotation as video_annotation).length as string)
-                setVideoSource((apData.activeAnnotation as video_annotation).url)
-
-                setAnnotationType(apData.activeAnnotationType)
-                setMediaType('url')
-                setVideoChecked(true)
-                setPhotoChecked(false)
-                setModelChecked(false)
-                setAnnotationTitle(apData.activeAnnotationTitle)
-                setAnnotationType(apData.activeAnnotationType)
-            }
-
+            else if (apData.activeAnnotationType === 'video') annotationEntryDataDispatch({ type: 'loadVideoAnnotation', apData: apData })
             // Set states for model annotation
-            else if (apData.activeAnnotationType === 'model') {
-
-                setModelAnnotationUid((apData.activeAnnotation as model_annotation).uid as string)
-                setAnnotation((apData.activeAnnotation as model_annotation).annotation)
-                setAnnotationType(apData.activeAnnotationType)
-
-                setAnnotationType(apData.activeAnnotationType)
-                setAnnotationTitle(apData.activeAnnotationTitle)
-                setMediaType('model')
-                setModelChecked(true)
-                setVideoChecked(false)
-                setPhotoChecked(false)
-            }
+            else if (apData.activeAnnotationType === 'model') annotationEntryDataDispatch({ type: 'loadModelAnnotation', apData: apData })
         }
     }, [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -392,127 +155,48 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
                 setCreateDisabled(false)
                 setSaveDisabled(false)
             }
-
             // Else disbale it
             else {
                 setSaveDisabled(true)
                 setCreateDisabled(true)
             }
         }
-
-        // Conditional based on radio button state
-        else if (annotationType == 'photo') {
-
+        // Photo annotation save/update enabler
+        else if (annotationEntryData.annotationType == 'photo') {
             switch (props.new) {
-
-                // For databased annotations
-                case false:
-
-                    // Type assertion for brevity
-                    const caseAnnotation = apData.activeAnnotation as photo_annotation
-
-                    // Required value arrays for comparison
-                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.author, caseAnnotation.license, caseAnnotation.annotation]
-                    const currentValues = [annotationTitle, author, license, annotation]
-
-                    // Optional value arrays for comparison
-                    const originalOptionalValues = [caseAnnotation.title, caseAnnotation.website]
-                    const optionalValues = [photoTitle, website]
-
-                    // If all required fields are populated and: they are different from the original, there is a new file, there is a new annotation position, or optional values have changed, enable "save changes"
-                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || file || isNewPosition || !allSame(originalOptionalValues, optionalValues))) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                // New annotations are the default
-                default:
-
-                    // Required fields
-                    const valueArray = [annotationTitle, file, author, license, annotation, apData.position3D]
-
-                    // Enable button if all required fields are populated
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
+                case false: aeFn.enablePhotoAnnotatonUpdate(apData, annotationEntryData, setSaveDisabled, isNewPosition); break
+                default: aeFn.enablePhotoAnnotationCreate(annotationEntryData, setCreateDisabled, apData.position3D as string); break
+            }
+        }
+        // Video annotation save/update enabler
+        else if (annotationEntryData.annotationType == 'video') {
+            switch (props.new) {
+                case false: aeFn.enableVideoAnnotationUpdate(apData, annotationEntryData, isNewPosition, setSaveDisabled); break
+                default: aeFn.enableVideoAnnotationCreate(annotationEntryData, apData.position3D as string, setCreateDisabled); break
             }
         }
 
-        // Conditional based on radio button state
-        else if (annotationType == 'video') {
-
+        // Model annotation save/update enabler
+        else if (annotationEntryData.annotationType == 'model') {
             switch (props.new) {
-
-                case false:
-
-                    // Type assertion, required value arrays
-                    const caseAnnotation = apData.activeAnnotation as video_annotation
-                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.url, caseAnnotation.length]
-                    const currentValues = [annotationTitle, videoSource, length]
-
-                    // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
-                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                default:
-
-                    // Required fields
-                    const valueArray = [annotationTitle, videoSource, length, apData.position3D]
-
-                    // Enable button if all required fields are populated
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
+                case false: aeFn.enableModelAnnotationUpdate(annotationEntryData, apData, isNewPosition, setSaveDisabled); break
+                default: aeFn.enableModelAnnotationCreate(annotationEntryData, apData.position3D as string, setCreateDisabled); break
             }
         }
 
-        // Conditional based on radio button states
-        else if (annotationType == 'model') {
-
-            switch (props.new) {
-
-                case false:
-
-                    // Type assertion, required value arrays
-                    const caseAnnotation = apData.activeAnnotation as model_annotation
-                    const originalValues = [apData.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
-                    const currentValues = [annotationTitle, modelAnnotationUid, annotation]
-
-                    // If all required fields are populated and: they are different from the original, or there is a new position, then enable "save changes"
-                    if (currentValues.every(allTruthy) && (!allSame(originalValues, currentValues) || isNewPosition)) setSaveDisabled(false)
-                    else setSaveDisabled(true)
-
-                    break
-
-                default:
-
-                    // Required fields
-                    const valueArray = [annotationTitle, modelAnnotationUid, annotation, apData.position3D]
-
-                    // Enable button if all required fields are populated
-                    if (valueArray.every(allTruthy)) setCreateDisabled(false)
-                    else setCreateDisabled(true)
-
-                    break
-            }
-        }
-
-    }, [annotationTitle, apData.position3D, url, author, license, annotation, file, length, photoTitle, website, modelAnnotationUid, videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author, annotationEntryData.license, annotationEntryData.annotation,
+    annotationEntryData.file, length, annotationEntryData.photoTitle, annotationEntryData.website, annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (props.index == 1) {
         return (
             <>
-                <DataTransferModal 
-                open={transferModalOpen} 
-                transferring={transferring} 
-                result={result} 
-                loadingLabel={loadingLabel as string} 
-                closeFn={close} 
-                closeVar={apData.annotationSavedOrDeleted} 
+                <DataTransferModal
+                    open={transferModalOpen}
+                    transferring={transferring}
+                    result={result}
+                    loadingLabel={loadingLabel as string}
+                    closeFn={close}
+                    closeVar={apData.annotationSavedOrDeleted}
                 />
 
                 <div className="w-[98%] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
@@ -539,128 +223,118 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
         )
     }
 
-        return (
-            <>
-                <DataTransferModal 
-                open={transferModalOpen} 
-                transferring={transferring} 
-                result={result} 
-                loadingLabel='Saving Changes' 
-                closeFn={close} 
+    return (
+        <AnnotationEntryData.Provider value={annotationEntryContext}>
+            <DataTransferModal
+                open={transferModalOpen}
+                transferring={transferring}
+                result={result}
+                loadingLabel='Saving Changes'
+                closeFn={close}
                 closeVar={apData.annotationSavedOrDeleted} />
 
-                <div className="w-[98%] min-w-[925px] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
-                    <section className="flex justify-around">
-                        {
-                            !props.new &&
-                            <AnnotationReposition />
-                        }
-                        <p className="text-2xl mb-4 mt-2">Annotation {props.index}</p>
-                        <section className="flex">
-                            <div className="flex flex-col items-center justify-center">
-                                <div className="flex items-center">
-                                    <RadioButtons
-                                        setAnnotationType={setAnnotationType}
-                                        setPhotoChecked={setPhotoChecked as Dispatch<SetStateAction<boolean>>}
-                                        setVideoChecked={setVideoChecked as Dispatch<SetStateAction<boolean>>}
-                                        setMediaType={setMediaType as Dispatch<SetStateAction<string>>}
-                                        setModelChecked={setModelChecked as Dispatch<SetStateAction<boolean>>}
-                                        photoChecked={photoChecked as boolean}
-                                        videoChecked={videoChecked as boolean}
-                                        annotationType={annotationType}
-                                        modelChecked={modelChecked as boolean}
-                                    />
-                                </div>
+            <div className="w-[98%] min-w-[925px] h-fit flex flex-col border border-[#004C46] dark:border-white mt-4 ml-[1%] rounded-xl">
+                <section className="flex justify-around">
+                    {
+                        !props.new &&
+                        <AnnotationReposition />
+                    }
+                    <p className="text-2xl mb-4 mt-2">Annotation {props.index}</p>
+                    <section className="flex">
+                        <div className="flex flex-col items-center justify-center">
+                            <div className="flex items-center">
+                                <RadioButtons />
                             </div>
-                        </section>
+                        </div>
                     </section>
-                    <section className="w-full h-fit">
-                        {
-                            annotationType == 'photo' && mediaType && mediaType === 'upload' &&
-                            <section className="mt-4 w-full h-fit">
-                                <div className="flex h-[530px]">
-                                    <div className="flex flex-col w-1/2">
-                                        <div className="ml-12">
-                                            <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
-                                        </div>
-
-                                        <div className="ml-12 mb-4">
-                                            <FileInput setFile={setFile as Dispatch<SetStateAction<File>>} />
-                                        </div>
-
-                                        <div className="ml-12">
-                                            <TextInput value={author as string} setValue={setAuthor} title='Author' required />
-                                            <License setLicense={setLicense} license={license} />
-                                            <TextInput value={photoTitle as string} setValue={setPhotoTitle} title='Photo Title' />
-                                            <TextInput value={website as string} setValue={setWebsite} title='Website' />
-                                        </div>
-
+                </section>
+                <section className="w-full h-fit">
+                    {
+                        annotationEntryData.annotationType == 'photo' && annotationEntryData.mediaType && annotationEntryData.mediaType === 'upload' &&
+                        <section className="mt-4 w-full h-fit">
+                            <div className="flex h-[530px]">
+                                <div className="flex flex-col w-1/2">
+                                    <div className="ml-12">
+                                        <TextInput value={annotationEntryData.annotationTitle as string} field={'annotationTitle'} title='Annotation Title' required />
                                     </div>
-                                    {
-                                        imageVisible &&
-                                        <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full' src={imageSource as string} alt={'Annotation Image'}></img>
-                                    }
-                                </div>
-                                <div className="ml-12">
-                                    <Annotation annotation={annotation} setAnnotation={setAnnotation} />
-                                </div>
-                            </section>
-                        }
-                        {
-                            annotationType == 'video' &&
-                            <section className="flex my-12">
-                                <div className="flex ml-12 mt-12 flex-col w-1/2 max-w-[750px]">
-                                    <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
-                                    <TextInput value={videoSource as string} setValue={setVideoSource} title='URL' required />
-                                    <TextInput value={length as string} setValue={setLength} title='Length' required />
-                                </div>
-                                <div className="flex h-[50vh] w-[45%]">
-                                    {
-                                        videoSource?.includes('https://www.youtube.com/embed/') &&
-                                        <iframe
-                                            src={videoSource}
-                                            className="h-full w-full ml-[1%] rounded-xl"
-                                        >
-                                        </iframe>
-                                    }
-                                </div>
-                            </section>
-                        }
-                        {
-                            annotationType === 'model' &&
-                            <section className="flex my-12 w-full">
-                                <div className="flex ml-12 mt-12 flex-col w-3/5 max-w-[750px] mr-12">
-                                    <TextInput value={annotationTitle as string} setValue={setAnnotationTitle as Dispatch<SetStateAction<string>>} title='Annotation Title' required />
-                                    <ModelAnnotationSelect value={modelAnnotationUid} setValue={setModelAnnotationUid} modelAnnotations={props.annotationModels} />
-                                    <Annotation annotation={annotation} setAnnotation={setAnnotation} />
+
+                                    <div className="ml-12 mb-4">
+                                        <FileInput />
+                                    </div>
+
+                                    <div className="ml-12">
+                                        <TextInput value={annotationEntryData.author as string} field={'author'} title='Author' required />
+                                        <License license={annotationEntryData.license} field='license' />
+                                        <TextInput value={annotationEntryData.photoTitle as string} field={'photoTitle'} title='Photo Title' />
+                                        <TextInput value={annotationEntryData.website as string} field={'website'} title='Website' />
+                                    </div>
+
                                 </div>
                                 {
-                                    modelAnnotationUid && modelAnnotationUid !== 'select' &&
-                                    <div className="w-full mr-12">
-                                        <ModelViewer uid={modelAnnotationUid} />
-                                    </div>
+                                    annotationEntryData.imageVisible &&
+                                    <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full' src={annotationEntryData.imageSource as string} alt={'Annotation Image'}></img>
                                 }
-                            </section>
-                        }
-                    </section>
-                    <section className="flex justify-end mb-8">
-                        {
-                            props.new &&
-                            <>
-                                <Button onClick={() => createAnnotation()} className="text-white text-lg mr-8" isDisabled={createDisabled}>Create Annotation</Button>
-                            </>
-                        }
-                        {
-                            !props.new && props.index !== 1 &&
-                            <div>
-                                <Button onClick={() => updateAnnotation()} className="text-white text-lg mr-2" isDisabled={saveDisabled}>Save Changes</Button>
-                                <Button onClick={() => deleteAnnotation()} color="danger" variant="light" className="mr-2">Delete Annotation</Button>
                             </div>
-                        }
+                            <div className="ml-12">
+                                <Annotation annotation={annotationEntryData.annotation} field='annotation' />
+                            </div>
+                        </section>
+                    }
+                    {
+                        annotationEntryData.annotationType == 'video' &&
+                        <section className="flex my-12">
+                            <div className="flex ml-12 mt-12 flex-col w-1/2 max-w-[750px]">
+                                <TextInput value={annotationEntryData.annotationTitle as string} field='annotationTitle' title='Annotation Title' required />
+                                <TextInput value={annotationEntryData.videoSource as string} field='videoSource' title='URL' required />
+                                <TextInput value={annotationEntryData.length as string} field='length' title='Length' required />
+                            </div>
+                            <div className="flex h-[50vh] w-[45%]">
+                                {
+                                    annotationEntryData.videoSource?.includes('https://www.youtube.com/embed/') &&
+                                    <iframe
+                                        src={annotationEntryData.videoSource}
+                                        className="h-full w-full ml-[1%] rounded-xl"
+                                    >
+                                    </iframe>
+                                }
+                            </div>
+                        </section>
+                    }
+                    {
+                        annotationEntryData.annotationType === 'model' &&
+                        <section className="flex my-12 w-full">
+                            <div className="flex ml-12 mt-12 flex-col w-3/5 max-w-[750px] mr-12">
+                                <TextInput value={annotationEntryData.annotationTitle as string} field={'annotationTitle'} title='Annotation Title' required />
+                                <ModelAnnotationSelect value={annotationEntryData.modelAnnotationUid} field={'modelAnnotationUid'} modelAnnotations={props.annotationModels} />
+                                <Annotation annotation={annotationEntryData.annotation} field='annotation' />
+                            </div>
+                            {
+                                annotationEntryData.modelAnnotationUid && annotationEntryData.modelAnnotationUid !== 'select' &&
+                                <div className="w-full mr-12">
+                                    <ModelViewer uid={annotationEntryData.modelAnnotationUid} />
+                                </div>
+                            }
+                        </section>
+                    }
+                </section>
+                <section className="flex justify-end mb-8">
+                    {
+                        props.new &&
+                        <>
+                            <Button onClick={() => createAnnotation()} className="text-white text-lg mr-8" isDisabled={createDisabled}>Create Annotation</Button>
+                        </>
+                    }
+                    {
+                        !props.new && props.index !== 1 &&
+                        <div>
+                            <Button onClick={() => updateAnnotation()} className="text-white text-lg mr-2" isDisabled={saveDisabled}>Save Changes</Button>
+                            <Button onClick={() => deleteAnnotation()} color="danger" variant="light" className="mr-2">Delete Annotation</Button>
+                        </div>
+                    }
 
-                    </section>
-                </div>
-            </>
-        )
-    }
+                </section>
+            </div>
+        </AnnotationEntryData.Provider>
+    )
+}
 export default AnnotationEntry

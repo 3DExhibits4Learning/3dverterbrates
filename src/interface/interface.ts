@@ -7,9 +7,36 @@ import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { annotations, photo_annotation, video_annotation, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
 
-export interface dispatch{
+export interface dispatch {
   type: string
 }
+
+export interface annotationEntryContext {
+  annotationEntryData: annotationEntry,
+  annotationEntryDataDispatch: Dispatch<any>,
+}
+
+export interface annotationEntry {
+  photoChecked: boolean | undefined,
+  videoChecked: boolean | undefined,
+  modelChecked: boolean | undefined,
+  annotationType: string,
+  mediaType: string | undefined,
+  imageVisible: boolean | undefined,
+  annotationTitle: string | undefined,
+  url: string,
+  file: File | undefined,
+  author: string,
+  license: string,
+  photoTitle: string,
+  website: string,
+  annotation: string,
+  length: string,
+  imageSource: string | undefined,
+  videoSource: string,
+  modelAnnotationUid: string
+}
+
 
 export interface annotationsAndPositions {
   annotations: fullAnnotation[] | undefined,

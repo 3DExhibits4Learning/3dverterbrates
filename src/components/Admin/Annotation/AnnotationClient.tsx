@@ -1,7 +1,9 @@
 /**
  * @file src/components/Admin/AnnotationClient.tsx
  * 
- * @fileoverview annotation client parent component; its most important children are AnnotationModelViewer and AnnotationEntry
+ * @fileoverview annotation client parent component; 
+ * its most significant children are AnnotationModelViewer and AnnotationEntry; 
+ * these are the three main components of the client annotation CRUD interface
  * 
  * @todo Extract and import single JSX components
  * 
@@ -56,10 +58,10 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
     const [annotationsAndPositions, annotationsAndPositionsDispatch] = useReducer(annotationsAndPositionsReducer, initialAnnotationsAndPositions)
     const [specimenData, specimenDataDispatch] = useReducer(annotationClientSpecimenReducer, initialSpecimenData)
 
-    // Context object
+    // Context 
     const annotationClientContext: annotationClientData = { annotationsAndPositions, annotationsAndPositionsDispatch, specimenData, specimenDataDispatch }
 
-    // Set name and email states
+    // Set name and email states fn
     const setNameAndEmailStates = (name: string, email: string) => { setEmail(email); setName(name) }
 
     // Approve/Unapprove annotation handlers
