@@ -2,7 +2,7 @@
 import { Modal, ModalContent, ModalBody, ModalFooter, Spinner, Button } from "@nextui-org/react"
 import { SetStateAction, Dispatch } from "react";
 
-export default function DataTransferModal(props: {
+export default function AnnotationEntryDataTransfer(props: {
     open: boolean,
     transferring: boolean,
     result: string,
@@ -56,3 +56,4 @@ export default function DataTransferModal(props: {
         </Modal>
     )
 }
+

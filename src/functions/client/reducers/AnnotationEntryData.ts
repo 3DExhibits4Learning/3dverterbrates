@@ -1,29 +1,6 @@
 import { annotationEntry, annotationsAndPositions } from "@/interface/interface";
-import { dispatch } from "@/interface/interface";
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client";
-
-export interface setImageSource extends dispatch {
-    path: string
-}
-export interface setImageVisibility extends dispatch {
-    isVisible: boolean
-}
-
-export interface loadAnnotation extends dispatch {
-    apData: annotationsAndPositions,
-}
-
-export interface setStringValue extends dispatch {
-    field: string
-    string: string
-}
-
-export interface setFile extends dispatch {
-    file: File
-}
-
-export type annotationEntryAction = dispatch | setImageSource | setImageVisibility | loadAnnotation | setStringValue | setFile
-
+import { annotationEntryAction, setImageSource, setImageVisibility, loadAnnotation, setStringValue, setFile } from "@/interface/actions";
 
 export default function AnnotationEntryReducer(data: annotationEntry, action: annotationEntryAction): annotationEntry {
 

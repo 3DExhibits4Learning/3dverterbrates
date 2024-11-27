@@ -4,7 +4,7 @@ import { annotationClientSpecimen, annotationEntry, annotationsAndPositions } fr
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client"
 import { SetStateAction, Dispatch } from "react"
 import { v4 as uuidv4 } from 'uuid'
-import { annotationEntryAction } from "./reducers/AnnotationEntryData"
+import { annotationEntryAction } from "@/interface/actions"
 
 export const allTruthy = (value: any) => value ? true : false
 export const allSame = (originalValues: any[], currentValues: any[]) => JSON.stringify(originalValues) === JSON.stringify(currentValues) ? true : false

@@ -6,14 +6,24 @@
 import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { annotations, photo_annotation, video_annotation, model, model_annotation, software, tags, authorized, assignment } from "@prisma/client";
+import { annotationDataTransferAction } from "./actions";
 
 export interface dispatch {
   type: string
 }
 
+export interface annotationDataTransfer {
+  transferModalOpen: boolean,
+  transferring: boolean,
+  result: string,
+  loadingLabel: string
+}
+
 export interface annotationEntryContext {
   annotationEntryData: annotationEntry,
   annotationEntryDataDispatch: Dispatch<any>,
+  transferState: annotationDataTransfer,
+  transferStateDispatch: Dispatch<annotationDataTransferAction>
 }
 
 export interface annotationEntry {
