@@ -4,6 +4,7 @@ import { annotationClientSpecimen, annotationEntry, annotationsAndPositions } fr
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client"
 import { SetStateAction, Dispatch } from "react"
 import { v4 as uuidv4 } from 'uuid'
+import { annotationEntryAction } from "./reducers/AnnotationEntryData"
 
 export const allTruthy = (value: any) => value ? true : false
 export const allSame = (originalValues: any[], currentValues: any[]) => JSON.stringify(originalValues) === JSON.stringify(currentValues) ? true : false
@@ -202,7 +203,7 @@ export const enableVideoAnnotationCreate = (aeData: annotationEntry, position: s
 }
 
 export const enableModelAnnotationUpdate = (aeData: annotationEntry, apData: annotationsAndPositions, isNewPosition: boolean, setSaveDisabled: Dispatch<SetStateAction<boolean>>) => {
-    
+
     // Type assertion, required value arrays
     const caseAnnotation = apData.activeAnnotation as model_annotation
     const originalValues = [apData.activeAnnotationTitle, caseAnnotation.uid, caseAnnotation.annotation]
@@ -214,7 +215,7 @@ export const enableModelAnnotationUpdate = (aeData: annotationEntry, apData: ann
 }
 
 export const enableModelAnnotationCreate = (aeData: annotationEntry, position: string, setCreateDisabled: Dispatch<SetStateAction<boolean>>) => {
-    
+
     // Required fields
     const valueArray = [aeData.annotationTitle, aeData.modelAnnotationUid, aeData.annotation, position]
 
@@ -224,7 +225,7 @@ export const enableModelAnnotationCreate = (aeData: annotationEntry, position: s
 }
 
 export const deleteAnnotationData = (apData: annotationsAndPositions, uid: string) => {
-    
+
     const requestObj = {
         annotation_id: apData.activeAnnotation?.annotation_id,
         modelUid: uid,
@@ -232,4 +233,78 @@ export const deleteAnnotationData = (apData: annotationsAndPositions, uid: strin
     }
 
     return JSON.stringify(requestObj)
+}
+
+export const createAnnotation = (index: number, uid: string, position: string, dataTransferWrapper: Function, aeData: annotationEntry) => {
+    // Simple handler for the first annotation (always taxonomy and description)
+    if (index === 1) {
+        const data = firstAnnotationFormData(uid, position, index.toString())
+        dataTransferWrapper(insertAnnotation, [data], "Creating annotation")
+    }
+    // Handler for all other annotations
+    else {
+        const data = annotationFormData(aeData, uid, index.toString(), position)
+        dataTransferWrapper(insertAnnotation, [data], "Creating annotation")
+    }
+}
+
+export const updateAnnotation = (index: number, dataTransferWrapper: Function, aeData: annotationEntry, apData: annotationsAndPositions, specimen: annotationClientSpecimen) => {
+    if (index == 1) {
+        const data = annotationFormData(aeData, specimen.uid as string, index.toString(), apData.position3D as string)
+        dataTransferWrapper(insertAnnotation, [data, 'PATCH'], "Updating annotation")
+    }
+    else {
+        const data = annotationUpdateData(aeData, apData, specimen)
+        dataTransferWrapper(insertAnnotation, [data, 'PATCH'], "Updating annotation")
+    }
+}
+
+export const deleteAnnotation = (apData: annotationsAndPositions, uid: string, dataTransferWrapper: Function) => {
+    const data = deleteAnnotationData(apData, uid)
+    dataTransferWrapper(insertAnnotation, [data, 'DELETE'], "Deleting annotation")
+}
+
+export const setImageVisibility = (index: number, aeData: annotationEntry, isNew: boolean, dispatch: Dispatch<annotationEntryAction>) => {
+    if (index !== 1 && aeData.annotationType === 'photo') {
+        if (!aeData.file && !isNew) dispatch({ type: 'setImageVisibility', isVisible: true })
+        else dispatch({ type: 'setImageVisibility', isVisible: false })
+    }
+}
+
+export const populateFormFields = (apData: annotationsAndPositions, dispatch: Dispatch<annotationEntryAction>) => {
+    if (apData.activeAnnotationType && apData.activeAnnotation) {
+        if (apData.activeAnnotationType === 'photo') {
+            dispatch({ type: 'loadPhotoAnnotation', apData: apData });
+            dispatch({ type: 'setImageSource', path: getImagePath(apData.activeAnnotation as photo_annotation) })
+        }
+        else if (apData.activeAnnotationType === 'video') dispatch({ type: 'loadVideoAnnotation', apData: apData })
+        else if (apData.activeAnnotationType === 'model') dispatch({ type: 'loadModelAnnotation', apData: apData })
+    }
+}
+
+export const enableSaveOrUpdateButton = (
+    apData: annotationsAndPositions, aeData: annotationEntry, enableFirstAnnotation: Function,
+    index: number, isNew: boolean, setCreateDisabled: Dispatch<SetStateAction<boolean>>,
+    setSaveDisabled: Dispatch<SetStateAction<boolean>>, isNewPosition: boolean
+) => {
+    if (index == 1) apData.position3D ? enableFirstAnnotation(false) : enableFirstAnnotation(true)
+
+    else if (aeData.annotationType == 'photo') {
+        switch (isNew) {
+            case false: enablePhotoAnnotatonUpdate(apData, aeData, setSaveDisabled, isNewPosition); break
+            default: enablePhotoAnnotationCreate(aeData, setCreateDisabled, apData.position3D as string); break
+        }
+    }
+    else if (aeData.annotationType == 'video') {
+        switch (isNew) {
+            case false: enableVideoAnnotationUpdate(apData, aeData, isNewPosition, setSaveDisabled); break
+            default: enableVideoAnnotationCreate(aeData, apData.position3D as string, setCreateDisabled); break
+        }
+    }
+    else if (aeData.annotationType == 'model') {
+        switch (isNew) {
+            case false: enableModelAnnotationUpdate(aeData, apData, isNewPosition, setSaveDisabled); break
+            default: enableModelAnnotationCreate(aeData, apData.position3D as string, setCreateDisabled); break
+        }
+    }
 }

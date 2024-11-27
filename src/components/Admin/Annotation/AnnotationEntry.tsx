@@ -1,11 +1,9 @@
 /**
  * @file src/components/Admin/AnnotationEntry.tsx
  * 
- * @fileoverview interface for annotation CRUD operations
+ * @fileoverview client interface for annotation CRUD operations
  * 
- * @todo extract and import create, update, delete and setImgSrc functions
- * @todo extract state logic with reducer and single state object for form fields
- * @todo convert data transfer states to context
+ * @todo extract and import individual JSX components/wrappers
  */
 
 'use client'
@@ -15,7 +13,6 @@ import * as aeFn from '@/functions/client/annotationEntry'
 
 // Typical imports
 import { useState, useEffect, useContext, createContext, useReducer } from "react"
-import { photo_annotation } from "@prisma/client"
 import { Button } from "@nextui-org/react"
 import { AnnotationEntryProps, annotationClientData, annotationEntryContext } from "@/interface/interface"
 import { AnnotationClientData } from "./AnnotationClient"
@@ -36,10 +33,13 @@ import initializeDataTransfer from '@/functions/client/dataTransfer/initializeDa
 import terminateDataTransfer from '@/functions/client/dataTransfer/terminateDataTransfer'
 import dataTransferHandler from '@/functions/client/dataTransfer/dataTransferHandler'
 
+// Dynamic imports
 const ModelViewer = dynamic(() => import('@/components/Shared/ModelViewer'), { ssr: false })
 
+// Data context initialization
 export const AnnotationEntryData = createContext<annotationEntryContext | ''>('')
 
+// Main JSX
 const AnnotationEntry = (props: AnnotationEntryProps) => {
 
     // Annotation client context
@@ -52,16 +52,15 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // Dispatch from context
     const apDataDispatch = clientData.annotationsAndPositionsDispatch
 
-    // Annotation entry data initialization
+    // Annotation entry data initialization and reducer
     const initialEntryData = getInitialAnnotationEntryData(apData)
-
-    // Reducer
     const [annotationEntryData, annotationEntryDataDispatch] = useReducer(annotationEntryReducer, initialEntryData)
 
     // Context objext
     const annotationEntryContext: annotationEntryContext = { annotationEntryData, annotationEntryDataDispatch }
 
     // Data transfer modal states
+    //const initialTransferData = {transferModalOpen: false, transferring: false, result: '', loadingLabel: ''}
     const [transferModalOpen, setTransferModalOpen] = useState<boolean>(false)
     const [transferring, setTransferring] = useState<boolean>(false)
     const [result, setResult] = useState<string>('')
@@ -70,122 +69,43 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // New position boolean
     const isNewPosition = apData.position3D !== undefined ? true : false
 
+    // First annotation create/save enablers
+    const enableFirstAnnotation = (disabled: boolean) => { setCreateDisabled(disabled); setSaveDisabled(disabled) }
+
     // Save/Create button enabled state
     const [createDisabled, setCreateDisabled] = useState<boolean>(true)
     const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
 
-    // Data transfer handlers for context
+    // Data transfer handlers
     const initializeDataTransferHandler = (loadingLabel: string) => initializeDataTransfer(setTransferModalOpen, setTransferring, setLoadingLabel, loadingLabel)
     const terminateDataTransferHandler = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
+    const dataTransferWrapper = (fn: Function, args: any[], label: string) => dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, fn, args, label)
 
     // Temporary close fn
     const close = (arg: boolean) => apDataDispatch({ type: 'annotationSavedOrDeleted' })
 
-    // Set imgSrc from NFS storage
-    const setImgSrc = () => annotationEntryDataDispatch({ type: 'setImageSource', path: aeFn.getImagePath(apData.activeAnnotation as photo_annotation) })
+    // Annotation CUD handlers
+    const createAnnotation = () => aeFn.createAnnotation(props.index, specimen.uid as string, apData.position3D as string, dataTransferWrapper, annotationEntryData)
+    const updateAnnotation = () => aeFn.updateAnnotation(props.index, dataTransferWrapper, annotationEntryData, apData, specimen)
+    const deleteAnnotation = () => aeFn.deleteAnnotation(apData, specimen.uid as string, dataTransferWrapper)
 
-    // Create annoation handler
-    const createAnnotation = async () => {
-        // Simple handler for the first annotation (always taxonomy and description)
-        if (props.index === 1) {
-            const data = aeFn.firstAnnotationFormData(specimen.uid as string, apData.position3D as string, props.index.toString())
-            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data], "Creating annotation")
-        }
-        // Handler for all other annotations
-        else {
-            const data = aeFn.annotationFormData(annotationEntryData, specimen.uid as string, props.index.toString(), apData.position3D as string)
-            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data], "Creating annotation")
-        }
-    }
+    // Image visibility effect dependencies
+    const imageVisibilityDependencies = [props.new, annotationEntryData.annotationType, props.index, annotationEntryData.file, apData.activeAnnotation]
 
-    // Update annotation handler
-    const updateAnnotation = async () => {
-        if (props.index == 1) {
-            const data = aeFn.annotationFormData(annotationEntryData, specimen.uid as string, props.index.toString(), apData.position3D as string)
-            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'PATCH'], "Updating annotation")
-        }
-        else {
-            const data = aeFn.annotationUpdateData(annotationEntryData, apData, specimen)
-            dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'PATCH'], "Updating annotation")
-        }
-    }
+    // Create/save annotation enable effect dependencies
+    const enableArgs = [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author,
+    annotationEntryData.license, annotationEntryData.annotation, annotationEntryData.file, length, annotationEntryData.photoTitle, annotationEntryData.website,
+    annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource]
 
-    // Delete annotation handler
-    const deleteAnnotation = async () => {
-        const data = aeFn.deleteAnnotationData(apData, specimen.uid as string)
-        dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, aeFn.insertAnnotation, [data, 'DELETE'], "Deleting annotation")
-    }
+    // Set image visibility 
+    useEffect(() => aeFn.setImageVisibility(props.index, annotationEntryData, props.new, annotationEntryDataDispatch), [imageVisibilityDependencies])
 
-    // This effect updates annotation image visibility and source
-    useEffect(() => {
-
-        // This code shouldn't run for the first annotation
-        if (props.index !== 1 && annotationEntryData.annotationType === 'photo') {
-
-            // Determine image visibility
-            if (!annotationEntryData.file && !props.new) annotationEntryDataDispatch({ type: 'setImageVisibility', isVisible: true })
-            else annotationEntryDataDispatch({ type: 'setImageVisibility', isVisible: false })
-        }
-
-    }, [props.new, annotationEntryData.annotationType, props.index, annotationEntryData.file, apData.activeAnnotation])
-
-    // This effect populates all relevant form fields with the corresponding data when there is an active annotation that has already been databased
-    useEffect(() => {
-
-        // Populate fields if there is an annotation pulled from the db
-        if (apData.activeAnnotationType && apData.activeAnnotation) {
-            // Set states for photo annotation
-            if (apData.activeAnnotationType === 'photo') { annotationEntryDataDispatch({ type: 'loadPhotoAnnotation', apData: apData }); setImgSrc() }
-            // Set for video annotation
-            else if (apData.activeAnnotationType === 'video') annotationEntryDataDispatch({ type: 'loadVideoAnnotation', apData: apData })
-            // Set states for model annotation
-            else if (apData.activeAnnotationType === 'model') annotationEntryDataDispatch({ type: 'loadModelAnnotation', apData: apData })
-        }
-    }, [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
+    // Populate form fields upon selection of a databased annotation
+    useEffect(() => aeFn.populateFormFields(apData, annotationEntryDataDispatch), [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // This effect enables the 'save changes' button for databased annoations if all required fields are populated and at least one differs from the data from the database
     // For new annotations, it enables the 'create annotation' button if all required fields are populated
-    useEffect(() => {
-
-        // For first annotation (always tax and description)
-        if (props.index == 1) {
-
-            // Enable button if an annotation position has been selected
-            if (apData.position3D) {
-                setCreateDisabled(false)
-                setSaveDisabled(false)
-            }
-            // Else disbale it
-            else {
-                setSaveDisabled(true)
-                setCreateDisabled(true)
-            }
-        }
-        // Photo annotation save/update enabler
-        else if (annotationEntryData.annotationType == 'photo') {
-            switch (props.new) {
-                case false: aeFn.enablePhotoAnnotatonUpdate(apData, annotationEntryData, setSaveDisabled, isNewPosition); break
-                default: aeFn.enablePhotoAnnotationCreate(annotationEntryData, setCreateDisabled, apData.position3D as string); break
-            }
-        }
-        // Video annotation save/update enabler
-        else if (annotationEntryData.annotationType == 'video') {
-            switch (props.new) {
-                case false: aeFn.enableVideoAnnotationUpdate(apData, annotationEntryData, isNewPosition, setSaveDisabled); break
-                default: aeFn.enableVideoAnnotationCreate(annotationEntryData, apData.position3D as string, setCreateDisabled); break
-            }
-        }
-
-        // Model annotation save/update enabler
-        else if (annotationEntryData.annotationType == 'model') {
-            switch (props.new) {
-                case false: aeFn.enableModelAnnotationUpdate(annotationEntryData, apData, isNewPosition, setSaveDisabled); break
-                default: aeFn.enableModelAnnotationCreate(annotationEntryData, apData.position3D as string, setCreateDisabled); break
-            }
-        }
-
-    }, [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author, annotationEntryData.license, annotationEntryData.annotation,
-    annotationEntryData.file, length, annotationEntryData.photoTitle, annotationEntryData.website, annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource]) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => aeFn.enableSaveOrUpdateButton(apData, annotationEntryData, enableFirstAnnotation, props.index, props.new, setCreateDisabled, setSaveDisabled, isNewPosition), enableArgs) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (props.index == 1) {
         return (
