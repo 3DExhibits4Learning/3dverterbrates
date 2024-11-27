@@ -45,19 +45,26 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // Annotation client context
     const clientData = useContext(AnnotationClientData) as annotationClientData
 
-    // Data from context
+    // Data and dispatch from context
     const apData = clientData.annotationsAndPositions
     const specimen = clientData.specimenData
-
-    // Dispatch from context
     const apDataDispatch = clientData.annotationsAndPositionsDispatch
 
     // Annotation entry data initialization and reducer
     const initialEntryData = getInitialAnnotationEntryData(apData)
     const [annotationEntryData, annotationEntryDataDispatch] = useReducer(annotationEntryReducer, initialEntryData)
 
-    // Context objext
+    // Context provider objext
     const annotationEntryContext: annotationEntryContext = { annotationEntryData, annotationEntryDataDispatch }
+
+    // Save/Create button enabled states
+    const [createDisabled, setCreateDisabled] = useState<boolean>(true)
+    const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
+
+    // Temporary close fn
+    const close = (arg: boolean) => apDataDispatch({ type: 'annotationSavedOrDeleted' })
+    // First annotation create/save enablers
+    const enableFirstAnnotation = (disabled: boolean) => { setCreateDisabled(disabled); setSaveDisabled(disabled) }
 
     // Data transfer modal states
     //const initialTransferData = {transferModalOpen: false, transferring: false, result: '', loadingLabel: ''}
@@ -69,20 +76,10 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     // New position boolean
     const isNewPosition = apData.position3D !== undefined ? true : false
 
-    // First annotation create/save enablers
-    const enableFirstAnnotation = (disabled: boolean) => { setCreateDisabled(disabled); setSaveDisabled(disabled) }
-
-    // Save/Create button enabled state
-    const [createDisabled, setCreateDisabled] = useState<boolean>(true)
-    const [saveDisabled, setSaveDisabled] = useState<boolean>(true)
-
     // Data transfer handlers
     const initializeDataTransferHandler = (loadingLabel: string) => initializeDataTransfer(setTransferModalOpen, setTransferring, setLoadingLabel, loadingLabel)
     const terminateDataTransferHandler = (result: string) => terminateDataTransfer(setResult, setTransferring, result)
     const dataTransferWrapper = (fn: Function, args: any[], label: string) => dataTransferHandler(initializeDataTransferHandler, terminateDataTransferHandler, fn, args, label)
-
-    // Temporary close fn
-    const close = (arg: boolean) => apDataDispatch({ type: 'annotationSavedOrDeleted' })
 
     // Annotation CUD handlers
     const createAnnotation = () => aeFn.createAnnotation(props.index, specimen.uid as string, apData.position3D as string, dataTransferWrapper, annotationEntryData)
@@ -93,19 +90,14 @@ const AnnotationEntry = (props: AnnotationEntryProps) => {
     const imageVisibilityDependencies = [props.new, annotationEntryData.annotationType, props.index, annotationEntryData.file, apData.activeAnnotation]
 
     // Create/save annotation enable effect dependencies
-    const enableArgs = [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author,
+    const enableDependencies = [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author,
     annotationEntryData.license, annotationEntryData.annotation, annotationEntryData.file, length, annotationEntryData.photoTitle, annotationEntryData.website,
     annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource]
 
-    // Set image visibility 
-    useEffect(() => aeFn.setImageVisibility(props.index, annotationEntryData, props.new, annotationEntryDataDispatch), [imageVisibilityDependencies])
-
-    // Populate form fields upon selection of a databased annotation
+    // Effects
+    useEffect(() => aeFn.setImageVisibility(props.index, annotationEntryData, props.new, annotationEntryDataDispatch), imageVisibilityDependencies)
     useEffect(() => aeFn.populateFormFields(apData, annotationEntryDataDispatch), [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
-
-    // This effect enables the 'save changes' button for databased annoations if all required fields are populated and at least one differs from the data from the database
-    // For new annotations, it enables the 'create annotation' button if all required fields are populated
-    useEffect(() => aeFn.enableSaveOrUpdateButton(apData, annotationEntryData, enableFirstAnnotation, props.index, props.new, setCreateDisabled, setSaveDisabled, isNewPosition), enableArgs) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => aeFn.enableSaveOrUpdateButton(apData, annotationEntryData, enableFirstAnnotation, props.index, props.new, setCreateDisabled, setSaveDisabled, isNewPosition), enableDependencies) // eslint-disable-line react-hooks/exhaustive-deps
 
     if (props.index == 1) {
         return (

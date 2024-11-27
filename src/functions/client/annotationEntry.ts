@@ -26,7 +26,7 @@ export const firstAnnotationFormData = (uid: string, position: string, index: st
 }
 
 export const insertAnnotation = async (data: FormData, method?: string) => {
-    await fetch('/api/annotations', {
+    return await fetch('/api/annotations', {
         method: method ? method : 'POST',
         body: data
     }).then(res => res.json()).then(json => json.data)
