@@ -34,7 +34,19 @@ export const insertAnnotation = async (data: FormData, method?: string) => {
 
 export const annotationFormData = (aeData: annotationEntry, uid: string, index: string, position: string): FormData => {
 
+    // Form data, annotation ID
     const data = new FormData()
+
+    // For first annotation
+    if (index === '1') {
+        data.set('uid', uid)
+        data.set('position', position)
+        data.set('index', index)
+        return data
+    }
+
+    // For all other annotations (this is the annotation id)
+    const annotationId = uuidv4()
 
     // Annotations table data
     data.set('uid', uid as string)
@@ -42,6 +54,19 @@ export const annotationFormData = (aeData: annotationEntry, uid: string, index: 
     data.set('annotation_type', aeData.annotationType)
     data.set('position', position as string)
     data.set('title', aeData.annotationTitle as string)
+    data.set('annotation_id', annotationId)
+
+    // Route handler data
+    data.set('mediaType', aeData.mediaType as string)
+    data.set('file', aeData.file as File)
+
+    // Directory, path and url data for photo uploads
+    if (aeData.file) {
+        const photo = aeData.file as File
+        data.set('dir', `public/data/Herbarium/Annotations/${uid}/${annotationId}`)
+        data.set('path', `public/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
+        data.set('url', `/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
+    }
 
     // Set relevant data based on annotationType
     switch (aeData.annotationType) {
@@ -67,25 +92,7 @@ export const annotationFormData = (aeData: annotationEntry, uid: string, index: 
             data.set('annotation', aeData.annotation)
             if (aeData.photoTitle) data.set('photoTitle', aeData.photoTitle)
             if (aeData.website) data.set('website', aeData.website)
-
-            break
     }
-
-    // Shared data (url was formerly the foreign key)
-    const annotationId = uuidv4()
-    data.set('annotation_id', annotationId)
-
-    // Directory, path and url data for photo uploads
-    if (aeData.file) {
-        const photo = aeData.file as File
-        data.set('dir', `public/data/Herbarium/Annotations/${uid}/${annotationId}`)
-        data.set('path', `public/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
-        data.set('url', `/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
-    }
-
-    // Route handler data
-    data.set('mediaType', aeData.mediaType as string)
-    data.set('file', aeData.file as File)
 
     return data
 }

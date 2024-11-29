@@ -8,7 +8,7 @@ export default function annotationDataTransferReducer(transferState: annotationD
         case 'initialize':
 
             const openAction = action as openAnnotationEntryModal
-            if (!openAction.loadingLabel) throw Error('No lable provided')
+            if (!openAction.loadingLabel) throw Error('No label provided')
 
             return {
                 ...transferState,
@@ -29,6 +29,7 @@ export default function annotationDataTransferReducer(transferState: annotationD
             }
 
         default:
+            console.error(action.type)
             throw Error("Unknown action type")
     }
 }

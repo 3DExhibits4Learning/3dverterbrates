@@ -76,7 +76,7 @@ export default function AnnotationEntry(props: AnnotationEntryProps) {
 
     // Effects: set whether annotation photo is visible, populate form fields upon annotation selection, enable save/update button, respectively
     useEffect(() => aeFn.setImageVisibility(props.index, annotationEntryData, props.new, annotationEntryDataDispatch), imageVisibilityDependencies)
-    useEffect(() => aeFn.populateFormFields(apData, annotationEntryDataDispatch), [apData.activeAnnotation]) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => aeFn.populateFormFields(apData, annotationEntryDataDispatch), [apData.activeAnnotation, apData.activeAnnotationIndex]) // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => aeFn.enableSaveOrUpdateButton(apData, annotationEntryData, enableFirstAnnotation, props.index, props.new, setCreateDisabled, setSaveDisabled, isNewPosition), enableDependencies) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Return JSX for first annotation

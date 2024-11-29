@@ -3,13 +3,14 @@
 import { Modal, ModalContent, ModalBody, ModalFooter, Spinner, Button } from "@nextui-org/react"
 import { useContext } from "react";
 import { AnnotationEntryData } from "./AnnotationEntry";
-import { annotationEntryContext } from "@/interface/interface";
+import { annotationClientData, annotationEntryContext } from "@/interface/interface";
+import { AnnotationClientData } from "./AnnotationClient";
 
 export default function AnnotationEntryTransferModal() {
 
     const context = useContext(AnnotationEntryData) as annotationEntryContext
+    const dispatch = (useContext(AnnotationClientData) as annotationClientData).annotationsAndPositionsDispatch
     const transferState = context.transferState
-    const dispatch = context.transferStateDispatch
 
     return (
         <Modal isOpen={transferState.transferModalOpen} isDismissable={false} hideCloseButton isKeyboardDismissDisabled={true}>
@@ -28,7 +29,7 @@ export default function AnnotationEntryTransferModal() {
                 <ModalFooter className="flex justify-center">
                     {
                         !transferState.transferring &&
-                        <Button color="primary" onPress={() => dispatch({type:'annotationSavedOrDeleted', result: transferState.result})}>OK</Button>
+                        <Button color="primary" onPress={() => dispatch({type:'annotationSavedOrDeleted'})}>OK</Button>
                     }
                 </ModalFooter>
             </ModalContent>

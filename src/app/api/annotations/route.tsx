@@ -256,7 +256,7 @@ export async function PATCH(request: Request) {
         .catch((e) => routeHandlerErrorHandler(route, e.message, 'PATCH request.formData()', "Couldn't get FormData")) as FormData
 
     // First annotation handler; always taxonomy and description, insert position with typical try-catch return
-    if (data.get('index') == '1') {
+    if (data.get('index') === '1') {
 
         try {
 
