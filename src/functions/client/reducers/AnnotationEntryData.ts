@@ -1,12 +1,20 @@
 import { annotationEntry, annotationsAndPositions } from "@/interface/interface";
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client";
 import { annotationEntryAction, setImageSource, setImageVisibility, loadAnnotation, setStringValue, setFile } from "@/interface/actions";
+import { getInitialAnnotationEntryData } from "@/interface/initializers";
 
 export default function AnnotationEntryReducer(data: annotationEntry, action: annotationEntryAction): annotationEntry {
 
     var apData: annotationsAndPositions
 
     switch (action.type) {
+
+        case 'newAnnotation':
+
+        const newAnnotationAction = action as loadAnnotation
+        if (!newAnnotationAction.apData) throw Error('Missing annotations and positions')
+
+        return getInitialAnnotationEntryData(newAnnotationAction.apData)
 
         case 'setImageSource':
 
@@ -21,7 +29,7 @@ export default function AnnotationEntryReducer(data: annotationEntry, action: an
         case 'setImageVisibility':
 
             const imageVisibilityAction = action as setImageVisibility
-            if (!imageVisibilityAction.isVisible) { throw Error("Bool missing") }
+            if (imageVisibilityAction.isVisible === undefined) { throw Error("Bool missing") }
 
             return {
                 ...data,

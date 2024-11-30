@@ -279,12 +279,18 @@ export const setImageVisibility = (index: number, aeData: annotationEntry, isNew
 }
 
 export const populateFormFields = (apData: annotationsAndPositions, dispatch: Dispatch<annotationEntryAction>) => {
+
     if (apData.activeAnnotationType && apData.activeAnnotation) {
-        if (apData.activeAnnotationType === 'photo') {
+
+        if (apData.activeAnnotationIndex === 'new') dispatch({ type: 'newAnnotation', apData: apData })
+
+        else if (apData.activeAnnotationType === 'photo') {
             dispatch({ type: 'loadPhotoAnnotation', apData: apData });
             dispatch({ type: 'setImageSource', path: getImagePath(apData.activeAnnotation as photo_annotation) })
         }
+
         else if (apData.activeAnnotationType === 'video') dispatch({ type: 'loadVideoAnnotation', apData: apData })
+
         else if (apData.activeAnnotationType === 'model') dispatch({ type: 'loadModelAnnotation', apData: apData })
     }
 }
