@@ -16,7 +16,7 @@ export default function Assignments(props: { studentsAssignmentsAndModels: stude
 
     return (
         <section className="flex w-full items-center flex-col mb-16">
-            <div className="flex w-1/2 rounded-lg overflow-auto">
+            <div className="flex w-3/4 rounded-lg overflow-auto">
                 <table className="w-full bg-[#D5CB9F] dark:bg-[#212121] min-w-[800px]">
                     <tr>
                         <th className="text-xl border-b border-[#004C46] border-r py-4">Name</th>
