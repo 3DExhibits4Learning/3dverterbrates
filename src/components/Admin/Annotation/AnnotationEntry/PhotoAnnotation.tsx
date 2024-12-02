@@ -8,7 +8,6 @@ import License from "../../AnnotationFields/License"
 import Annotation from "../Annotation"
 import FileInput from "@/components/Admin/AnnotationFields/ImageInput"
 
-
 export default function PhotoAnnotationEntry() {
 
     const annotationEntryData = (useContext(AnnotationEntryData) as annotationEntryContext).annotationEntryData
@@ -38,7 +37,7 @@ export default function PhotoAnnotationEntry() {
                         </div>
                         {
                             annotationEntryData.imageVisible &&
-                            <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full' src={annotationEntryData.imageSource as string} alt={'Annotation Image'}></img>
+                            <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full' src={annotationEntryData.url as string} alt={'Annotation Image'}></img>
                         }
                     </div>
                     <div className="ml-12">

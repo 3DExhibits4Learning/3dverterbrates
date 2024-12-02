@@ -32,8 +32,6 @@ export default function AnnotationEntry(props: AnnotationEntryProps) {
 
     // Annotation client context
     const clientData = useContext(AnnotationClientData) as annotationClientData
-
-    // Data from context
     const apData = clientData.annotationsAndPositions
     const specimen = clientData.specimenData
 
@@ -71,14 +69,14 @@ export default function AnnotationEntry(props: AnnotationEntryProps) {
 
     // Create/save annotation enable effect dependencies
     const enableDependencies = [annotationEntryData.annotationTitle, apData.position3D, annotationEntryData.url, annotationEntryData.author,
-    annotationEntryData.license, annotationEntryData.annotation, annotationEntryData.file, length, annotationEntryData.photoTitle, annotationEntryData.website,
-    annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource]
+    annotationEntryData.license, annotationEntryData.annotation, annotationEntryData.file, annotationEntryData.length, annotationEntryData.photoTitle, annotationEntryData.website,
+    annotationEntryData.modelAnnotationUid, annotationEntryData.videoSource, annotationEntryData.annotationType]
 
     // Effects: set whether annotation photo is visible, populate form fields upon annotation selection, enable save/update button, respectively
     useEffect(() => aeFn.setImageVisibility(props.index, annotationEntryData, props.new, annotationEntryDataDispatch), imageVisibilityDependencies)
     useEffect(() => aeFn.populateFormFields(apData, annotationEntryDataDispatch), [apData.activeAnnotation, apData.activeAnnotationIndex]) // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => aeFn.enableSaveOrUpdateButton(apData, annotationEntryData, enableFirstAnnotation, props.index, props.new, setCreateDisabled, setSaveDisabled, isNewPosition), enableDependencies) // eslint-disable-line react-hooks/exhaustive-deps
-
+    
     // Return JSX for first annotation
     if (props.index === 1) return (
         <>

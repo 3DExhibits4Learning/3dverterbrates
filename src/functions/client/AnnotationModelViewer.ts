@@ -1,11 +1,12 @@
 /**
- * @file
+ * @file src/functions/client/AnnotationModelViewer.ts
  * 
- * @fileoverview
+ * @fileoverview 
  */
 
 import { annotationsAndPositions } from "@/interface/interface"
 import { MutableRefObject, Dispatch } from "react"
+import { fullAnnotation } from "@/interface/interface"
 
 /**
  * 
@@ -36,24 +37,78 @@ export const replaceHigherAnnotations = (apData: annotationsAndPositions, sketch
     }
 }
 
-export const createAnnotation = (info: any, newAnnotationEnabled: MutableRefObject<boolean>, temporaryAnnotationIndex: MutableRefObject<number>, sketchfabApi: any, apData: annotationsAndPositions, apDataDispatch: Dispatch<any>) => {
+export const dispatchNewPosition = (info: any, dispatch: any, camera: any, activeAnnotationIndex: number | 'new' | undefined) => {
+    const positionArray = Array.from(info.position3D)
+    dispatch({ type: 'newPosition', position: JSON.stringify([positionArray, camera.position, camera.target]) })
+    if (activeAnnotationIndex !== 'new') dispatch({ type: 'newAnnotationIndex', index: 'new' })
+}
 
+export const createAnnotation = (info: any,
+    newAnnotationEnabled: MutableRefObject<boolean>,
+    temporaryAnnotationIndex: MutableRefObject<number>,
+    sketchfabApi: any,
+    apData: annotationsAndPositions,
+    apDataDispatch: Dispatch<any>) => {
+
+    // Check flags before anything
     if (newAnnotationEnabled) {
 
         // Remove previous annotation if there is a new click
-        if (temporaryAnnotationIndex.current != undefined) sketchfabApi.removeAnnotation(temporaryAnnotationIndex.current, (err: any) => { })
+        if (temporaryAnnotationIndex.current !== undefined) sketchfabApi.removeAnnotation(temporaryAnnotationIndex.current, (err: any) => { if (err) throw Error('Model Viewer Error') })
 
         // Get camera position and create annotation
         sketchfabApi.getCameraLookAt((err: any, camera: any) => {
-            sketchfabApi.createAnnotationFromScenePosition(info.position3D, camera.position, camera.target, '', '', (err: any, index: any) => { temporaryAnnotationIndex.current = index })
+            if (err) throw Error('Model Viewer Error')
+
+            // Create annotation in viewer
+            sketchfabApi.createAnnotationFromScenePosition(info.position3D, camera.position, camera.target, '', '', (err: any, index: any) => {
+                if (err) throw Error('Model Viewer Error')
+                temporaryAnnotationIndex.current = index
+            })
+
+            // If the click was on the 3d model (and not the background) set position/activeAnnotation data, or else set position undefined
+            if (info.position3D) dispatchNewPosition(info, apDataDispatch, camera, apData.activeAnnotationIndex)
+            else apDataDispatch({ type: 'newPosition', position: undefined })
+        })
+    }
+}
+
+/**
+ * 
+ * @param info 
+ */
+export const repositionAnnotation = (info: any, apData: annotationsAndPositions, sketchfabApi: any, temporaryAnnotationIndex: MutableRefObject<number | 'new' | undefined>, dispatch: any) => {
+
+    if (apData.repositionEnabled) {
+
+        // Remove higher annotations 
+        removeHigherAnnotations(apData, sketchfabApi)
+
+        // Remove current annotation
+        sketchfabApi.removeAnnotation(apData.activeAnnotationIndex as number - 1, (err: any) => {if (err) throw Error('Model Viewer Error')})
+
+        // Get camera position 
+        sketchfabApi.getCameraLookAt((err: any, camera: any) => {
+            if (err) throw Error('Model Viewer Error')
+
+            // Determine title
+            const title = (apData.annotations as fullAnnotation[])[apData.activeAnnotationIndex as number - 2]?.title ?
+                `${(apData.annotations as fullAnnotation[])[apData.activeAnnotationIndex as number - 2].title}` :
+                'Taxonomy and Description'
+
+            // Create annotation and replace higher annotations
+            sketchfabApi.createAnnotationFromScenePosition(info.position3D, camera.position, camera.target, `${title}`, '', (err: any, index: any) => { 
+                if (err) throw Error('Model Viewer Error')
+                temporaryAnnotationIndex.current = index
+                replaceHigherAnnotations(apData, sketchfabApi, temporaryAnnotationIndex.current as number)
+            })
 
             // If the click was on the 3d model (and not the background) set position/activeAnnotation data, or else set position undefined
             if (info.position3D) {
                 const positionArray = Array.from(info.position3D)
-                apDataDispatch({ type: 'newPosition', position: JSON.stringify([positionArray, camera.position, camera.target]) })
-                if (apData.activeAnnotationIndex !== 'new') apDataDispatch({ type: 'newAnnotationIndex', index: 'new' })
+                dispatch({ type: 'newPosition', position: JSON.stringify([positionArray, camera.position, camera.target]) })
             }
-            else apDataDispatch({ type: 'newPosition', position: undefined })
+            else dispatch({ type: 'newPosition', position: undefined })
         })
     }
 }

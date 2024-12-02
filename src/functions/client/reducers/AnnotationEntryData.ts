@@ -14,7 +14,7 @@ export default function AnnotationEntryReducer(data: annotationEntry, action: an
         const newAnnotationAction = action as loadAnnotation
         if (!newAnnotationAction.apData) throw Error('Missing annotations and positions')
 
-        return getInitialAnnotationEntryData(newAnnotationAction.apData)
+        return getInitialAnnotationEntryData(newAnnotationAction.apData, true)
 
         case 'setImageSource':
 

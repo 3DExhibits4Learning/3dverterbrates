@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     const data = await request.formData()
 
     // First annotation handler
-    if (data.get('index') == '1') {
+    if (data.get('index') === '1') {
 
         try {
 

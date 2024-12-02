@@ -24,7 +24,7 @@ export default function TextInput(props: { value: string, setValue?: Dispatch<Se
                 type='text'
                 onChange={(e) => {
                     if(props.setValue)props.setValue(e.target.value)
-                    else if(dispatch && props.field) dispatch({ type: 'setStringValue', field: props.field, value: e.target.value })
+                    else if(dispatch && props.field) dispatch({ type: 'setStringValue', field: props.field, string: e.target.value })
                 }}
                 value={props.value}
             >
