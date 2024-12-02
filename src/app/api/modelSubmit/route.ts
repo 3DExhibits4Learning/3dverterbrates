@@ -42,10 +42,11 @@ export async function POST(request: Request) {
         const buildMethod = data.get('buildMethod') as string
         const software: string[] = JSON.parse(data.get('software') as string)
         const tags: string[] = JSON.parse(data.get('tags') as string)
-        const position: {lat: string, lng: string} = JSON.parse(data.get('position') as string)
+        const position: { lat: string, lng: string } = JSON.parse(data.get('position') as string)
         const speciesAcquisitionDate = data.get('speciesAcquisitionDate') as string
         const modelFile = data.get('modelFile') as File
         const baseOrAnnotation = data.get('baseOrAnnotation') as string
+        const commonName = data.get('commonName') ? data.get('commonName') as string : ''
 
         // Form and fetch Variables 
         formData.set('orgProject', process.env.SKETCHFAB_PROJECT_3DVERTEBRATES as string)
@@ -92,7 +93,8 @@ export async function POST(request: Request) {
                 spec_acquis_date: speciesAcquisitionDate ? speciesAcquisitionDate : null,
                 site_ready: true,
                 user: user,
-                base_model: baseOrAnnotation === 'base' ? true : false
+                base_model: baseOrAnnotation === 'base' ? true : false,
+                pref_comm_name: commonName
             }
         }).catch((e) => {
             console.error(e.message)
@@ -215,6 +217,7 @@ export async function PATCH(request: Request) {
         const position: LatLngLiteral = JSON.parse(data.get('position') as string)
         const speciesAcquisitionDate = data.get('speciesAcquisitionDate') as string
         const uid = data.get('uid') as string
+        const commonName = data.get('commonName') ? data.get('commonName') as string : ''
 
         // Session variables
         const email = session.user?.email
@@ -231,7 +234,8 @@ export async function PATCH(request: Request) {
                 lng: position.lng,
                 spec_acquis_date: speciesAcquisitionDate ? speciesAcquisitionDate : null,
                 email: email,
-                user: user
+                user: user,
+                pref_comm_name: commonName
             }
         }).catch((e) => {
             console.error(e.message)

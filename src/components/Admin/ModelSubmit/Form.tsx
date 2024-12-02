@@ -12,7 +12,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@nextui-org/react";
 import { Divider } from '@nextui-org/react';
-import dynamic from 'next/dynamic';
 
 import ArtistName from './ArtistNameField';
 import SpeciesName from './SpeciesNameField';
@@ -23,6 +22,7 @@ import SpeciesAcquisitionDate from './AcquisitionDate';
 import ModelInput from './ModelInput';
 import LatLng from './LatLng';
 import BaseOrAnnotation from './BaseOrAnnotation';
+import TextInput from '@/components/Shared/Form Fields/TextInput';
 
 // Main component
 export default function ModelSubmitForm() {
@@ -38,6 +38,7 @@ export default function ModelSubmitForm() {
     const [software, setSoftware] = useState<{ value: string }[]>([])
     const [tags, setTags] = useState<{ value: string }[]>([])
     const [file, setFile] = useState<File | null>(null)
+    const [commonName, setCommonName] = useState<string>('')
 
     // Data transfer states
     const [uploadDisabled, setUploadDisabled] = useState<boolean>(true)
@@ -72,6 +73,7 @@ export default function ModelSubmitForm() {
             data.set('speciesAcquisitionDate', speciesAcquisitionDate)
             data.set('modelFile', file as File)
             data.set('baseOrAnnotation', baseOrAnnotation)
+            data.set('commonName', commonName)
 
             // Upload 3d model to sketchfab and insert model data into database via associated route handler
             await fetch('/api/modelSubmit', {
@@ -131,6 +133,7 @@ export default function ModelSubmitForm() {
                 <Divider className='mb-6' />
 
                 <SpeciesName value={species} setValue={setSpecies} />
+                <TextInput value={commonName} setValue={setCommonName} title='Common Name' leftMargin='ml-12' textSize='text-2xl'/> 
                 <SpeciesAcquisitionDate value={speciesAcquisitionDate} setValue={setSpeciesAcquisitionDate} />
                 <LatLng lat={lat} lng={lng} setLat={setLat} setLng={setLng}/>
                 <TagInput value={tags} setValue={setTags} />

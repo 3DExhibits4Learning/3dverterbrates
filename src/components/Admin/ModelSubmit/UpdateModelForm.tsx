@@ -47,6 +47,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
     const [software, setSoftware] = useState<{ value: string }[]>(model.software.map((softwareObject) => ({ value: softwareObject.software })))
     const [tags, setTags] = useState<{ value: string }[]>(model.tags.map((tagObject) => ({ value: tagObject.tag })))
     const [file, setFile] = useState<File | null>(null)
+    const [commonName, setCommonName] = useState<string>(model.pref_comm_name ?? '')
 
     // Data transfer states
     const [updateDisabled, setUpdateDisabled] = useState<boolean>(true)
@@ -101,6 +102,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
             data.set('tags', formTags)
             data.set('position', formPosition)
             data.set('speciesAcquisitionDate', speciesAcquisitionDate as string)
+            data.set('commonName', commonName)
 
             // Update model data in the database and set resultant states
             await fetch('/api/modelSubmit', {
@@ -163,6 +165,7 @@ export default function UpdateModelForm(props: UpdateModelFormProps) {
                 <Divider className='mb-6' />
 
                 <AutoCompleteWrapper value={species} setValue={setSpecies} />
+                <TextInput value={commonName} setValue={setCommonName} title='Common Name' leftMargin='ml-12' textSize='text-2xl'/> 
                 <LatLng lat={lat} lng={lng} setLat={setLat} setLng={setLng} />
                 <TagInput key={reRenderKey} value={tags} setValue={setTags} defaultValues={tagString} />
 
