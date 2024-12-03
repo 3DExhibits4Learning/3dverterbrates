@@ -257,9 +257,9 @@ export const annotationFormData = (aeData: annotationEntry, uid: string, index: 
     // Directory, path and url data for photo uploads
     if (aeData.file) {
         const photo = aeData.file as File
-        data.set('dir', `public/data/Herbarium/Annotations/${uid}/${annotationId}`)
-        data.set('path', `public/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
-        data.set('url', `/data/Herbarium/Annotations/${uid}/${annotationId}/${photo.name}`)
+        data.set('dir', `public/data/Vertebrates/Annotations/${uid}/${annotationId}`)
+        data.set('path', `public/data/Vertebrates/Annotations/${uid}/${annotationId}/${photo.name}`)
+        data.set('url', `/data/Vertebrates/Annotations/${uid}/${annotationId}/${photo.name}`)
     }
 
     // Set relevant data based on annotationType
@@ -341,9 +341,9 @@ export const annotationUpdateData = (aeData: annotationEntry, apData: annotation
     if (aeData.file) {
         const photo = aeData.file as File
         const annotation = apData.activeAnnotation as photo_annotation
-        data.set('dir', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}`)
-        data.set('path', `public/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
-        data.set('url', `/data/Herbarium/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
+        data.set('dir', `public/data/Vertebrates/Annotations/${specimen.uid}/${annotation.annotation_id}`)
+        data.set('path', `public/data/Vertebrates/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
+        data.set('url', `/data/Vertebrates/Annotations/${specimen.uid}/${annotation.annotation_id}/${photo.name}`)
         data.set('file', photo)
         if (apData.activeAnnotationType === 'photo') data.set('oldUrl', (apData.activeAnnotation as photo_annotation).url)
     }

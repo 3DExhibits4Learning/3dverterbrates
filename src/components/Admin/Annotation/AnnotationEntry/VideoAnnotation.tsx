@@ -24,7 +24,7 @@ export default function VideoAnnotationEntry() {
                             annotationEntryData.videoSource?.includes('https://www.youtube.com/embed/') &&
                             <iframe
                                 src={annotationEntryData.videoSource}
-                                className="h-full w-full ml-[1%] rounded-xl"
+                                className="h-full w-full ml-[1%] rounded-xl mr-12"
                             >
                             </iframe>
                         }
