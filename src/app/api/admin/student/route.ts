@@ -6,7 +6,7 @@
 import { removeStudent, addStudent } from "@/functions/server/queries"
 import { getAuthorizedUsers } from "@/functions/server/queries"
 import { authorized } from "@prisma/client"
-import { informStudentOfAssignment } from "@/functions/server/email"
+import { emailNewlyAddedStudent, informStudentOfAssignment } from "@/functions/server/email"
 import { routeHandlerErrorHandler, nonFatalError } from "@/functions/server/error"
 
 // Route path
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         const insertStudent = await addStudent(email, name).catch((e) => routeHandlerErrorHandler(route, e.message, 'addStudent()', "Couldn't add student"))
 
         // Email student, informing them of their addition to the project
-        await informStudentOfAssignment(process.env.NODE_ENV === 'production' ? email : "ab632@humboldt.edu", 'beta.3dvertebrates.org').catch((e) => nonFatalError(route, e.message, 'emailNewlyAddedStudent()'))
+        await emailNewlyAddedStudent(process.env.NODE_ENV === 'production' ? email : "ab632@humboldt.edu", 'beta.3dvertebrates.org').catch((e) => nonFatalError(route, e.message, 'emailNewlyAddedStudent()'))
 
         // Typical success response
         return Response.json({ data: 'Student added', response: insertStudent })
