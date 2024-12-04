@@ -1,7 +1,7 @@
 import { annotationEntry, annotationsAndPositions } from "@/interface/interface";
 import { photo_annotation, video_annotation, model_annotation } from "@prisma/client";
 import { annotationEntryAction, setImageSource, setImageVisibility, loadAnnotation, setStringValue, setFile } from "@/interface/actions";
-import { getInitialAnnotationEntryData } from "@/interface/initializers";
+import { getNewAnnotationEntryData } from "@/interface/initializers";
 
 export default function AnnotationEntryReducer(data: annotationEntry, action: annotationEntryAction): annotationEntry {
 
@@ -14,7 +14,7 @@ export default function AnnotationEntryReducer(data: annotationEntry, action: an
         const newAnnotationAction = action as loadAnnotation
         if (!newAnnotationAction.apData) throw Error('Missing annotations and positions')
 
-        return getInitialAnnotationEntryData(newAnnotationAction.apData, true)
+        return getNewAnnotationEntryData()
 
         case 'setImageSource':
 
@@ -23,7 +23,7 @@ export default function AnnotationEntryReducer(data: annotationEntry, action: an
 
             return {
                 ...data,
-                imageSource: `/api/nfs?path=${imageSourceAction.path}`
+                imageSource: imageSourceAction.path
             }
 
         case 'setImageVisibility':

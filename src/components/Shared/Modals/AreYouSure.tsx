@@ -3,6 +3,7 @@
 import { Modal, ModalContent, ModalBody, Button } from "@nextui-org/react"
 import { SetStateAction, useState, Dispatch } from "react";
 import { Spinner } from "@nextui-org/react";
+import Link from "next/link";
 
 export default function AreYouSure(props: { uid: string, open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
 
@@ -55,7 +56,7 @@ export default function AreYouSure(props: { uid: string, open: boolean, setOpen:
                                     <>
                                         <p className="mb-8">{msg}</p>
                                         <div>
-                                            <a href='/admin/botanist'><Button id='editModal' className="text-white">OK</Button></a>
+                                            <Link href='/admin/student'><Button id='editModal' className="text-white">OK</Button></Link>
                                         </div>
                                     </>
                                 }

@@ -19,7 +19,7 @@ import { studentsAssignmentsAndModels, annotationClientData } from "@/interface/
 import { toUpperFirstLetter } from "@/functions/utils/toUpperFirstLetter"
 import { Button } from "@nextui-org/react"
 import { DataTransferContext } from "@/components/Admin/Administrator/ManagerClient"
-import { approveAnnotations, unapproveAnnotations } from "@/functions/client/managerClient/approveAnnotations"
+import { approveAnnotations, unapproveAnnotations, rejectAnnotations } from "@/functions/client/managerClient/approveAnnotations"
 import { annotationsAndPositionsReducer } from "@/functions/client/reducers/annotationsAndPositions"
 import { annotationClientSpecimenReducer } from "@/functions/client/reducers/annotationClientSpecimen"
 import { getIndex, getAssignmentArgs, getAssignmentLabel, activeAnnotationChangeHandler, modelOrAnnotationChangeHandler, modelClickHandler } from "@/functions/client/annotationClient"
@@ -66,6 +66,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
 
     // Approve/Unapprove annotation handlers
     const approveAnnotationsHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, approveAnnotations, [specimenData.uid], 'Approving annotations')
+    const rejectAnnotationsHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, rejectAnnotations, [specimenData.uid], 'Rejecting annotations')
     const unapproveAnnotationsHandler = async () => await dataTransferHandler(initializeDataTransfer, terminateDataTransfer, unapproveAnnotations, [specimenData.uid], 'Unapproving annotations')
 
     // Annotation assign (or unassign) handler
@@ -142,13 +143,22 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                             {
                                                 // Approval button
                                                 specimenData.annotated && !specimenData.annotationsApproved &&
-                                                <div className="flex">
-                                                    <Button onPress={() => approveAnnotationsHandler()}
-                                                        className="text-white mt-2 text-lg"
-                                                    >
-                                                        Approve
-                                                    </Button>
-                                                </div>
+                                                <>
+                                                    <div className="flex">
+                                                        <Button onPress={() => approveAnnotationsHandler()}
+                                                            className="text-white mt-2 text-lg"
+                                                        >
+                                                            Approve annotations
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex">
+                                                        <Button onPress={() => rejectAnnotationsHandler()}
+                                                            className="text-white mt-2 text-lg"
+                                                        >
+                                                            Reject annotations
+                                                        </Button>
+                                                    </div>
+                                                </>
                                             }
                                             {
                                                 // Unapproval button
@@ -157,7 +167,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                                     <Button onPress={() => unapproveAnnotationsHandler()}
                                                         className="text-white mt-2 text-lg"
                                                     >
-                                                        Unapprove
+                                                        Unapprove annotations
                                                     </Button>
                                                 </div>
                                             }
@@ -165,7 +175,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                                 <Button onPress={() => assignAnnotationHandler()}
                                                     className="text-white mt-2 text-lg"
                                                 >
-                                                    Unassign
+                                                    Unassign model
                                                 </Button>
                                             </div>
                                         </>
@@ -173,8 +183,9 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                     {
                                         // New annotation button
                                         !annotationsAndPositions.newAnnotationEnabled &&
-                                        annotationsAndPositions.activeAnnotationIndex != 'new' &&
-                                        annotationsAndPositions.firstAnnotationPosition != undefined &&
+                                        annotationsAndPositions.activeAnnotationIndex !== 'new' &&
+                                        annotationsAndPositions.firstAnnotationPosition !== undefined &&
+                                        (!specimenData.annotator || !props.admin) &&
                                         <Button onPress={() => { newAnnotationEnabled.current = true; annotationsAndPositionsDispatch({ type: 'newAnnotation' }) }}
                                             className="text-white mt-2 text-lg"
                                             isDisabled={annotationsAndPositions.repositionEnabled}
@@ -186,6 +197,7 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                         // 'Mark as annotated' button
                                         annotationsAndPositions.annotations &&
                                         annotationsAndPositions.annotations?.length >= 6 &&
+                                        (!specimenData.annotator || !props.admin) &&
                                         <>
                                             <br></br>
                                             <Button onPress={() => setModalOpen(true)}

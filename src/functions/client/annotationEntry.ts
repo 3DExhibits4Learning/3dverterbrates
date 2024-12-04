@@ -24,7 +24,7 @@ export const allSame = (originalValues: any[], currentValues: any[]) => JSON.str
  * @returns a route handler returning an HTTP response with the image to be served
  */
 export function getImagePath(photoAnnotation: photo_annotation) {
-    const path = process.env.NEXT_PUBLIC_LOCAL === 'true' ? `X:${photoAnnotation.url.slice(5)}` : `public${photoAnnotation.url}`
+    const path = process.env.NEXT_PUBLIC_NODE_ENV === 'development' ? `X:${photoAnnotation.url.slice(5)}` : `public${photoAnnotation.url}`
     return `/api/nfs?path=${path}`
 }
 /**
@@ -182,11 +182,11 @@ export const setImageVisibility = (index: number, aeData: annotationEntry, isNew
 
 export const populateFormFields = (apData: annotationsAndPositions, dispatch: Dispatch<annotationEntryAction>) => {
 
-    if (apData.activeAnnotationType && apData.activeAnnotation) {
+    if (apData.activeAnnotationIndex === 'new') dispatch({ type: 'newAnnotation', apData: apData })
 
-        if (apData.activeAnnotationIndex === 'new') dispatch({ type: 'newAnnotation', apData: apData })
+    else if (apData.activeAnnotationType && apData.activeAnnotation) {
 
-        else if (apData.activeAnnotationType === 'photo') {
+        if (apData.activeAnnotationType === 'photo') {
             dispatch({ type: 'loadPhotoAnnotation', apData: apData });
             dispatch({ type: 'setImageSource', path: getImagePath(apData.activeAnnotation as photo_annotation) })
         }
@@ -215,14 +215,14 @@ export const enableSaveOrUpdateButton = (
             default: enablePhotoAnnotationCreate(aeData, setCreateDisabled, apData.position3D as string)
         }
     }
-    
+
     else if (aeData.annotationType === 'video') {
         switch (isNew) {
             case false: enableVideoAnnotationUpdate(apData, aeData, isNewPosition, setSaveDisabled); break
             default: enableVideoAnnotationCreate(aeData, apData.position3D as string, setCreateDisabled)
         }
     }
-    
+
     else if (aeData.annotationType === 'model') {
         switch (isNew) {
             case false: enableModelAnnotationUpdate(aeData, apData, isNewPosition, setSaveDisabled); break

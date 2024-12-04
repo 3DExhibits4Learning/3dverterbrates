@@ -37,7 +37,7 @@ export default function PhotoAnnotationEntry() {
                         </div>
                         {
                             annotationEntryData.imageVisible &&
-                            <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full mr-12' src={annotationEntryData.url as string} alt={'Annotation Image'}></img>
+                            <img className='rounded-sm inline-block w-1/2 max-w-[600px] h-full mr-12' src={annotationEntryData.imageSource as string} alt={'Annotation Image'}></img>
                         }
                     </div>
                     <div className="ml-12">

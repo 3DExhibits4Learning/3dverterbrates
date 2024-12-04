@@ -785,6 +785,15 @@ export const approveAnnotations = async (uid: string) => {
 }
 
 /**
+ * @function rejectAnnotations
+ * @description reject 3d model annotations
+ * 
+ */
+export const rejectAnnotations = async (uid: string) => {
+  return await prisma.model.update({ where: { uid: uid }, data: { annotated: false } })
+}
+
+/**
  * @function unapproveAnnotations
  * @description unapprove 3d model annotations
  * 
