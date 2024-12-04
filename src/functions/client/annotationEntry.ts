@@ -24,7 +24,7 @@ export const allSame = (originalValues: any[], currentValues: any[]) => JSON.str
  * @returns a route handler returning an HTTP response with the image to be served
  */
 export function getImagePath(photoAnnotation: photo_annotation) {
-    const path = process.env.NEXT_PUBLIC_NODE_ENV === 'development' ? `X:${photoAnnotation.url.slice(5)}` : `public${photoAnnotation.url}`
+    const path = process.env.NEXT_PUBLIC_LOCAL === 'development' ? `X:${photoAnnotation.url.slice(5)}` : `public${photoAnnotation.url}`
     return `/api/nfs?path=${path}`
 }
 /**

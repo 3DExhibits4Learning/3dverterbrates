@@ -200,12 +200,14 @@ export default function AnnotationClient(props: { modelsToAnnotate: model[], ann
                                         (!specimenData.annotator || !props.admin) &&
                                         <>
                                             <br></br>
-                                            <Button onPress={() => setModalOpen(true)}
-                                                className="text-white mt-2 text-lg"
-                                                isDisabled={annotationsAndPositions.repositionEnabled}
-                                            >
-                                                Mark as Annotated
-                                            </Button>
+                                            <div className="mb-4">
+                                                <Button onPress={() => setModalOpen(true)}
+                                                    className="text-white mt-2 text-lg"
+                                                    isDisabled={annotationsAndPositions.repositionEnabled}
+                                                >
+                                                    Mark as Annotated
+                                                </Button>
+                                            </div>
                                         </>
                                     }
                                     {
